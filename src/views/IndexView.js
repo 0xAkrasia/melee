@@ -75,6 +75,7 @@ class IndexView extends React.Component {
                 </div>
                 <div className="af-class-main">
                   <div className="af-class-gamebg"><img src="images/Vectors-Wrapper.svg" loading="lazy" width={720} height={720} alt className="af-class-grid" />
+                    {/*Looks like there will be a video being played in this division, but seems this piece of code does not take any effect, need double check*/}
                     <div data-poster-url="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-poster-00001.jpg"
                       data-video-urls="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.mp4,https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.webm"
                       data-autoplay="true"
@@ -86,6 +87,7 @@ class IndexView extends React.Component {
                         <source src="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.webm" data-wf-ignore="true" />
                       </video>
                     </div>
+                    {/* TODO based on my understanding the position of these images should not be controlled by CSS, and should be controlled by a location coordinate*/}
                     <img src="images/bluehsip.svg" loading="lazy" alt className="af-class-objects af-class-blue-ship" />
                     <img src="images/pinkship.svg" loading="lazy" alt className="af-class-objects af-class-pinkship" />
                     <img src="images/greenship.png" loading="lazy" alt className="af-class-objects af-class-greenship" />
