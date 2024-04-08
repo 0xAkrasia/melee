@@ -1,0 +1,256 @@
+:root {
+  --white: white;
+  --black: black;
+}
+
+.body {
+  background-color: #000;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+.shooting-game {
+  grid-row-gap: 40px;
+  background-color: #07020f;
+  border: 2px solid #230552;
+  border-radius: 16px;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1038px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 40px;
+  text-decoration: none;
+  display: flex;
+}
+
+.game-header {
+  color: #9428ff;
+  letter-spacing: .04em;
+  text-shadow: 0 0 24px rgba(255, 135, 0, .5);
+  margin-top: 0;
+  margin-bottom: 0;
+  font-family: Casino, sans-serif;
+  font-size: 48px;
+  font-weight: 400;
+  line-height: 100%;
+  text-decoration: none;
+}
+
+.game {
+  grid-column-gap: 16px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  text-decoration: none;
+  display: flex;
+}
+
+.player-col {
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+  height: 720px;
+  display: flex;
+}
+
+.play-1 {
+  color: #ff31de;
+  letter-spacing: .13em;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 100%;
+  text-decoration: none;
+}
+
+.pl {
+  color: #93ed00;
+  letter-spacing: .13em;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 100%;
+  text-decoration: none;
+}
+
+.main {
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 720px;
+  text-decoration: none;
+  display: flex;
+  position: relative;
+}
+
+.grid-overlay {
+  object-fit: cover;
+  flex: 0 auto;
+  justify-content: center;
+  align-items: center;
+  width: 720px;
+  text-decoration: none;
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.gamebg {
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 720px;
+  height: 720px;
+  text-decoration: none;
+  display: flex;
+  position: relative;
+}
+
+.player-col-2 {
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  height: 720px;
+  display: flex;
+}
+
+.player {
+  color: #339cfe;
+  letter-spacing: .13em;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 100%;
+  text-decoration: none;
+}
+
+.player.pink {
+  color: #fe33f7;
+}
+
+.player.green {
+  color: #41fe33;
+}
+
+.player.orange {
+  color: #fe9833;
+}
+
+.text-10 {
+  color: #ffb763;
+  letter-spacing: .13em;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 100%;
+  text-decoration: none;
+}
+
+.background-video {
+  width: 720px;
+  height: 720px;
+  position: absolute;
+}
+
+.frame-6 {
+  grid-column-gap: 8px;
+  flex: 0 auto;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-decoration: none;
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.grid {
+  object-fit: cover;
+  flex: 0 auto;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  display: flex;
+  position: absolute;
+}
+
+.objects {
+  width: 60px;
+  height: 60px;
+  position: absolute;
+  top: 0%;
+  bottom: auto;
+  left: 0%;
+  right: auto;
+}
+
+.objects.blue-ship {
+  top: 0%;
+  bottom: auto;
+  left: auto;
+  right: 0%;
+}
+
+.objects.blue-ship.orangeship {
+  top: auto;
+  bottom: 0%;
+  left: auto;
+  right: 0%;
+}
+
+.objects.greenship {
+  top: auto;
+  bottom: 0%;
+  left: 0%;
+  right: auto;
+}
+
+.objects.orangeship {
+  top: auto;
+  bottom: 0%;
+  left: auto;
+  right: 0%;
+}
+
+.objects.asteroid {
+  top: 50%;
+  bottom: 0%;
+  left: 41.5%;
+  right: 0%;
+}
+
+.objects.star {
+  top: 25%;
+  bottom: 0%;
+  left: 33.5%;
+  right: 0%;
+}
+
+
+@font-face {
+  font-family: 'Casino 3 Dlines';
+  src: url('../fonts/Casino3DLines.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Casino';
+  src: url('../fonts/Casino.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
