@@ -58,7 +58,8 @@ class IndexView extends React.Component {
 
     return (
       <span>
-        <style dangerouslySetInnerHTML={{ __html: `
+        <style dangerouslySetInnerHTML={{
+          __html: `
           @import url(/css/normalize.css);
           @import url(/css/webflow.css);
           @import url(/css/shooting-game-96dbb1.webflow.css);
@@ -74,10 +75,23 @@ class IndexView extends React.Component {
                 </div>
                 <div className="af-class-main">
                   <div className="af-class-gamebg"><img src="images/Vectors-Wrapper.svg" loading="lazy" width={720} height={720} alt className="af-class-grid" />
-                    <div data-poster-url="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-poster-00001.jpg" data-video-urls="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.mp4,https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.webm" data-autoplay="true" data-loop="true" data-wf-ignore="true" className="af-class-background-video w-background-video w-background-video-atom"><video id="7030711c-69a7-544c-8ec1-2cdfd7a165b4-video" autoPlay loop style={{backgroundImage: 'url("https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-poster-00001.jpg")'}} muted playsInline data-wf-ignore="true" data-object-fit="cover">
+                    <div data-poster-url="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-poster-00001.jpg"
+                      data-video-urls="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.mp4,https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.webm"
+                      data-autoplay="true"
+                      data-loop="true"
+                      data-wf-ignore="true"
+                      className="af-class-background-video w-background-video w-background-video-atom">
+                      <video id="7030711c-69a7-544c-8ec1-2cdfd7a165b4-video" autoPlay loop style={{ backgroundImage: 'url("https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-poster-00001.jpg")' }} muted playsInline data-wf-ignore="true" data-object-fit="cover">
                         <source src="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.mp4" data-wf-ignore="true" />
                         <source src="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.webm" data-wf-ignore="true" />
-                      </video></div><img src="images/bluehsip.svg" loading="lazy" alt className="af-class-objects af-class-blue-ship" /><img src="images/pinkship.svg" loading="lazy" alt className="af-class-objects af-class-pinkship" /><img src="images/greenship.png" loading="lazy" alt className="af-class-objects af-class-greenship" /><img src="images/star-1.svg" loading="lazy" alt className="af-class-objects af-class-star" /><img src="images/asteroid.svg" loading="lazy" alt className="af-class-objects af-class-asteroid" /><img src="images/orangeship.svg" loading="lazy" alt className="af-class-objects af-class-orangeship" />
+                      </video>
+                    </div>
+                    <img src="images/bluehsip.svg" loading="lazy" alt className="af-class-objects af-class-blue-ship" />
+                    <img src="images/pinkship.svg" loading="lazy" alt className="af-class-objects af-class-pinkship" />
+                    <img src="images/greenship.png" loading="lazy" alt className="af-class-objects af-class-greenship" />
+                    <img src="images/star-1.svg" loading="lazy" alt className="af-class-objects af-class-star" />
+                    <img src="images/asteroid.svg" loading="lazy" alt className="af-class-objects af-class-asteroid" />
+                    <img src="images/orangeship.svg" loading="lazy" alt className="af-class-objects af-class-orangeship" />
                   </div>
                 </div>
                 <div className="af-class-player-col-2">
