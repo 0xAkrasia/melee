@@ -1,0 +1,444 @@
+:root {
+  --chakra-petch: "Chakra Petch", sans-serif;
+  --brand: #ff8700;
+  --black: black;
+  --casino: Casino, sans-serif;
+  --white: white;
+}
+
+.w-layout-vflex {
+  flex-direction: column;
+  align-items: flex-start;
+  display: flex;
+}
+
+.body {
+  font-family: var(--chakra-petch);
+  color: var(--brand);
+  background-color: #000;
+  margin-top: 24px;
+  margin-left: 0;
+}
+
+.game-container {
+  width: 100%;
+  max-width: 1038px;
+  grid-row-gap: 40px;
+  background-color: rgba(25, 13, 0, .5);
+  border: 2px solid #4c2800;
+  border-radius: 16px;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 40px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 40px;
+  text-decoration: none;
+  display: flex;
+}
+
+.game-header {
+  width: 100%;
+  grid-row-gap: 24px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  display: flex;
+}
+
+.game-title {
+  width: 100%;
+  grid-row-gap: 8px;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-decoration: none;
+  display: flex;
+}
+
+.h1 {
+  box-shadow: 0 0 16px 4px var(--black);
+  color: #ff8700;
+  letter-spacing: .04em;
+  text-shadow: 0 0 24px rgba(255, 135, 0, .5);
+  margin-top: 0;
+  margin-bottom: 0;
+  font-family: Casino, sans-serif;
+  font-size: 48px;
+  font-weight: 400;
+  line-height: 100%;
+  text-decoration: none;
+}
+
+.p_body {
+  box-shadow: 0 0 12px 0 var(--black);
+  color: #ff8700;
+  text-shadow: 0 0 12px #ff8700;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-family: Chakra Petch, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 100%;
+  text-decoration: none;
+}
+
+.game-stats {
+  width: 100%;
+  grid-column-gap: 40px;
+  justify-content: flex-start;
+  align-items: flex-end;
+  text-decoration: none;
+  display: flex;
+}
+
+.typehead {
+  width: 100%;
+  grid-column-gap: 8px;
+  grid-row-gap: 8px;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-decoration: none;
+  display: flex;
+}
+
+.h2 {
+  box-shadow: 0 0 12px 0 var(--black);
+  color: #ff8700;
+  text-shadow: 0 0 12px #ff8700;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-family: Chakra Petch, sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 100%;
+  text-decoration: none;
+}
+
+.bet-input {
+  width: 100%;
+  height: auto;
+  grid-column-gap: 24px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-decoration: none;
+  display: flex;
+}
+
+.amount-field {
+  width: 25%;
+  grid-column-gap: 16px;
+  background-color: #000;
+  border: 2px solid #ff8700;
+  border-radius: 12px;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 16px 24px;
+  text-decoration: none;
+  display: flex;
+}
+
+.currency {
+  width: 24px;
+  grid-column-gap: 8px;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  display: flex;
+}
+
+.vectors-wrapper {
+  width: 14.1466px;
+  height: 24px;
+  object-fit: cover;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  display: flex;
+}
+
+.text-3 {
+  opacity: .7;
+  color: #ff8700;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-family: Chakra Petch, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  text-decoration: none;
+}
+
+.btn-primary {
+  width: 100%;
+  max-width: 228px;
+  grid-column-gap: 8px;
+  background-color: #ff8700;
+  border-radius: 12px;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 24px;
+  text-decoration: none;
+  display: flex;
+}
+
+.text-4 {
+  color: #000;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-family: Chakra Petch, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 24px;
+  text-decoration: none;
+}
+
+.selection-grid {
+  width: 100%;
+  grid-column-gap: 16px;
+  grid-row-gap: 16px;
+  flex-wrap: wrap;
+  grid-template-rows: auto auto;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-auto-columns: 1fr;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-decoration: none;
+  display: grid;
+}
+
+.item {
+  grid-column-gap: 8px;
+  color: var(--brand);
+  background-color: rgba(124, 89, 19, .05);
+  border: 2px solid #331b00;
+  border-radius: 16px;
+  flex: 0 auto;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 8px;
+  text-decoration: none;
+  display: flex;
+}
+
+.item.selected {
+  border-color: var(--brand);
+}
+
+.img {
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.item-2 {
+  grid-column-gap: 8px;
+  border: 2px solid #282329;
+  border-radius: 16px;
+  flex: 0 auto;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 8px;
+  text-decoration: none;
+  display: flex;
+}
+
+.form-block {
+  width: 100%;
+  grid-column-gap: 16px;
+  grid-row-gap: 16px;
+  flex-flow: row;
+  grid-template-rows: auto auto;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-columns: 1fr;
+  margin-bottom: 0;
+  display: block;
+}
+
+.form {
+  width: 100%;
+  grid-column-gap: 24px;
+  grid-row-gap: 24px;
+  display: flex;
+}
+
+.text-field {
+  width: 100%;
+  height: 60px;
+  background-color: var(--black);
+  border: 2px solid #663600;
+  border-radius: 12px;
+  margin-bottom: 0;
+  padding: 0 24px;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.text-field:focus {
+  border-color: var(--brand);
+}
+
+.text-field::-ms-input-placeholder {
+  color: #804400;
+}
+
+.text-field::placeholder {
+  color: #804400;
+}
+
+.submit-button {
+  background-color: var(--brand);
+  color: var(--black);
+  border-radius: 12px;
+  padding: 16px 40px;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.error-message, .success-message {
+  border-radius: 8px;
+}
+
+.flex-block {
+  grid-column-gap: 24px;
+  grid-row-gap: 24px;
+}
+
+@media screen and (max-width: 991px) {
+  .game-container {
+    max-width: 720px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .bet-input {
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .btn-primary {
+    max-width: none;
+  }
+
+  .selection-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .game-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .p_body {
+    line-height: 150%;
+  }
+
+  .game-stats {
+    grid-row-gap: 24px;
+    flex-flow: column;
+  }
+
+  .item {
+    border-radius: 12px;
+  }
+
+  .img {
+    height: 120px;
+    border-radius: 8px;
+  }
+
+  .form {
+    flex-flow: column;
+  }
+}
+
+
+@font-face {
+  font-family: 'Casino';
+  src: url('../fonts/Casino.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Casinoflatshadow';
+  src: url('../fonts/CasinoFlatShadow-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Casino 3 D';
+  src: url('../fonts/Casino3D-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Casino 3 D';
+  src: url('../fonts/Casino3D.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Casino 3 Dmarquee';
+  src: url('../fonts/Casino3DMarquee-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Casinoshadow';
+  src: url('../fonts/CasinoShadow-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Casino 3 Dlines';
+  src: url('../fonts/Casino3DLines-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Casino 3 Dfilled';
+  src: url('../fonts/Casino3DFilled-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Casino 3 Dfilledmarquee';
+  src: url('../fonts/Casino3DFilledMarquee-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Casinoflat';
+  src: url('../fonts/CasinoFlat-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Casino 3 Dlines';
+  src: url('../fonts/Casino3DLines.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Casino 3 Dlinesmarquee';
+  src: url('../fonts/Casino3DLinesMarquee.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
