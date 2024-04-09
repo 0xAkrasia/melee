@@ -33,6 +33,11 @@ class IndexView extends React.Component {
     }
   }
 
+  constructor(props) {
+    super(props);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+  }
+
   gridWidth = 12;
   // TODO: Load the asteroid positions from the contract
   astArray = [27, 28, 32, 45, 62, 90, 102, 123];
@@ -57,6 +62,7 @@ class IndexView extends React.Component {
       star: { x: 6, y: 5, rotation: 0 }, // # TODO star is hard coded for now
       ...this.asteroidsInState,
     },
+    hoverGrid: null,
   };
 
 
@@ -108,7 +114,6 @@ class IndexView extends React.Component {
   }
 
   renderObject(name, position) {
-    console.log(name, position);
     const style = {
       top: `${position.y * 60}px`,
       left: `${position.x * 60}px`,
@@ -129,6 +134,80 @@ class IndexView extends React.Component {
     );
   }
 
+  handleMouseMove = (event) => {
+    // Assuming the game grid element has a class of 'af-class-gamebg'.
+    const gameGridElement = document.querySelector('.af-class-gamebg');
+  
+    if (!gameGridElement) {
+      // Exit early if the game grid element is not found.
+      return;
+    }
+  
+    // Get the bounding rectangle for the game grid element.
+    const gridRect = gameGridElement.getBoundingClientRect();
+  
+    // Calculate the mouse position relative to the game grid.
+    const relativeX = event.clientX - gridRect.left;
+    const relativeY = event.clientY - gridRect.top;
+  
+    // Calculate the grid coordinates.
+    // Use Math.floor to get the lower bound (so 0.1 and 0.9 both align to grid space 0).
+    // Use Math.max to prevent negative grid locations if the cursor is slightly out of bounds.
+    const gridX = Math.max(0, Math.floor(relativeX / 60)); // Assuming grid cell width is 60px.
+    const gridY = Math.max(0, Math.floor(relativeY / 60)); // Assuming grid cell height is 60px.
+  
+    // Update hover state if mouse is within grid boundaries.
+    if (gridX >= 0 && gridX < this.gridWidth && gridY >= 0 && gridY < this.gridWidth) {
+      const hoverGrid = { x: gridX, y: gridY };
+      this.setState({ hoverGrid });
+    } else {
+      // Optional: clear hover state if mouse leaves the game grid boundaries.
+      this.setState({ hoverGrid: null });
+    }
+  }
+
+  calculateDistance(pos1, pos2) {
+    // Calculate the distance between two points (pos1 and pos2)
+    const distanceX = Math.abs(pos1.x - pos2.x);
+    const distanceY = Math.abs(pos1.y - pos2.y);
+    return Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
+  }
+  
+  renderShadowEffect(hoverGrid, orangeShip) {
+    // Generate the shadow effect based on hoverGrid and orangeShip positions
+    const distance = this.calculateDistance(hoverGrid, orangeShip);
+    console.log('Distance:', distance);
+    if (distance < 3) { // FIXEME distance should be less than 2 grid units instead of 2
+      // If the distance is within 2 units, apply shadow effect to hoverGrid
+      return (
+        <div
+          className="af-class-shadow-effect"
+          style={{
+            top: `${hoverGrid.y * 60}px`,
+            left: `${hoverGrid.x * 60}px`,
+            position: 'absolute',
+            width: '60px',
+            height: '60px',
+            backgroundColor: 'rgba(255,165,0, 0.3)' // Shadow with some transparency
+          }}
+        />
+      );
+    } else {
+      // If the distance is more than 2 units, return null as no shadow effect is needed
+      return null;
+    }
+  }
+  
+  renderGridOverlay() {
+    // Your existing TODO code goes here to determine the shadow effect
+    const { hoverGrid, shipPositions } = this.state;
+    if (hoverGrid) {
+      // Check if hoverGrid is close enough to the orangeShip
+      return this.renderShadowEffect(hoverGrid, shipPositions.orangeShip);
+    }
+    return null;
+  }
+
   async componentDidMount() {
     const htmlEl = document.querySelector('html')
     htmlEl.dataset['wfPage'] = '660f583e0bf21e7507c46dfe'
@@ -147,7 +226,7 @@ class IndexView extends React.Component {
 
       return active.isAsync ? next : loading
     }))
-    await this.loadContractData();
+    //await this.loadContractData();
   }
 
   render() {
@@ -176,7 +255,8 @@ class IndexView extends React.Component {
                   <div className="af-class-player af-class-green">0xABD</div>
                 </div>
                 <div className="af-class-main">
-                  <div className="af-class-gamebg"><img src="images/Vectors-Wrapper.svg" loading="lazy" width={720} height={720} alt className="af-class-grid" />
+                  <div className="af-class-gamebg" onMouseMove={this.handleMouseMove}>
+                    <img src="images/Vectors-Wrapper.svg" loading="lazy" width={720} height={720} alt className="af-class-grid" />
                     {/*Looks like there will be a video being played in this division, but seems this piece of code does not take any effect, need double check*/}
                     <div data-poster-url="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-poster-00001.jpg"
                       data-video-urls="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.mp4,https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.webm"
@@ -189,6 +269,7 @@ class IndexView extends React.Component {
                         <source src="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.webm" data-wf-ignore="true" />
                       </video>
                     </div>
+                    {this.renderGridOverlay()}
                     {Object.keys(shipPositions).map((name) => this.renderObject(name, shipPositions[name]))}
                   </div>
                 </div>
