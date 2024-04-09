@@ -31,7 +31,65 @@ class IndexView extends React.Component {
     }
   }
 
-  componentDidMount() {
+  state = {
+    shipPositions: {
+      blueShip: { x: 0, y: 11, rotation: 0 },
+      pinkShip: { x: 11, y: 0, rotation: 90 },
+      greenShip: { x: 0, y: 0, rotation: 180 },
+      star: { x: 3, y: 2, rotation: 0 },
+      asteroid: { x: 5, y: 6, rotation: 0 },
+      orangeShip: { x: 11, y: 11, rotation: 270 },
+    },
+  };
+
+  async loadContractData() {
+    /*
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const contract = new ethers.Contract(
+      contractAddress,
+      contractABI,
+      provider
+    );
+
+    try {
+      // Fetch the positions from the contract
+      const blueShipPosition = await contract.getBlueShipPosition();
+      const pinkShipPosition = await contract.getPinkShipPosition();
+      // ... get other positions
+
+      this.setState({
+        shipPositions: {
+          blueShip: blueShipPosition,
+          pinkShip: pinkShipPosition,
+          // ... set other positions
+        },
+      });
+    } catch (error) {
+      console.error('Error fetching positions from smart contract', error);
+    }
+    */
+  }
+
+  renderShip(shipName, position) {
+    const style = {
+      top: `${position.x * 60}px`,
+      left: `${position.y * 60}px`,
+      transform: `rotate(${position.rotation}deg)`
+    };
+
+    const suffix = shipName === 'greenShip' ? 'png' : 'svg';
+
+    return (
+      <img
+        src={`images/${shipName}.${suffix}`}
+        alt={`${shipName}`}
+        className={`af-class-objects`}
+        style={style}
+      />
+    );
+  }
+
+  async componentDidMount() {
     const htmlEl = document.querySelector('html')
     htmlEl.dataset['wfPage'] = '660f583e0bf21e7507c46dfe'
     htmlEl.dataset['wfSite'] = '660f583e0bf21e7507c46de9'
@@ -49,12 +107,15 @@ class IndexView extends React.Component {
 
       return active.isAsync ? next : loading
     }))
+    await this.loadContractData();
   }
 
   render() {
     const proxies = IndexView.Controller !== IndexView ? transformProxies(this.props.children) : {
 
     }
+
+    const { shipPositions } = this.state;
 
     return (
       <span>
@@ -88,12 +149,13 @@ class IndexView extends React.Component {
                       </video>
                     </div>
                     {/* TODO based on my understanding the position of these images should not be controlled by CSS, and should be controlled by a location coordinate*/}
-                    <img src="images/bluehsip.svg" loading="lazy" alt className="af-class-objects af-class-blue-ship" />
-                    <img src="images/pinkship.svg" loading="lazy" alt className="af-class-objects af-class-pinkship" />
-                    <img src="images/greenship.png" loading="lazy" alt className="af-class-objects af-class-greenship" />
-                    <img src="images/star-1.svg" loading="lazy" alt className="af-class-objects af-class-star" />
-                    <img src="images/asteroid.svg" loading="lazy" alt className="af-class-objects af-class-asteroid" />
-                    <img src="images/orangeship.svg" loading="lazy" alt className="af-class-objects af-class-orangeship" />
+                    {this.renderShip('blueShip', this.state.shipPositions.blueShip)}
+                    {this.renderShip('pinkShip', this.state.shipPositions.pinkShip)}
+                    {this.renderShip('greenShip', this.state.shipPositions.greenShip)}
+                    {this.renderShip('star', this.state.shipPositions.star)}
+                    {this.renderShip('asteroid', this.state.shipPositions.asteroid)}
+                    {this.renderShip('orangeShip', this.state.shipPositions.orangeShip)}
+
                   </div>
                 </div>
                 <div className="af-class-player-col-2">

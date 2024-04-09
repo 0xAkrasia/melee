@@ -197,49 +197,6 @@
   right: auto;
 }
 
-.af-view .af-class-objects.af-class-blue-ship {
-  top: 0%;
-  bottom: auto;
-  left: auto;
-  right: 0%;
-}
-
-.af-view .af-class-objects.af-class-blue-ship.af-class-orangeship {
-  top: auto;
-  bottom: 0%;
-  left: auto;
-  right: 0%;
-}
-
-.af-view .af-class-objects.af-class-greenship {
-  top: auto;
-  bottom: 0%;
-  left: 0%;
-  right: auto;
-}
-
-.af-view .af-class-objects.af-class-orangeship {
-  top: auto;
-  bottom: 0%;
-  left: auto;
-  right: 0%;
-}
-
-.af-view .af-class-objects.af-class-asteroid {
-  top: 50%;
-  bottom: 0%;
-  left: 41.5%;
-  right: 0%;
-}
-
-.af-view .af-class-objects.af-class-star {
-  top: 25%;
-  bottom: 0%;
-  left: 33.5%;
-  right: 0%;
-}
-
-
 @font-face {
   font-family: 'Casino 3 Dlines';
   src: url('../fonts/Casino3DLines.ttf') format('truetype');
