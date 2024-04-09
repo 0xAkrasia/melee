@@ -31,58 +31,53 @@ class IndexView extends React.Component {
     }
   }
 
+  gridWidth = 12;
+  // TODO: Load the asteroid positions from the contract
+  astArray = [27, 28, 32, 45, 62, 90, 102, 123];
+  asteroidPositions = this.astArray.map((linearPos) => {
+    const x = linearPos % this.gridWidth;
+    const y = Math.floor(linearPos / this.gridWidth);
+    return { x, y, rotation: 0 }; // rotation is set to 0 for simplicity
+  });
+
+  asteroidsInState = this.asteroidPositions.reduce((acc, pos, index) => {
+    acc[`asteroid${index + 1}`] = pos; // +1 to start naming from 1 instead of 0
+    return acc;
+  }, {});
+
+  // Initialize the React state with the ship positions and the asteroid positions
   state = {
     shipPositions: {
       blueShip: { x: 0, y: 11, rotation: 0 },
       pinkShip: { x: 11, y: 0, rotation: 90 },
       greenShip: { x: 0, y: 0, rotation: 180 },
-      star: { x: 3, y: 2, rotation: 0 },
-      asteroid: { x: 5, y: 6, rotation: 0 },
       orangeShip: { x: 11, y: 11, rotation: 270 },
+      star: { x: 6, y: 5, rotation: 0 }, // # TODO star is hard coded for now
+      ...this.asteroidsInState,
     },
   };
 
+
   async loadContractData() {
-    /*
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const contract = new ethers.Contract(
-      contractAddress,
-      contractABI,
-      provider
-    );
-
-    try {
-      // Fetch the positions from the contract
-      const blueShipPosition = await contract.getBlueShipPosition();
-      const pinkShipPosition = await contract.getPinkShipPosition();
-      // ... get other positions
-
-      this.setState({
-        shipPositions: {
-          blueShip: blueShipPosition,
-          pinkShip: pinkShipPosition,
-          // ... set other positions
-        },
-      });
-    } catch (error) {
-      console.error('Error fetching positions from smart contract', error);
-    }
-    */
+    // TODO load state from contract
   }
 
-  renderShip(shipName, position) {
+  renderObject(name, position) {
+    console.log(name, position);
     const style = {
-      top: `${position.x * 60}px`,
-      left: `${position.y * 60}px`,
+      top: `${position.y * 60}px`,
+      left: `${position.x * 60}px`, 
       transform: `rotate(${position.rotation}deg)`
     };
-
-    const suffix = shipName === 'greenShip' ? 'png' : 'svg';
-
+  
+    const suffix = name.includes('greenShip') ? 'png' : 'svg';
+    const imagePath = name.includes('asteroid') ? 'images/asteroid.svg' : `images/${name}.${suffix}`;
+  
     return (
       <img
-        src={`images/${shipName}.${suffix}`}
-        alt={`${shipName}`}
+        key={name}
+        src={imagePath}
+        alt={name}
         className={`af-class-objects`}
         style={style}
       />
@@ -148,14 +143,7 @@ class IndexView extends React.Component {
                         <source src="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.webm" data-wf-ignore="true" />
                       </video>
                     </div>
-                    {/* TODO based on my understanding the position of these images should not be controlled by CSS, and should be controlled by a location coordinate*/}
-                    {this.renderShip('blueShip', this.state.shipPositions.blueShip)}
-                    {this.renderShip('pinkShip', this.state.shipPositions.pinkShip)}
-                    {this.renderShip('greenShip', this.state.shipPositions.greenShip)}
-                    {this.renderShip('star', this.state.shipPositions.star)}
-                    {this.renderShip('asteroid', this.state.shipPositions.asteroid)}
-                    {this.renderShip('orangeShip', this.state.shipPositions.orangeShip)}
-
+                    {Object.keys(shipPositions).map((name) => this.renderObject(name, shipPositions[name]))}
                   </div>
                 </div>
                 <div className="af-class-player-col-2">
