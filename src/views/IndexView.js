@@ -72,31 +72,38 @@ class IndexView extends React.Component {
     const contractAddress = '0xBfec76C39961b6E39599C68e87ec575be9F4CA83';
 
     // Create a contract instance
-    const gameContract = new Contract(contractAddress, starFighterAbi, signer);
+    const gameContract = new Contract(contractAddress, starFighterAbi, provider);
 
     // Retrieve positions for each ship
     const ships = ['blueShip', 'pinkShip', 'greenShip', 'orangeShip'];
-    const shipPositionsPromises = ships.map((ship, index) =>
-      gameContract.positions(index).then((positionData) => ({
-        x: positionData[0].toNumber(),
-        y: positionData[1].toNumber(),
-        rotation: this.state.shipPositions[ship].rotation, // maintain the existing rotation
-      }))
+    // Retrieve addresses for each player from the `players` public array
+    const playerAddressesPromises = ships.map((_, index) =>
+      gameContract.players(index)
     );
 
     try {
-      // Await all promises to provide the positions array
-      const positionsArray = await Promise.all(shipPositionsPromises);
-
-      // Map those positions back to the `shipPositions` state attribute
+      const addressesArray = await Promise.all(playerAddressesPromises);
+  
+      const positionPromises = addressesArray.map((address) => {
+        const xPositionPromise = gameContract.positions(address, 0); // Index for x-axis
+        const yPositionPromise = gameContract.positions(address, 1); // Index for y-axis
+        return Promise.all([xPositionPromise, yPositionPromise]).then(([xPosition, yPosition]) => ({
+          x: Number(xPosition), // Replace with conversion code if necessary
+          y: Number(yPosition), // Replace with conversion code if necessary
+          rotation: 0,
+        }));
+      });
+  
+      const positionsArray = await Promise.all(positionPromises);
+  
       const newShipPositions = ships.reduce((acc, ship, index) => {
         acc[ship] = positionsArray[index];
         return acc;
-      }, {});
-
+      }, {...this.state.shipPositions});
+  
       this.setState({ shipPositions: newShipPositions });
     } catch (error) {
-      console.error("Error fetching positions from the contract: ", error);
+      console.error("Error fetching player addresses or positions from the contract: ", error);
     }
   }
 
