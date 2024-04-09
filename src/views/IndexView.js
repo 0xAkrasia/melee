@@ -2,6 +2,8 @@
 
 import React from 'react'
 import { createScope, map, transformProxies } from './helpers'
+import { BrowserProvider, Contract } from 'ethers';
+import starFighterAbi from '../abi/starFighter.json';
 
 const scripts = [
   { loading: fetch("https://d3e54v103j8qbb.cloudfront.net/js/jquery-3.5.1.min.dc5e7f18c8.js?site=660f583e0bf21e7507c46de9").then(body => body.text()), isAsync: false },
@@ -59,20 +61,56 @@ class IndexView extends React.Component {
 
 
   async loadContractData() {
-    // TODO load state from contract
+    // Initialize Ethereum provider, for example using MetaMask
+    const provider = new BrowserProvider(window.ethereum);
+
+    // TODO use privy wallet
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner(); // Get the signer to perform transactions
+
+    // TODO hard coded contract address
+    const contractAddress = '0xBfec76C39961b6E39599C68e87ec575be9F4CA83';
+
+    // Create a contract instance
+    const gameContract = new Contract(contractAddress, starFighterAbi, signer);
+
+    // Retrieve positions for each ship
+    const ships = ['blueShip', 'pinkShip', 'greenShip', 'orangeShip'];
+    const shipPositionsPromises = ships.map((ship, index) =>
+      gameContract.positions(index).then((positionData) => ({
+        x: positionData[0].toNumber(),
+        y: positionData[1].toNumber(),
+        rotation: this.state.shipPositions[ship].rotation, // maintain the existing rotation
+      }))
+    );
+
+    try {
+      // Await all promises to provide the positions array
+      const positionsArray = await Promise.all(shipPositionsPromises);
+
+      // Map those positions back to the `shipPositions` state attribute
+      const newShipPositions = ships.reduce((acc, ship, index) => {
+        acc[ship] = positionsArray[index];
+        return acc;
+      }, {});
+
+      this.setState({ shipPositions: newShipPositions });
+    } catch (error) {
+      console.error("Error fetching positions from the contract: ", error);
+    }
   }
 
   renderObject(name, position) {
     console.log(name, position);
     const style = {
       top: `${position.y * 60}px`,
-      left: `${position.x * 60}px`, 
+      left: `${position.x * 60}px`,
       transform: `rotate(${position.rotation}deg)`
     };
-  
+
     const suffix = name.includes('greenShip') ? 'png' : 'svg';
     const imagePath = name.includes('asteroid') ? 'images/asteroid.svg' : `images/${name}.${suffix}`;
-  
+
     return (
       <img
         key={name}
@@ -123,6 +161,7 @@ class IndexView extends React.Component {
         <span className="af-view">
           <div className="af-class-body">
             <div className="af-class-shooting-game">
+              <button onClick={() => this.loadContractData()}>Load Game Data</button> {/* Add this button */}
               <div className="af-class-game-header">Make a move!</div>
               <div className="af-class-game">
                 <div className="af-class-player-col">
