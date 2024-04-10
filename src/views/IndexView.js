@@ -37,6 +37,7 @@ class IndexView extends React.Component {
     super(props);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.isAsteroidOrStarOnPath = this.isAsteroidOrStarOnPath.bind(this);
+    this.sharedHoverGridLogic = this.sharedHoverGridLogic.bind(this);
   }
 
   gridWidth = 12;
@@ -189,16 +190,16 @@ class IndexView extends React.Component {
   isAsteroidOrStarOnPath(pos) {
     const mainShip = this.state.mainShip;
     const hoverGrid = this.state.hoverGrid;
-  
+
     // Only check if hoverGrid is defined
     if (!hoverGrid) {
       return false;
     }
-  
+
     // Check if pos is on the same row or column as the mainShip and hoverGrid.
     const isSameRow = (pos.y === mainShip.y) && (pos.y === hoverGrid.y);
     const isSameColumn = (pos.x === mainShip.x) && (pos.x === hoverGrid.x);
-  
+
     if (isSameRow) {
       // Check if pos.x is between mainShip.x and hoverGrid.x
       return (pos.x - mainShip.x) * (pos.x - hoverGrid.x) <= 0;
@@ -206,11 +207,11 @@ class IndexView extends React.Component {
       // Check if pos.y is between mainShip.y and hoverGrid.y
       return (pos.y - mainShip.y) * (pos.y - hoverGrid.y) <= 0;
     }
-  
+
     // Check if pos is on a diagonal path
     const deltaX = mainShip.x - hoverGrid.x;
     const deltaY = mainShip.y - hoverGrid.y;
-  
+
     // To be on the same diagonal, the differences in x and y from the mainShip to hoverGrid 
     // should be equal to those to pos (in terms of absolute value)
     if (deltaX !== 0 && deltaY !== 0 && Math.abs(deltaX) === Math.abs(deltaY)) {
@@ -220,32 +221,75 @@ class IndexView extends React.Component {
         (pos.x - mainShip.x) * (pos.x - hoverGrid.x) <= 0 &&
         (pos.y - mainShip.y) * (pos.y - hoverGrid.y) <= 0;
     }
-  
+
     return false;
-  } 
-  
-  renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition) {
+  }
+
+  sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition) {
     const isOnAsteroidOrStar = asteroidPositions.some(
       pos => pos.x === hoverGrid.x && pos.y === hoverGrid.y
     ) || (starPosition.x === hoverGrid.x && starPosition.y === hoverGrid.y);
-  
+
     if (isOnAsteroidOrStar) {
-      return null;
+      return { shouldRender: false };
     }
-  
-    // Calculate the distance between two points (hoverGrid and mainShip)
+
     const distanceX = Math.abs(hoverGrid.x - mainShip.x);
     const distanceY = Math.abs(hoverGrid.y - mainShip.y);
-  
+
     const isPathBlocked = asteroidPositions.some(this.isAsteroidOrStarOnPath) || this.isAsteroidOrStarOnPath(starPosition);
-  
-    if (isPathBlocked) {
-      return null;
+
+    return { shouldRender: !isPathBlocked, distanceX, distanceY };
+  }
+
+  renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition) {
+    const { shouldRender, distanceX, distanceY } = this.sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition);
+    if (!shouldRender) return null;
+    // Check if hoverGrid is on a horizontal, vertical, or straight diagonal path within 2 units
+    const isHorizontalOrVertical = (distanceX <= 3 && distanceY === 0) || (distanceX === 0 && distanceY <= 3);
+    const isStraightDiagonal = distanceX === distanceY && distanceX <= 3;
+
+    // Apply shadow effect if hoverGrid meets the above condition and the path is not blocked
+    if ((isHorizontalOrVertical || isStraightDiagonal)) {
+      // Calculate the steps needed to draw the path
+      const steps = Math.max(Math.abs(hoverGrid.x - mainShip.x), Math.abs(hoverGrid.y - mainShip.y));
+      const deltaX = (hoverGrid.x - mainShip.x) / steps;
+      const deltaY = (hoverGrid.y - mainShip.y) / steps;
+      let pathElements = [];
+
+      // Generate divs for each step in the path
+      for (let i = 1; i <= steps; i++) {
+        const stepX = mainShip.x + deltaX * i;
+        const stepY = mainShip.y + deltaY * i;
+        const key = `path-${stepX}-${stepY}`;
+
+        pathElements.push(
+          <div
+            key={key}
+            className="af-class-shadow-effect"
+            style={{
+              top: `${stepY * 60}px`,
+              left: `${stepX * 60}px`,
+              position: 'absolute',
+              width: '60px',
+              height: '60px',
+              backgroundColor: 'rgba(255,0,0, 0.3)', // Distinct color for attack path
+              zIndex: 1 // To ensure it is rendered below the ships and asteroids
+            }}
+          />
+        );
+      }
+      return pathElements;
     }
+  }
+
+  renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition) {
+    const { shouldRender, distanceX, distanceY } = this.sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition);
+    if (!shouldRender) return null;
     // Check if hoverGrid is on a horizontal, vertical, or straight diagonal path within 2 units
     const isHorizontalOrVertical = (distanceX <= 2 && distanceY === 0) || (distanceX === 0 && distanceY <= 2);
     const isStraightDiagonal = distanceX === distanceY && distanceX <= 2;
-  
+
     // Apply shadow effect if hoverGrid meets the above condition and the path is not blocked
     if ((isHorizontalOrVertical || isStraightDiagonal)) {
       return (
@@ -281,7 +325,8 @@ class IndexView extends React.Component {
 
     if (hoverGrid) {
       // Check if hoverGrid is close enough to the mainShip and not on asteroid or star
-      return this.renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition);
+      //return this.renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition);
+      return this.renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition);
     }
     return null;
   }
