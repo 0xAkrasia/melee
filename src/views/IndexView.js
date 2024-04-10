@@ -110,7 +110,8 @@ class IndexView extends React.Component {
 
       this.setState({ shipPositions: newShipPositions });
       //const currentAddress = await signer.get_address();
-      const currentAddress = '0xfF2A73A2eB87cbb6934b7a408719D0889bcF57B7'; // TODO: replace with the current address from the signer
+      //const currentAddress = '0xfF2A73A2eB87cbb6934b7a408719D0889bcF57B7'; // TODO: replace with the current address from the signer
+      const currentAddress = '0x24Ea37698DB1220d929223fD09fDa0f0ABff3Dfd'
       // Find mainShip based on currentAddress
       let mainShip = this.state.shipPositions.orangeShip;
       if (addressesArray[0] && currentAddress.toLowerCase() === addressesArray[0].toLowerCase()) mainShip = newShipPositions.blueShip;
@@ -183,12 +184,48 @@ class IndexView extends React.Component {
     return Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
   }
 
-  renderShadowEffect(hoverGrid, mainShip) {
-    // Generate the shadow effect based on hoverGrid and mainShip positions
-    const distance = this.calculateDistance(hoverGrid, mainShip);
-    console.log('Distance:', distance);
-    if (distance < 3) { // FIXEME distance should be less than 2 grid units instead of 2
-      // If the distance is within 2 units, apply shadow effect to hoverGrid
+  
+  renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition) {
+    const isOnAsteroidOrStar = asteroidPositions.some(
+      pos => pos.x === hoverGrid.x && pos.y === hoverGrid.y
+    ) || (starPosition.x === hoverGrid.x && starPosition.y === hoverGrid.y);
+  
+    if (isOnAsteroidOrStar) {
+      return null;
+    }
+  
+    // Calculate the distance between two points (hoverGrid and mainShip)
+    const distanceX = Math.abs(hoverGrid.x - mainShip.x);
+    const distanceY = Math.abs(hoverGrid.y - mainShip.y);
+  /*
+    // Function to check if a given position is on the line of sight between two points
+    const isAsteroidOrStarOnPath = (pos) => {
+      // Check if pos is between mainShip and hoverGrid both for x and y axis
+      const isBetweenX = (pos.x - mainShip.x) * (pos.x - hoverGrid.x) <= 0;
+      const isBetweenY = (pos.y - mainShip.y) * (pos.y - hoverGrid.y) <= 0;
+  
+      // Check if pos is on the straight line path from mainShip to hoverGrid
+      return isBetweenX && isBetweenY && 
+             (pos.x === mainShip.x || // same column
+              pos.y === mainShip.y || // same row
+              (Math.abs(pos.x - mainShip.x) === Math.abs(pos.y - mainShip.y)) // diagonal
+             );
+    };
+  
+    // Check if any asteroid or the star is on the path from the mainShip to the hoverGrid
+    const isPathBlocked = asteroidPositions.some(isAsteroidOrStarOnPath) || isAsteroidOrStarOnPath(starPosition);
+  
+    if (isPathBlocked) {
+      return null;
+    }
+  */
+    const isPathBlocked = false;
+    // Check if hoverGrid is on a horizontal, vertical, or straight diagonal path within 2 units
+    const isHorizontalOrVertical = (distanceX <= 2 && distanceY === 0) || (distanceX === 0 && distanceY <= 2);
+    const isStraightDiagonal = distanceX === distanceY && distanceX <= 2;
+  
+    // Apply shadow effect if hoverGrid meets the above condition and the path is not blocked
+    if ((isHorizontalOrVertical || isStraightDiagonal) && !isPathBlocked) {
       return (
         <div
           className="af-class-shadow-effect"
@@ -203,20 +240,26 @@ class IndexView extends React.Component {
         />
       );
     } else {
-      // If the distance is more than 2 units, return null as no shadow effect is needed
+      // If hoverGrid is not on one of the specified paths, no shadow effect is needed
       return null;
     }
   }
 
   renderGridOverlay() {
-    // Your existing TODO code goes here to determine the shadow effect
-    let { hoverGrid, mainShip } = this.state;
+    let { hoverGrid, mainShip, shipPositions } = this.state;
     if (!mainShip) {
-      mainShip = this.state.shipPositions.orangeShip;
+      mainShip = shipPositions.orangeShip;
     }
+
+    // Assuming star position is stored in state
+    const starPosition = this.state.shipPositions.star;
+
+    // Assuming asteroid positions are stored in state in a similar format as shipPositions
+    const asteroidPositions = this.asteroidPositions;
+
     if (hoverGrid) {
-      // Check if hoverGrid is close enough to the orangeShip
-      return this.renderShadowEffect(hoverGrid, mainShip);
+      // Check if hoverGrid is close enough to the mainShip and not on asteroid or star
+      return this.renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition);
     }
     return null;
   }
