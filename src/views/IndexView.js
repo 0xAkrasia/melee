@@ -43,8 +43,13 @@ class IndexView extends React.Component {
   };
 
   async loadContractData() {
-    /*
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+    await wallets[0]?.isConnected();
+    const currentWallet = await wallets[0]?.getEthereumProvider();
+    const provider = new BrowserProvider(currentWallet);
+    const signer = await bp.getSigner();
+
+    // const provider = new ethers.providers.Web3Provider(window.ethereum);
     const contract = new ethers.Contract(
       contractAddress,
       contractABI,
@@ -67,7 +72,6 @@ class IndexView extends React.Component {
     } catch (error) {
       console.error('Error fetching positions from smart contract', error);
     }
-    */
   }
 
   renderShip(shipName, position) {

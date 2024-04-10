@@ -1,8 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
 import {PrivyProvider} from '@privy-io/react-auth';
 import { defineChain } from 'viem'
+import './index.css';
+import reportWebVitals from './reportWebVitals';
+import './styles'
+import './scripts'
+import IndexView from './views/IndexView';
 // let privy_key = import.meta.env.VITE_PRIVY_KEY;
 
 export const inco = defineChain({
@@ -44,7 +48,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           },
       }}
     >
-      <App />
+      <IndexView />
     </PrivyProvider>
   </React.StrictMode>
 )

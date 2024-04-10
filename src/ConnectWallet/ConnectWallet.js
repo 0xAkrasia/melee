@@ -5,12 +5,12 @@ export const LoginButton = () => {
     const handleLogin = async () => {
         login();
     };
-    
+
     return (
         <div className="w-layout-vflex thin-wrapper">
             <div className="w-layout-vflex main-content">
-                <button className="primary-button w-inline-block">
-                    <div onClick={handleLogin} className="button-text">
+                <button className="primary-button w-inline-block connect-wallet-button">
+                    <div onClick={handleLogin} className="move-button-text">
                         Connect Wallet
                     </div>
                 </button>
