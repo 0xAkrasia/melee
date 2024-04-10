@@ -36,6 +36,7 @@ class IndexView extends React.Component {
   constructor(props) {
     super(props);
     this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.isAsteroidOrStarOnPath = this.isAsteroidOrStarOnPath.bind(this);
   }
 
   gridWidth = 12;
@@ -111,7 +112,8 @@ class IndexView extends React.Component {
       this.setState({ shipPositions: newShipPositions });
       //const currentAddress = await signer.get_address();
       //const currentAddress = '0xfF2A73A2eB87cbb6934b7a408719D0889bcF57B7'; // TODO: replace with the current address from the signer
-      const currentAddress = '0x24Ea37698DB1220d929223fD09fDa0f0ABff3Dfd'
+      //const currentAddress = '0x24Ea37698DB1220d929223fD09fDa0f0ABff3Dfd'
+      const currentAddress = '0x93513A4fAe6df9A730aE19F538205b8170AE5D6F'
       // Find mainShip based on currentAddress
       let mainShip = this.state.shipPositions.orangeShip;
       if (addressesArray[0] && currentAddress.toLowerCase() === addressesArray[0].toLowerCase()) mainShip = newShipPositions.blueShip;
@@ -184,6 +186,43 @@ class IndexView extends React.Component {
     return Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
   }
 
+  isAsteroidOrStarOnPath(pos) {
+    const mainShip = this.state.mainShip;
+    const hoverGrid = this.state.hoverGrid;
+  
+    // Only check if hoverGrid is defined
+    if (!hoverGrid) {
+      return false;
+    }
+  
+    // Check if pos is on the same row or column as the mainShip and hoverGrid.
+    const isSameRow = (pos.y === mainShip.y) && (pos.y === hoverGrid.y);
+    const isSameColumn = (pos.x === mainShip.x) && (pos.x === hoverGrid.x);
+  
+    if (isSameRow) {
+      // Check if pos.x is between mainShip.x and hoverGrid.x
+      return (pos.x - mainShip.x) * (pos.x - hoverGrid.x) <= 0;
+    } else if (isSameColumn) {
+      // Check if pos.y is between mainShip.y and hoverGrid.y
+      return (pos.y - mainShip.y) * (pos.y - hoverGrid.y) <= 0;
+    }
+  
+    // Check if pos is on a diagonal path
+    const deltaX = mainShip.x - hoverGrid.x;
+    const deltaY = mainShip.y - hoverGrid.y;
+  
+    // To be on the same diagonal, the differences in x and y from the mainShip to hoverGrid 
+    // should be equal to those to pos (in terms of absolute value)
+    if (deltaX !== 0 && deltaY !== 0 && Math.abs(deltaX) === Math.abs(deltaY)) {
+      // Calculate gradient and check if position follows the line based on the formula y - y1 = m(x - x1)
+      const gradient = deltaY / deltaX;
+      return (pos.y - mainShip.y) === gradient * (pos.x - mainShip.x) &&
+        (pos.x - mainShip.x) * (pos.x - hoverGrid.x) <= 0 &&
+        (pos.y - mainShip.y) * (pos.y - hoverGrid.y) <= 0;
+    }
+  
+    return false;
+  } 
   
   renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition) {
     const isOnAsteroidOrStar = asteroidPositions.some(
@@ -197,35 +236,18 @@ class IndexView extends React.Component {
     // Calculate the distance between two points (hoverGrid and mainShip)
     const distanceX = Math.abs(hoverGrid.x - mainShip.x);
     const distanceY = Math.abs(hoverGrid.y - mainShip.y);
-  /*
-    // Function to check if a given position is on the line of sight between two points
-    const isAsteroidOrStarOnPath = (pos) => {
-      // Check if pos is between mainShip and hoverGrid both for x and y axis
-      const isBetweenX = (pos.x - mainShip.x) * (pos.x - hoverGrid.x) <= 0;
-      const isBetweenY = (pos.y - mainShip.y) * (pos.y - hoverGrid.y) <= 0;
   
-      // Check if pos is on the straight line path from mainShip to hoverGrid
-      return isBetweenX && isBetweenY && 
-             (pos.x === mainShip.x || // same column
-              pos.y === mainShip.y || // same row
-              (Math.abs(pos.x - mainShip.x) === Math.abs(pos.y - mainShip.y)) // diagonal
-             );
-    };
-  
-    // Check if any asteroid or the star is on the path from the mainShip to the hoverGrid
-    const isPathBlocked = asteroidPositions.some(isAsteroidOrStarOnPath) || isAsteroidOrStarOnPath(starPosition);
+    const isPathBlocked = asteroidPositions.some(this.isAsteroidOrStarOnPath) || this.isAsteroidOrStarOnPath(starPosition);
   
     if (isPathBlocked) {
       return null;
     }
-  */
-    const isPathBlocked = false;
     // Check if hoverGrid is on a horizontal, vertical, or straight diagonal path within 2 units
     const isHorizontalOrVertical = (distanceX <= 2 && distanceY === 0) || (distanceX === 0 && distanceY <= 2);
     const isStraightDiagonal = distanceX === distanceY && distanceX <= 2;
   
     // Apply shadow effect if hoverGrid meets the above condition and the path is not blocked
-    if ((isHorizontalOrVertical || isStraightDiagonal) && !isPathBlocked) {
+    if ((isHorizontalOrVertical || isStraightDiagonal)) {
       return (
         <div
           className="af-class-shadow-effect"
@@ -240,7 +262,7 @@ class IndexView extends React.Component {
         />
       );
     } else {
-      // If hoverGrid is not on one of the specified paths, no shadow effect is needed
+      // If hoverGrid is not on one of the specified paths, render X mark
       return null;
     }
   }
