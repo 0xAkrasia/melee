@@ -63,6 +63,7 @@ class IndexView extends React.Component {
       ...this.asteroidsInState,
     },
     hoverGrid: null,
+    mainShip: null,
   };
 
 
@@ -89,7 +90,7 @@ class IndexView extends React.Component {
 
     try {
       const addressesArray = await Promise.all(playerAddressesPromises);
-  
+
       const positionPromises = addressesArray.map((address) => {
         const xPositionPromise = gameContract.positions(address, 0); // Index for x-axis
         const yPositionPromise = gameContract.positions(address, 1); // Index for y-axis
@@ -99,15 +100,24 @@ class IndexView extends React.Component {
           rotation: 0,
         }));
       });
-  
+
       const positionsArray = await Promise.all(positionPromises);
-  
+
       const newShipPositions = ships.reduce((acc, ship, index) => {
         acc[ship] = positionsArray[index];
         return acc;
-      }, {...this.state.shipPositions});
-  
+      }, { ...this.state.shipPositions });
+
       this.setState({ shipPositions: newShipPositions });
+      //const currentAddress = await signer.get_address();
+      const currentAddress = '0xfF2A73A2eB87cbb6934b7a408719D0889bcF57B7'; // TODO: replace with the current address from the signer
+      // Find mainShip based on currentAddress
+      let mainShip = this.state.shipPositions.orangeShip;
+      if (addressesArray[0] && currentAddress.toLowerCase() === addressesArray[0].toLowerCase()) mainShip = newShipPositions.blueShip;
+      else if (addressesArray[1] && currentAddress.toLowerCase() === addressesArray[1].toLowerCase()) mainShip = newShipPositions.pinkShip;
+      else if (addressesArray[2] && currentAddress.toLowerCase() === addressesArray[2].toLowerCase()) mainShip = newShipPositions.greenShip;
+      else if (addressesArray[3] && currentAddress.toLowerCase() === addressesArray[3].toLowerCase()) mainShip = newShipPositions.orangeShip;
+      this.setState({ mainShip });
     } catch (error) {
       console.error("Error fetching player addresses or positions from the contract: ", error);
     }
@@ -137,25 +147,25 @@ class IndexView extends React.Component {
   handleMouseMove = (event) => {
     // Assuming the game grid element has a class of 'af-class-gamebg'.
     const gameGridElement = document.querySelector('.af-class-gamebg');
-  
+
     if (!gameGridElement) {
       // Exit early if the game grid element is not found.
       return;
     }
-  
+
     // Get the bounding rectangle for the game grid element.
     const gridRect = gameGridElement.getBoundingClientRect();
-  
+
     // Calculate the mouse position relative to the game grid.
     const relativeX = event.clientX - gridRect.left;
     const relativeY = event.clientY - gridRect.top;
-  
+
     // Calculate the grid coordinates.
     // Use Math.floor to get the lower bound (so 0.1 and 0.9 both align to grid space 0).
     // Use Math.max to prevent negative grid locations if the cursor is slightly out of bounds.
     const gridX = Math.max(0, Math.floor(relativeX / 60)); // Assuming grid cell width is 60px.
     const gridY = Math.max(0, Math.floor(relativeY / 60)); // Assuming grid cell height is 60px.
-  
+
     // Update hover state if mouse is within grid boundaries.
     if (gridX >= 0 && gridX < this.gridWidth && gridY >= 0 && gridY < this.gridWidth) {
       const hoverGrid = { x: gridX, y: gridY };
@@ -172,10 +182,10 @@ class IndexView extends React.Component {
     const distanceY = Math.abs(pos1.y - pos2.y);
     return Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
   }
-  
-  renderShadowEffect(hoverGrid, orangeShip) {
-    // Generate the shadow effect based on hoverGrid and orangeShip positions
-    const distance = this.calculateDistance(hoverGrid, orangeShip);
+
+  renderShadowEffect(hoverGrid, mainShip) {
+    // Generate the shadow effect based on hoverGrid and mainShip positions
+    const distance = this.calculateDistance(hoverGrid, mainShip);
     console.log('Distance:', distance);
     if (distance < 3) { // FIXEME distance should be less than 2 grid units instead of 2
       // If the distance is within 2 units, apply shadow effect to hoverGrid
@@ -197,13 +207,16 @@ class IndexView extends React.Component {
       return null;
     }
   }
-  
+
   renderGridOverlay() {
     // Your existing TODO code goes here to determine the shadow effect
-    const { hoverGrid, shipPositions } = this.state;
+    let { hoverGrid, mainShip } = this.state;
+    if (!mainShip) {
+      mainShip = this.state.shipPositions.orangeShip;
+    }
     if (hoverGrid) {
       // Check if hoverGrid is close enough to the orangeShip
-      return this.renderShadowEffect(hoverGrid, shipPositions.orangeShip);
+      return this.renderShadowEffect(hoverGrid, mainShip);
     }
     return null;
   }
