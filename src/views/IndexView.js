@@ -45,7 +45,7 @@ class IndexView extends React.Component {
   astArray = [27, 28, 32, 45, 62, 90, 102, 123];
   asteroidPositions = this.astArray.map((linearPos) => {
     const x = linearPos % this.gridWidth;
-    const y = Math.floor(linearPos / this.gridWidth);
+    const y = 11 - Math.floor(linearPos / this.gridWidth);
     return { x, y, rotation: 0 }; // rotation is set to 0 for simplicity
   });
 
@@ -66,10 +66,14 @@ class IndexView extends React.Component {
     },
     hoverGrid: null,
     mainShip: null,
+    actionType: null,
+    permanentHoverGrid: null,
+    permanentAttackGrid: null,
   };
 
 
   async loadContractData() {
+    this.setState({ actionType: null }); // Reset selected action
     // Initialize Ethereum provider, for example using MetaMask
     const provider = new BrowserProvider(window.ethereum);
 
@@ -94,11 +98,11 @@ class IndexView extends React.Component {
       const addressesArray = await Promise.all(playerAddressesPromises);
 
       const positionPromises = addressesArray.map((address) => {
-        const xPositionPromise = gameContract.positions(address, 0); // Index for x-axis
-        const yPositionPromise = gameContract.positions(address, 1); // Index for y-axis
+        const xPositionPromise = gameContract.positions(address, 0);
+        const yPositionPromise = gameContract.positions(address, 1);
         return Promise.all([xPositionPromise, yPositionPromise]).then(([xPosition, yPosition]) => ({
-          x: Number(xPosition), // Replace with conversion code if necessary
-          y: Number(yPosition), // Replace with conversion code if necessary
+          x: Number(xPosition),
+          y: 11 - Number(yPosition),
           rotation: 0,
         }));
       });
@@ -180,6 +184,36 @@ class IndexView extends React.Component {
     }
   }
 
+  handleGridClick = () => {
+    if (this.state.actionType === 'move') {
+      this.setState({
+        permanentHoverGrid: { ...this.state.hoverGrid }
+      });
+    } else if (this.state.actionType === 'attack') {
+      this.setState({
+        permanentAttackGrid: { ...this.state.hoverGrid }
+      });
+    }
+  }
+
+  handleSetMove = () => {
+    this.setState({
+      actionType: 'move',
+
+    });
+  }
+
+  handleSetAttack = () => {
+    this.setState({
+      actionType: 'attack',
+    });
+  }
+
+  getButtonClass = (action) => {
+    const { actionType } = this.state;
+    return `af-class-button ${actionType === action ? 'af-class-button-dark' : ''}`;
+  }
+
   calculateDistance(pos1, pos2) {
     // Calculate the distance between two points (pos1 and pos2)
     const distanceX = Math.abs(pos1.x - pos2.x);
@@ -192,7 +226,7 @@ class IndexView extends React.Component {
     const hoverGrid = this.state.hoverGrid;
 
     // Only check if hoverGrid is defined
-    if (!hoverGrid) {
+    if (!hoverGrid || !mainShip) {
       return false;
     }
 
@@ -242,15 +276,15 @@ class IndexView extends React.Component {
     return { shouldRender: !isPathBlocked, distanceX, distanceY };
   }
 
-  renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition) {
+  renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition, isPermanent = false) {
     const { shouldRender, distanceX, distanceY } = this.sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition);
-    if (!shouldRender) return null;
+    if (!shouldRender && !isPermanent) return null;
     // Check if hoverGrid is on a horizontal, vertical, or straight diagonal path within 2 units
     const isHorizontalOrVertical = (distanceX <= 3 && distanceY === 0) || (distanceX === 0 && distanceY <= 3);
     const isStraightDiagonal = distanceX === distanceY && distanceX <= 3;
 
     // Apply shadow effect if hoverGrid meets the above condition and the path is not blocked
-    if ((isHorizontalOrVertical || isStraightDiagonal)) {
+    if ((isHorizontalOrVertical || isStraightDiagonal) || isPermanent) {
       // Calculate the steps needed to draw the path
       const steps = Math.max(Math.abs(hoverGrid.x - mainShip.x), Math.abs(hoverGrid.y - mainShip.y));
       const deltaX = (hoverGrid.x - mainShip.x) / steps;
@@ -283,15 +317,15 @@ class IndexView extends React.Component {
     }
   }
 
-  renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition) {
+  renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition, isPermanent = false) {
     const { shouldRender, distanceX, distanceY } = this.sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition);
-    if (!shouldRender) return null;
+    if (!shouldRender && !isPermanent) return null;
     // Check if hoverGrid is on a horizontal, vertical, or straight diagonal path within 2 units
     const isHorizontalOrVertical = (distanceX <= 2 && distanceY === 0) || (distanceX === 0 && distanceY <= 2);
     const isStraightDiagonal = distanceX === distanceY && distanceX <= 2;
 
     // Apply shadow effect if hoverGrid meets the above condition and the path is not blocked
-    if ((isHorizontalOrVertical || isStraightDiagonal)) {
+    if ((isHorizontalOrVertical || isStraightDiagonal) || isPermanent) {
       return (
         <div
           className="af-class-shadow-effect"
@@ -313,6 +347,8 @@ class IndexView extends React.Component {
 
   renderGridOverlay() {
     let { hoverGrid, mainShip, shipPositions } = this.state;
+    const gridToShow = hoverGrid;
+
     if (!mainShip) {
       mainShip = shipPositions.orangeShip;
     }
@@ -323,12 +359,57 @@ class IndexView extends React.Component {
     // Assuming asteroid positions are stored in state in a similar format as shipPositions
     const asteroidPositions = this.asteroidPositions;
 
-    if (hoverGrid) {
-      // Check if hoverGrid is close enough to the mainShip and not on asteroid or star
-      //return this.renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition);
-      return this.renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition);
+    if (gridToShow) {
+      if (this.state.actionType === 'move') {
+        return this.renderMoveShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition);
+      } else if (this.state.actionType === 'attack') {
+        return this.renderAttackShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition);
+      }
+    } else {
+      return null;
     }
-    return null;
+  }
+
+  renderPermanentHoverGrid() {
+    let {mainShip, shipPositions, permanentHoverGrid} = this.state;
+    const gridToShow = permanentHoverGrid;
+
+    if (!mainShip) {
+      mainShip = shipPositions.orangeShip;
+    }
+
+    // Assuming star position is stored in state
+    const starPosition = this.state.shipPositions.star;
+
+    // Assuming asteroid positions are stored in state in a similar format as shipPositions
+    const asteroidPositions = this.asteroidPositions;
+
+    if (gridToShow) {
+      return this.renderMoveShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, true);
+    } else {
+      return null;
+    }
+  }
+
+  renderPermanentAttackGrid() {
+    let {  mainShip, shipPositions, permanentAttackGrid } = this.state;
+    const gridToShow = permanentAttackGrid;
+
+    if (!mainShip) {
+      mainShip = shipPositions.orangeShip;
+    }
+
+    // Assuming star position is stored in state
+    const starPosition = this.state.shipPositions.star;
+
+    // Assuming asteroid positions are stored in state in a similar format as shipPositions
+    const asteroidPositions = this.asteroidPositions;
+
+    if (gridToShow) {
+      return this.renderAttackShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, true);
+    } else {
+      return null;
+    }
   }
 
   async componentDidMount() {
@@ -370,7 +451,11 @@ class IndexView extends React.Component {
         <span className="af-view">
           <div className="af-class-body">
             <div className="af-class-shooting-game">
-              <button onClick={() => this.loadContractData()}>Load Game Data</button> {/* Add this button */}
+              <div className="af-class-button-row">
+                <button className="af-class-button" onClick={() => this.loadContractData()}>Load Game Data</button>
+                <button className={this.getButtonClass('move')} onClick={this.handleSetMove}>Set Move</button>
+                <button className={this.getButtonClass('attack')} onClick={this.handleSetAttack}>Set Attack</button>
+              </div>
               <div className="af-class-game-header">Make a move!</div>
               <div className="af-class-game">
                 <div className="af-class-player-col">
@@ -378,7 +463,7 @@ class IndexView extends React.Component {
                   <div className="af-class-player af-class-green">0xABD</div>
                 </div>
                 <div className="af-class-main">
-                  <div className="af-class-gamebg" onMouseMove={this.handleMouseMove}>
+                  <div className="af-class-gamebg" onMouseMove={this.handleMouseMove} onClick={this.handleGridClick}>
                     <img src="images/Vectors-Wrapper.svg" loading="lazy" width={720} height={720} alt className="af-class-grid" />
                     {/*Looks like there will be a video being played in this division, but seems this piece of code does not take any effect, need double check*/}
                     <div data-poster-url="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-poster-00001.jpg"
@@ -393,6 +478,8 @@ class IndexView extends React.Component {
                       </video>
                     </div>
                     {this.renderGridOverlay()}
+                    {this.renderPermanentHoverGrid()}
+                    {this.renderPermanentAttackGrid()}
                     {Object.keys(shipPositions).map((name) => this.renderObject(name, shipPositions[name]))}
                   </div>
                 </div>
