@@ -1,0 +1,20 @@
+import { usePrivy } from '@privy-io/react-auth';
+
+export const LoginButton = () => {
+    const { login } = usePrivy();
+    const handleLogin = async () => {
+        login();
+    };
+
+    return (
+        <div className="w-layout-vflex thin-wrapper">
+            <div className="w-layout-vflex main-content">
+                <button className="primary-button w-inline-block connect-wallet-button">
+                    <div onClick={handleLogin} className="move-button-text">
+                        Connect Wallet
+                    </div>
+                </button>
+            </div>
+        </div>
+    );
+};

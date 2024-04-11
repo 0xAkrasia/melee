@@ -92,6 +92,18 @@ class IndexView extends React.Component {
     // Retrieve addresses for each player from the `players` public array
     const playerAddressesPromises = ships.map((_, index) =>
       gameContract.players(index)
+/*
+    await wallets[0]?.isConnected();
+    const currentWallet = await wallets[0]?.getEthereumProvider();
+    const provider = new BrowserProvider(currentWallet);
+    const signer = await bp.getSigner();
+
+    // const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const contract = new ethers.Contract(
+      contractAddress,
+      contractABI,
+      provider
+*/
     );
 
     try {
