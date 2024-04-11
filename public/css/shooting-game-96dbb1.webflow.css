@@ -28,6 +28,23 @@
   display: flex;
 }
 
+.af-class-button-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Center items vertically */
+}
+
+.af-class-button {
+  margin: 100px; /* For example, 10px margin on left and right */
+  /* You can adjust the margin value as needed */
+}
+
+.af-class-button-dark {
+  background-color: #333; /* Dark background */
+  color: #fff; /* Light text */
+  /* Other styles for "dark" state */
+}
+
 .af-view .af-class-game-header {
   color: #9428ff;
   letter-spacing: .04em;
