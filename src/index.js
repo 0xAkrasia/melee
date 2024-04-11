@@ -3,11 +3,12 @@ import ReactDOM from 'react-dom/client'
 import {PrivyProvider} from '@privy-io/react-auth';
 import { defineChain } from 'viem'
 import './index.css';
-import reportWebVitals from './reportWebVitals';
 import './styles'
 import './scripts'
 import IndexView from './views/IndexView';
-// let privy_key = import.meta.env.VITE_PRIVY_KEY;
+
+import { Buffer } from 'buffer';
+window.Buffer = Buffer;
 
 export const inco = defineChain({
   id: 9090,
@@ -20,10 +21,10 @@ export const inco = defineChain({
   },
   rpcUrls: {
     default: {
-        http: ['https://testnet.inco.org']
+      http: ['https://testnet.inco.org']
     },
     public: {
-        http: ['https://testnet.inco.org']
+      http: ['https://testnet.inco.org']
     },
   },
   blockExplorers: {
@@ -32,7 +33,6 @@ export const inco = defineChain({
 })
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
     <PrivyProvider
       appId={"clsay39yw04tv13s57t7fig9f"}
       config={{
@@ -50,5 +50,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     >
       <IndexView />
     </PrivyProvider>
-  </React.StrictMode>
 )

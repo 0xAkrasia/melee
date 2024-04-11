@@ -43,7 +43,7 @@ class IndexView extends React.Component {
   };
 
   async loadContractData() {
-
+/*
     await wallets[0]?.isConnected();
     const currentWallet = await wallets[0]?.getEthereumProvider();
     const provider = new BrowserProvider(currentWallet);
@@ -72,6 +72,7 @@ class IndexView extends React.Component {
     } catch (error) {
       console.error('Error fetching positions from smart contract', error);
     }
+    */
   }
 
   renderShip(shipName, position) {
@@ -111,7 +112,7 @@ class IndexView extends React.Component {
 
       return active.isAsync ? next : loading
     }))
-    await this.loadContractData();
+    //await this.loadContractData();
   }
 
   render() {
