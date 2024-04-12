@@ -4,6 +4,34 @@ import React from 'react'
 import { createScope, map, transformProxies } from './helpers'
 import { BrowserProvider, Contract } from 'ethers';
 import starFighterAbi from '../abi/starFighter.json';
+import { LoginButton } from '../ConnectWallet';
+import {LogoutButton} from '../LogoutButton';
+import { useEffect, useState } from 'react';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
+
+function ParentComponent() {
+  const { authenticated } = usePrivy(); // Example usage of usePrivy
+  const { wallets } = useWallets(); // Example usage of useWallets
+
+  const [walletProvider, setWalletProvider] = useState(null);
+
+  useEffect(() => {
+    async function connectWallet() {
+      if (wallets && wallets.length > 0) {
+        await wallets[0]?.isConnected();
+        const currentWallet = await wallets[0]?.getEthereumProvider();
+        const provider = new BrowserProvider(currentWallet);
+        setWalletProvider(provider);
+      }
+    }
+    console.log(authenticated, wallets);
+    connectWallet();
+  }, [wallets]);
+
+  return (
+    <IndexView authenticated={authenticated} walletProvider={walletProvider} />
+  );
+}
 
 const scripts = [
   { loading: fetch("https://d3e54v103j8qbb.cloudfront.net/js/jquery-3.5.1.min.dc5e7f18c8.js?site=660f583e0bf21e7507c46de9").then(body => body.text()), isAsync: false },
@@ -73,12 +101,13 @@ class IndexView extends React.Component {
 
 
   async loadContractData() {
-    this.setState({ actionType: null }); // Reset selected action
-    // Initialize Ethereum provider, for example using MetaMask
-    const provider = new BrowserProvider(window.ethereum);
+    if (!this.props.walletProvider) {
+      console.error('Wallet provider is not available.');
+      return;
+    }
 
-    // TODO use privy wallet
-    await provider.send("eth_requestAccounts", []);
+    const provider = this.props.walletProvider;
+
     const signer = provider.getSigner(); // Get the signer to perform transactions
 
     // TODO hard coded contract address
@@ -92,18 +121,6 @@ class IndexView extends React.Component {
     // Retrieve addresses for each player from the `players` public array
     const playerAddressesPromises = ships.map((_, index) =>
       gameContract.players(index)
-/*
-    await wallets[0]?.isConnected();
-    const currentWallet = await wallets[0]?.getEthereumProvider();
-    const provider = new BrowserProvider(currentWallet);
-    const signer = await bp.getSigner();
-
-    // const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const contract = new ethers.Contract(
-      contractAddress,
-      contractABI,
-      provider
-*/
     );
 
     try {
@@ -127,10 +144,7 @@ class IndexView extends React.Component {
       }, { ...this.state.shipPositions });
 
       this.setState({ shipPositions: newShipPositions });
-      //const currentAddress = await signer.get_address();
-      //const currentAddress = '0xfF2A73A2eB87cbb6934b7a408719D0889bcF57B7'; // TODO: replace with the current address from the signer
-      //const currentAddress = '0x24Ea37698DB1220d929223fD09fDa0f0ABff3Dfd'
-      const currentAddress = '0x93513A4fAe6df9A730aE19F538205b8170AE5D6F'
+      const currentAddress = await signer.get_address();
       // Find mainShip based on currentAddress
       let mainShip = this.state.shipPositions.orangeShip;
       if (addressesArray[0] && currentAddress.toLowerCase() === addressesArray[0].toLowerCase()) mainShip = newShipPositions.blueShip;
@@ -383,7 +397,7 @@ class IndexView extends React.Component {
   }
 
   renderPermanentHoverGrid() {
-    let {mainShip, shipPositions, permanentHoverGrid} = this.state;
+    let { mainShip, shipPositions, permanentHoverGrid } = this.state;
     const gridToShow = permanentHoverGrid;
 
     if (!mainShip) {
@@ -404,7 +418,7 @@ class IndexView extends React.Component {
   }
 
   renderPermanentAttackGrid() {
-    let {  mainShip, shipPositions, permanentAttackGrid } = this.state;
+    let { mainShip, shipPositions, permanentAttackGrid } = this.state;
     const gridToShow = permanentAttackGrid;
 
     if (!mainShip) {
@@ -451,6 +465,7 @@ class IndexView extends React.Component {
     }
 
     const { shipPositions } = this.state;
+    const { authenticated } = this.props;
 
     return (
       <span>
@@ -460,6 +475,9 @@ class IndexView extends React.Component {
           @import url(/css/webflow.css);
           @import url(/css/shooting-game-96dbb1.webflow.css);
         ` }} />
+        <div className="login-button-container">
+          {authenticated ? <LogoutButton /> : <LoginButton />}
+        </div>
         <span className="af-view">
           <div className="af-class-body">
             <div className="af-class-shooting-game">
@@ -508,6 +526,6 @@ class IndexView extends React.Component {
   }
 }
 
-export default IndexView
+export default ParentComponent;
 
 /* eslint-enable */

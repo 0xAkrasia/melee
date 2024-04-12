@@ -7,14 +7,10 @@ export const LoginButton = () => {
     };
 
     return (
-        <div className="w-layout-vflex thin-wrapper">
-            <div className="w-layout-vflex main-content">
-                <button className="primary-button w-inline-block connect-wallet-button">
-                    <div onClick={handleLogin} className="move-button-text">
-                        Connect Wallet
-                    </div>
-                </button>
+        <button className="primary-button w-inline-block connect-wallet-button connect-wallet-text">
+            <div onClick={handleLogin}>
+                Connect Wallet
             </div>
-        </div>
+        </button>
     );
 };

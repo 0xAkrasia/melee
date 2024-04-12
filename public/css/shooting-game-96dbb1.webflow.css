@@ -28,6 +28,47 @@
   display: flex;
 }
 
+.login-button-container {
+  position: absolute; /* or fixed, based on your requirements */
+  top: 10px; /* adjust as needed */
+  right: 10px; /* adjust as needed */
+  z-index: 100; /* to ensure it's above other elements */
+}
+
+.primary-button {
+  width: 100%;
+  max-width: 500px;
+  grid-column-gap: 4px;
+  grid-row-gap: 4px;
+  background-color: var(--brand);
+  border-radius: 8px;
+  flex: 0 auto;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 24px;
+  text-decoration: none;
+  display: flex;
+}
+
+.connect-wallet-button {
+  border-radius: 100px;
+  border: 1px solid var(--ff-8700, #FF8700);
+}
+
+.connect-wallet-text {
+  display: flex;
+  padding: 8px 24px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  color: var(--ff-8700, #FF8700);
+  font-family: "Chakra Petch";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px; /* 150% */
+}
+
 .af-class-button-row {
   display: flex;
   justify-content: space-between;
