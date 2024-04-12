@@ -3,11 +3,17 @@
 import React from 'react'
 import { createScope, map, transformProxies } from './helpers'
 import { BrowserProvider, Contract } from 'ethers';
+import { initFhevm, createInstance } from "fhevmjs"
+import { AbiCoder } from 'ethers';
 import starFighterAbi from '../abi/starFighter.json';
 import { LoginButton } from '../ConnectWallet';
 import { LogoutButton } from '../LogoutButton';
 import { useEffect, useState } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
+
+initFhevm()
+
+let instance;
 
 function ParentComponent() {
   const { authenticated } = usePrivy(); // Example usage of usePrivy
@@ -258,6 +264,22 @@ class IndexView extends React.Component {
     return index; // This will return a number between 0 and 7 indicating the direction as per the orientations array.
   }
 
+  async createInstance(web3Provider) {
+    // Initiate FHE
+    const FHE_LIB_ADDRESS = "0x000000000000000000000000000000000000005d";
+    const network = await web3Provider.getNetwork();
+    const chainId = +network.chainId.toString();
+    const ret = await web3Provider.call({
+      to: FHE_LIB_ADDRESS,
+      data: "0xd9d47bb001",
+    });
+    const decoded = AbiCoder.defaultAbiCoder().decode(["bytes"], ret);
+    const publicKey = decoded[0];
+    instance = await createInstance({ chainId, publicKey });
+    console.log("FHE instance created", instance);
+    return instance;
+  }
+
   handleMove = async () => {
     const { permanentHoverGrid, permanentAttackGrid, shipPositions, mainShip } = this.state;
     if (!permanentHoverGrid || !permanentAttackGrid) {
@@ -275,16 +297,22 @@ class IndexView extends React.Component {
     const moveDir = this.calculateDirection(mainShip, permanentHoverGrid);
     const shotDir = this.calculateDirection(mainShip, permanentAttackGrid);
 
+    console.log('Move distance: ', moveDist);
+    console.log('Move direction: ', moveDir);
+    console.log('Shot direction: ', shotDir);
+
     // Assume each direction is encoded in 3 bits and distance in 4 bits.
     const encodedMove = (moveDist & 0xF) | ((moveDir & 0x7) << 4) | ((shotDir & 0x7) << 7);
 
     const provider = this.props.walletProvider;
-    const signer = provider.getSigner();
+    const signer = await provider.getSigner();
     const contractAddress = '0xBfec76C39961b6E39599C68e87ec575be9F4CA83'; // TODO: replace with your contract address
-    const gameContract = new ethers.Contract(contractAddress, starFighterAbi, signer);
+    const gameContract = new Contract(contractAddress, starFighterAbi, signer);
 
     try {
-      const moveTransaction = await gameContract.move(ethers.utils.arrayify(encodedMove));
+      instance = await this.createInstance(provider);
+      const encryptedMove = await instance.encrypt16(encodedMove);
+      const moveTransaction = await gameContract.move(encryptedMove);
       console.log('Move transaction sent: ', moveTransaction.hash);
 
       // Wait for the transaction to be mined
@@ -306,11 +334,11 @@ class IndexView extends React.Component {
     }
   
     const provider = this.props.walletProvider;
-    const signer = provider.getSigner();
+    const signer = await provider.getSigner();
   
     // Replace with your contract address
     const contractAddress = '0xBfec76C39961b6E39599C68e87ec575be9F4CA83';
-    const gameContract = new ethers.Contract(contractAddress, starFighterAbi, signer);
+    const gameContract = new Contract(contractAddress, starFighterAbi, signer);
   
     try {
       // Call the revealMoves() method on the contract
@@ -338,11 +366,11 @@ class IndexView extends React.Component {
     }
   
     const provider = this.props.walletProvider;
-    const signer = provider.getSigner();
+    const signer = await provider.getSigner();
   
     // Replace with your contract address
     const contractAddress = '0xBfec76C39961b6E39599C68e87ec575be9F4CA83';
-    const gameContract = new ethers.Contract(contractAddress, starFighterAbi, signer);
+    const gameContract = new Contract(contractAddress, starFighterAbi, signer);
   
     try {
       // Call the attack() method on the contract
@@ -612,9 +640,9 @@ class IndexView extends React.Component {
                 <button className="move-button move-button-text" onClick={() => this.loadContractData()}>Load Data</button>
                 <button className={this.getButtonClass('move')} onClick={this.handleSetMove}>Set Move</button>
                 <button className={this.getButtonClass('attack')} onClick={this.handleSetAttack}>Set Attack</button>
-                <button className={this.getButtonClass('move')} onClick={this.handleMove}>Move</button>
-                <button className={this.getButtonClass('attack')} onClick={this.handleReveal}>Reveal</button>
-                <button className={this.getButtonClass('attack')} onClick={this.handleAttack}>Attack</button>
+                <button className={this.getButtonClass('moveTx')} onClick={this.handleMove}>Move</button>
+                <button className={this.getButtonClass('revealTx')} onClick={this.handleReveal}>Reveal</button>
+                <button className={this.getButtonClass('attackTx')} onClick={this.handleAttack}>Attack</button>
               </div>
               <div className="af-class-game-header">Make a move!</div>
               <div className="af-class-game">
