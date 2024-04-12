@@ -5,7 +5,7 @@ import { createScope, map, transformProxies } from './helpers'
 import { BrowserProvider, Contract } from 'ethers';
 import starFighterAbi from '../abi/starFighter.json';
 import { LoginButton } from '../ConnectWallet';
-import {LogoutButton} from '../LogoutButton';
+import { LogoutButton } from '../LogoutButton';
 import { useEffect, useState } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 
@@ -29,7 +29,7 @@ function ParentComponent() {
   }, [wallets]);
 
   return (
-    <IndexView authenticated={authenticated} walletProvider={walletProvider} />
+    <IndexView authenticated={authenticated} walletProvider={walletProvider} wallets={wallets} />
   );
 }
 
@@ -144,7 +144,7 @@ class IndexView extends React.Component {
       }, { ...this.state.shipPositions });
 
       this.setState({ shipPositions: newShipPositions });
-      const currentAddress = await signer.get_address();
+      const currentAddress = this.props.wallets[0].address;
       // Find mainShip based on currentAddress
       let mainShip = this.state.shipPositions.orangeShip;
       if (addressesArray[0] && currentAddress.toLowerCase() === addressesArray[0].toLowerCase()) mainShip = newShipPositions.blueShip;
@@ -235,9 +235,136 @@ class IndexView extends React.Component {
     });
   }
 
+  calculateMoveDistance(mainShip, hoverGrid) {
+    return Math.max(Math.abs(mainShip.x - hoverGrid.x), Math.abs(mainShip.y - hoverGrid.y));
+  }
+
+  calculateDirection(mainShip, hoverGrid) {
+    let directionX = Math.sign(hoverGrid.x - mainShip.x);
+    let directionY = Math.sign(hoverGrid.y - mainShip.y);
+    let index;
+
+    // Diagonals and straight lines
+    if (directionX === 0 && directionY === -1) index = 0; // Up
+    else if (directionX === 1 && directionY === -1) index = 1; // Up-Right
+    else if (directionX === 1 && directionY === 0) index = 2; // Right
+    else if (directionX === 1 && directionY === 1) index = 3; // Down-Right
+    else if (directionX === 0 && directionY === 1) index = 4; // Down
+    else if (directionX === -1 && directionY === 1) index = 5; // Down-Left
+    else if (directionX === -1 && directionY === 0) index = 6; // Left
+    else if (directionX === -1 && directionY === -1) index = 7; // Up-Left
+    else throw new Error('Invalid move vector');
+
+    return index; // This will return a number between 0 and 7 indicating the direction as per the orientations array.
+  }
+
+  handleMove = async () => {
+    const { permanentHoverGrid, permanentAttackGrid, shipPositions, mainShip } = this.state;
+    if (!permanentHoverGrid || !permanentAttackGrid) {
+      console.log('Move and Attack positions must be set before sending transaction');
+      return;
+    }
+
+    if (!this.props.walletProvider) {
+      console.error('Wallet provider is not available.');
+      return;
+    }
+
+    // Create an encoded input for the move
+    const moveDist = this.calculateMoveDistance(mainShip, permanentHoverGrid);
+    const moveDir = this.calculateDirection(mainShip, permanentHoverGrid);
+    const shotDir = this.calculateDirection(mainShip, permanentAttackGrid);
+
+    // Assume each direction is encoded in 3 bits and distance in 4 bits.
+    const encodedMove = (moveDist & 0xF) | ((moveDir & 0x7) << 4) | ((shotDir & 0x7) << 7);
+
+    const provider = this.props.walletProvider;
+    const signer = provider.getSigner();
+    const contractAddress = '0xBfec76C39961b6E39599C68e87ec575be9F4CA83'; // TODO: replace with your contract address
+    const gameContract = new ethers.Contract(contractAddress, starFighterAbi, signer);
+
+    try {
+      const moveTransaction = await gameContract.move(ethers.utils.arrayify(encodedMove));
+      console.log('Move transaction sent: ', moveTransaction.hash);
+
+      // Wait for the transaction to be mined
+      const receipt = await moveTransaction.wait();
+      console.log('Transaction confirmed in block: ', receipt.blockNumber);
+
+      // Reload the ship positions after the move
+      await this.loadContractData();
+
+    } catch (error) {
+      console.error('Error sending move transaction: ', error);
+    }
+  }
+
+  handleReveal = async () => {
+    if (!this.props.walletProvider) {
+      console.error('Wallet provider is not available.');
+      return;
+    }
+  
+    const provider = this.props.walletProvider;
+    const signer = provider.getSigner();
+  
+    // Replace with your contract address
+    const contractAddress = '0xBfec76C39961b6E39599C68e87ec575be9F4CA83';
+    const gameContract = new ethers.Contract(contractAddress, starFighterAbi, signer);
+  
+    try {
+      // Call the revealMoves() method on the contract
+      const revealTransaction = await gameContract.revealMoves();
+  
+      console.log('Reveal transaction sent: ', revealTransaction.hash);
+  
+      // Wait for the transaction to be mined
+      const receipt = await revealTransaction.wait();
+      console.log('Transaction confirmed in block: ', receipt.blockNumber);
+  
+      // Reload the game data after the reveal to update the UI
+      await this.loadContractData();
+  
+    } catch (error) {
+      console.error('Error sending reveal transaction: ', error);
+    }
+  }
+  
+
+  handleAttack = async () => {
+    if (!this.props.walletProvider) {
+      console.error('Wallet provider is not available.');
+      return;
+    }
+  
+    const provider = this.props.walletProvider;
+    const signer = provider.getSigner();
+  
+    // Replace with your contract address
+    const contractAddress = '0xBfec76C39961b6E39599C68e87ec575be9F4CA83';
+    const gameContract = new ethers.Contract(contractAddress, starFighterAbi, signer);
+  
+    try {
+      // Call the attack() method on the contract
+      const attackTransaction = await gameContract.attack();
+  
+      console.log('attack transaction sent: ', attackTransaction.hash);
+  
+      // Wait for the transaction to be mined
+      const receipt = await attackTransaction.wait();
+      console.log('Transaction confirmed in block: ', receipt.blockNumber);
+  
+      // Reload the game data after the attack to update the UI
+      await this.loadContractData();
+  
+    } catch (error) {
+      console.error('Error sending attach transaction: ', error);
+    }
+  }
+
   getButtonClass = (action) => {
     const { actionType } = this.state;
-    return `af-class-button ${actionType === action ? 'af-class-button-dark' : ''}`;
+    return ` ${actionType === action ? 'waiting-button waiting-button-text' : 'move-button move-button-text'}`;
   }
 
   calculateDistance(pos1, pos2) {
@@ -482,9 +609,12 @@ class IndexView extends React.Component {
           <div className="af-class-body">
             <div className="af-class-shooting-game">
               <div className="af-class-button-row">
-                <button className="af-class-button" onClick={() => this.loadContractData()}>Load Game Data</button>
+                <button className="move-button move-button-text" onClick={() => this.loadContractData()}>Load Data</button>
                 <button className={this.getButtonClass('move')} onClick={this.handleSetMove}>Set Move</button>
                 <button className={this.getButtonClass('attack')} onClick={this.handleSetAttack}>Set Attack</button>
+                <button className={this.getButtonClass('move')} onClick={this.handleMove}>Move</button>
+                <button className={this.getButtonClass('attack')} onClick={this.handleReveal}>Reveal</button>
+                <button className={this.getButtonClass('attack')} onClick={this.handleAttack}>Attack</button>
               </div>
               <div className="af-class-game-header">Make a move!</div>
               <div className="af-class-game">
