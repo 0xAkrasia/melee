@@ -208,7 +208,7 @@
 .af-view textarea {
   color: inherit;
   /* 1 */
-  font: inherit;
+  /* font: inherit; */
   /* 2 */
   margin: 0;
   /* 3 */

@@ -10,11 +10,14 @@ import { LoginButton } from '../ConnectWallet';
 import { LogoutButton } from '../LogoutButton';
 import { useEffect, useState } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
+import '../css/normalize.css'
+import '../css/webflow.css'
+import '../css/starFighter.css'
 
 initFhevm()
 
 let instance;
-// 🍑, 🐸, 🔥, 🥶
+
 function ParentComponent() {
   const { authenticated } = usePrivy(); // Example usage of usePrivy
   const { wallets } = useWallets(); // Example usage of useWallets
@@ -614,12 +617,6 @@ class IndexView extends React.Component {
 
     return (
       <span>
-        <style dangerouslySetInnerHTML={{
-          __html: `
-          @import url(/css/normalize.css);
-          @import url(/css/webflow.css);
-          @import url(/css/starFighter.css);
-        ` }} />
         <div>
           <img src="../../public/images/meleeName.png" />
         </div>
@@ -630,18 +627,34 @@ class IndexView extends React.Component {
           <div className="af-class-body">
             <div className="af-class-shooting-game">
               <div className="af-class-button-row">
-                <button className="move-button move-button-text" onClick={() => this.loadContractData()}>Load data</button>
-                <button className={this.getButtonClass('move')} onClick={this.handleSetMove}>Set move</button>
-                <button className={this.getButtonClass('attack')} onClick={this.handleSetAttack}>Set attack</button>
-                <button className={this.getButtonClass('moveTx')} onClick={this.handleMove}>Move</button>
-                <button className={this.getButtonClass('revealTx')} onClick={this.handleReveal}>Reveal</button>
-                <button className={this.getButtonClass('attackTx')} onClick={this.handleAttack}>Attack</button>
+                <button onClick={() => this.loadContractData()}>Load data</button>
+                <button onClick={this.handleSetMove}>Set move</button>
+                <button onClick={this.handleSetAttack}>Set attack</button>
+                <button onClick={this.handleMove}>Move</button>
+                <button onClick={this.handleReveal}>Reveal</button>
+                <button onClick={this.handleAttack}>Attack</button>
               </div>
               <div className="af-class-game-header">Star Fighter</div>
               <div className="af-class-game">
                 <div className="af-class-player-col">
-                  <div className="af-class-player af-class-orange">0xEED</div>
-                  <div className="af-class-player af-class-blue">0xABD</div>
+                <div className="frame">
+                  <div className="frame-div">
+                  <div className="frame-text-wrapper">0x</div>
+                    <img className="frame-group" alt="star" src="images/star.svg" />
+                  </div>
+                  <div className="frame-element-orange">
+                    0xACC
+                  </div>
+                </div>
+                <div className="frame">
+                  <div className="frame-div">
+                  <div className="frame-text-wrapper">1x</div>
+                    <img className="frame-group" alt="star" src="images/star.svg" />
+                  </div>
+                  <div className="frame-element-blue">
+                    0xF7Y
+                  </div>
+                </div>
                 </div>
                 <div className="af-class-main">
                   <div className="af-class-gamebg" onMouseMove={this.handleMouseMove} onClick={this.handleGridClick}>
@@ -665,9 +678,29 @@ class IndexView extends React.Component {
                   </div>
                 </div>
                 <div className="af-class-player-col-2">
-                  <div className="af-class-player af-class-green">mary.eth</div>
-                  <div className="af-class-player af-class-pink">0xABD (you)</div>
+                  <div className="frame">
+                    <div className="frame-div">
+                      <img className="frame-group" alt="star" src="images/star.svg" />
+                      <div className="frame-text-wrapper">x0</div>
+                    </div>
+                    <div className="frame-element-green">
+                      mary.eth
+                    </div>
+                  </div>
+                  <div className="frame">
+                    <div className="frame-div">
+                      <img className="frame-group" alt="star" src="images/star.svg" />
+                      <div className="frame-text-wrapper">x1</div>
+                    </div>
+                    <div className="frame-element-pink">
+                      0xABD <br />
+                      (you)
+                    </div>
+                  </div>
                 </div>
+              </div>
+              <div className="af-class-button-row">
+                <button className="move-button move-button-text" onClick={this.handleMove}>Move</button>
               </div>
             </div>
           </div>

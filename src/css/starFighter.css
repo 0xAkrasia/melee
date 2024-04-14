@@ -1,4 +1,82 @@
-connect-wallet-text {
+.frame {
+  align-items: flex-start;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+
+.frame .frame-div {
+  align-items: flex-start;
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  position: relative;
+}
+
+.frame .frame-group {
+  height: 40.97px;
+  position: relative;
+  width: 40px;
+}
+
+.frame .frame-text-wrapper {
+  color: #ffffff;
+  font-family: "Chakra Petch-Medium", Helvetica;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 4px;
+  line-height: normal;
+  margin-top: -1px;
+  position: relative;
+  width: fit-content;
+}
+
+.frame .frame-element-blue {
+  color: #339cfe;
+  font-family: "Chakra Petch";
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1.82px;
+  line-height: normal;
+  position: relative;
+  width: fit-content;
+}
+
+.frame .frame-element-pink {
+  color: #fe33f7;
+  font-family: "Chakra Petch";
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1.82px;
+  line-height: normal;
+  position: relative;
+  width: fit-content;
+}
+
+.frame .frame-element-green {
+  color: #41fe33;
+  font-family: "Chakra Petch";
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1.82px;
+  line-height: normal;
+  position: relative;
+  width: fit-content;
+}
+
+.frame .frame-element-orange {
+  color: #fe9833;
+  font-family: "Chakra Petch";
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1.82px;
+  line-height: normal;
+  position: relative;
+  width: fit-content;
+}
+
+.connect-wallet-text {
   display: flex;
   padding: 8px 24px;
   justify-content: center;
@@ -13,14 +91,14 @@ connect-wallet-text {
   background-color: black;
 }
 
-connect-wallet-button {
+.connect-wallet-button {
   border-radius: 100px;
   border: 1px solid var(--ff-8700, #FF8700);
   background-color: black;
   color: black
 }
 
-move-button {
+.move-button {
   border-radius: 8px;
   background: #AA56FF;
   box-shadow: 0px 0px 24px 0px #9428FF;
@@ -32,7 +110,7 @@ move-button {
   gap: 8px;
 }
 
-move-button-text {
+.move-button-text {
   color: #000;
   text-align: center;
   font-family: "Chakra Petch";
@@ -43,7 +121,7 @@ move-button-text {
   letter-spacing: 0.2px;
 }
 
-waiting-button {
+.waiting-button {
   border-radius: 8px;
   border: 2px solid #AA56FF;
   display: flex;
@@ -54,7 +132,7 @@ waiting-button {
   gap: 8px;
 }
 
-waiting-button-text {
+.waiting-button-text {
   color: #AA56FF;
   text-align: center;
   font-family: "Chakra Petch";
@@ -140,51 +218,6 @@ waiting-button-text {
   display: flex;
   justify-content: space-between;
   align-items: center; /* Center items vertically */
-}
-
-.move-button {
-  border-radius: 8px;
-  background: #AA56FF;
-  box-shadow: 0px 0px 24px 0px #9428FF;
-  display: flex;
-  width: 120px;
-  padding: 16px 24px;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-}
-
-.move-button-text {
-  color: #000;
-  text-align: center;
-  font-family: "Chakra Petch";
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: normal;
-  letter-spacing: 0.2px;
-}
-
-.waiting-button {
-  border-radius: 8px;
-  border: 2px solid #AA56FF;
-  display: flex;
-  width: 120px;
-  padding: 16px 24px;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-}
-
-.waiting-button-text {
-  color: #AA56FF;
-  text-align: center;
-  font-family: "Chakra Petch";
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: normal;
-  letter-spacing: 0.2px;
 }
 
 .af-class-button-dark {
@@ -301,15 +334,15 @@ waiting-button-text {
   text-decoration: none;
 }
 
-.af-view .af-class-player.af-class-pink {
+.af-view .af-class-player .af-class-pink {
   color: #fe33f7;
 }
 
-.af-view .af-class-player.af-class-green {
+.af-view .af-class-player .af-class-green {
   color: #41fe33;
 }
 
-.af-view .af-class-player.af-class-orange {
+.af-view .af-class-player .af-class-orange {
   color: #fe9833;
 }
 

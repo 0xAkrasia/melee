@@ -2,8 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import {PrivyProvider} from '@privy-io/react-auth';
 import { defineChain } from 'viem'
-import './styles'
-import './scripts'
 import App from './App';
 import { Buffer } from 'buffer';
 window.Buffer = Buffer;
@@ -40,7 +38,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           appearance: {
               theme: 'dark',
               accentColor: '#3673f5',
-              logo: 'https://raw.githubusercontent.com/0xAkrasia/In-Theory-Games/main/src/images/sculpture_no_art.png',
+              logo: 'https://raw.githubusercontent.com/0xAkrasia/Star-Fighter/main/public/images/meleeIcon.png',
               showWalletLoginFirst: false,
               walletList: ['coinbase_wallet', 'wallet_connect', 'metamask'],
           },
