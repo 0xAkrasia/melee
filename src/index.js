@@ -2,11 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import {PrivyProvider} from '@privy-io/react-auth';
 import { defineChain } from 'viem'
-import './index.css';
 import './styles'
 import './scripts'
-import IndexView from './views/IndexView';
-
+import App from './App';
 import { Buffer } from 'buffer';
 window.Buffer = Buffer;
 
@@ -48,6 +46,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           },
       }}
     >
-      <IndexView />
+      <App />
     </PrivyProvider>
 )

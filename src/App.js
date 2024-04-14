@@ -1,25 +1,23 @@
-import logo from './logo.svg';
 import './App.css';
+import WebFont from 'webfontloader';
+import IndexView from './views/IndexView';
 
 function App() {
+
+  WebFont.load({
+    google: {
+      families: [
+        "Pixelify Sans:regular,500,600,700",
+        "Urbanist:100,200,300,regular,500,600,700,800,900,100italic,200italic,300italic,italic,500italic,600italic,700italic,800italic,900italic",
+        "Source Code Pro:200,300,regular,500,600,700,800,900,200italic,300italic,italic,500italic,600italic,700italic,800italic,900italic",
+        "Chakra Petch:200,300,regular,500,600,700,800,900,200italic,300italic,italic,500italic,600italic,700italic,800italic,900italic"
+      ]
+    }
+  });
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <IndexView />
+  )
 }
 
 export default App;

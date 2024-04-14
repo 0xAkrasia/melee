@@ -3,15 +3,15 @@
 const styles = [
   {
     type: 'href',
+    body: '/css/starFighter.css',
+  },
+  {
+    type: 'href',
     body: '/css/normalize.css',
   },
   {
     type: 'href',
     body: '/css/webflow.css',
-  },
-  {
-    type: 'href',
-    body: '/css/shooting-game-96dbb1.webflow.css',
   },
 ]
 

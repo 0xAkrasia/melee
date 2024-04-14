@@ -7,7 +7,7 @@ export const LoginButton = () => {
     };
 
     return (
-        <button className="primary-button w-inline-block connect-wallet-button connect-wallet-text">
+        <button className="primary-button connect-wallet-button connect-wallet-text">
             <div onClick={handleLogin}>
                 Connect Wallet
             </div>
