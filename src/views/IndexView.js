@@ -1,6 +1,7 @@
 /* eslint-disable */
 
-import { React, useEffect, useState } from 'react'
+import React from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { transformProxies } from './helpers'
 import { BrowserProvider, Contract, AbiCoder } from 'ethers';
 import { initFhevm, createInstance } from "fhevmjs"
@@ -16,29 +17,38 @@ import '../css/starFighter.css'
 initFhevm()
 let instance;
 
-const contractAddress = contractAddresses[0].starFighterMain;
+const contractAddress = contractAddresses[1].starFighterMain;
 
 function ParentComponent() {
   const { authenticated } = usePrivy(); // Example usage of usePrivy
   const { wallets } = useWallets(); // Example usage of useWallets
 
   const [walletProvider, setWalletProvider] = useState(null);
+  const indexViewRef = useRef(); // Create a ref to IndexView to call its methods
 
   useEffect(() => {
     async function connectWallet() {
       if (wallets && wallets.length > 0) {
-        await wallets[0]?.isConnected();
-        const currentWallet = await wallets[0]?.getEthereumProvider();
-        const provider = new BrowserProvider(currentWallet);
-        setWalletProvider(provider);
+        const isConnected = await wallets[0]?.isConnected();
+        if (isConnected) {
+          const currentWallet = await wallets[0]?.getEthereumProvider();
+          const provider = new BrowserProvider(currentWallet);
+          setWalletProvider(provider);
+        }
       }
     }
-    console.log(authenticated, wallets);
+
     connectWallet();
   }, [wallets]);
 
+  useEffect(() => {
+    if (walletProvider && indexViewRef.current) {
+      indexViewRef.current.loadContractData();
+    }
+  }, [walletProvider]);
+
   return (
-    <IndexView authenticated={authenticated} walletProvider={walletProvider} wallets={wallets} />
+    <IndexView ref={indexViewRef} authenticated={authenticated} walletProvider={walletProvider} wallets={wallets} />
   );
 }
 
@@ -82,7 +92,7 @@ class IndexView extends React.Component {
   astArray = [27, 28, 32, 45, 62, 90, 102, 123];
   asteroidPositions = this.astArray.map((linearPos) => {
     const x = linearPos % this.gridWidth;
-    const y = Math.floor(linearPos / this.gridWidth);
+    const y = 11 - Math.floor(linearPos / this.gridWidth);
     return { x, y, rotation: 0 }; // rotation is set to 0 for simplicity
   });
 
@@ -135,8 +145,7 @@ class IndexView extends React.Component {
         const yPositionPromise = gameContract.positions(address, 1);
         return Promise.all([xPositionPromise, yPositionPromise]).then(([xPosition, yPosition]) => ({
           x: Number(xPosition),
-          y: Number(yPosition),
-          rotation: 0,
+          y: 11 - Number(yPosition),
         }));
       });
 
@@ -157,6 +166,7 @@ class IndexView extends React.Component {
       else if (addressesArray[2] && currentAddress.toLowerCase() === addressesArray[2].toLowerCase()) mainShip = newShipPositions.greenShip;
       else if (addressesArray[3] && currentAddress.toLowerCase() === addressesArray[3].toLowerCase()) mainShip = newShipPositions.orangeShip;
       this.setState({ mainShip });
+      this.handleSetMove();
     } catch (error) {
       console.error("Error fetching player addresses or positions from the contract: ", error);
     }
@@ -164,7 +174,7 @@ class IndexView extends React.Component {
 
   renderObject(name, position) {
     const style = {
-      top: `${(11 - position.y) * 60}px`,
+      top: `${(position.y) * 60}px`,
       left: `${position.x * 60}px`,
       transform: `rotate(${position.rotation}deg)`
     };
@@ -217,11 +227,18 @@ class IndexView extends React.Component {
   handleGridClick = () => {
     if (this.state.actionType === 'move') {
       this.setState({
-        permanentHoverGrid: { ...this.state.hoverGrid }
+        permanentHoverGrid: { ...this.state.hoverGrid },
+        mainShip: { ...this.state.hoverGrid, rotation: this.state.mainShip.rotation },
+      }, () => {
+        this.setState({ actionType: 'attack' });
       });
     } else if (this.state.actionType === 'attack') {
       this.setState({
         permanentAttackGrid: { ...this.state.hoverGrid }
+      }, () => {
+        this.setState({
+          actionType: 'move',
+        });
       });
     }
   }
@@ -230,12 +247,6 @@ class IndexView extends React.Component {
     this.setState({
       actionType: 'move',
 
-    });
-  }
-
-  handleSetAttack = () => {
-    this.setState({
-      actionType: 'attack',
     });
   }
 
@@ -250,13 +261,13 @@ class IndexView extends React.Component {
 
     // Diagonals and straight lines
     if (directionX === 0 && directionY === -1) index = 0; // Up
-    else if (directionX === 1 && directionY === 1) index = 1; // Up-Right
+    else if (directionX === 1 && directionY === -1) index = 1; // Up-Right
     else if (directionX === 1 && directionY === 0) index = 2; // Right
-    else if (directionX === 1 && directionY === -1) index = 3; // Down-Right
-    else if (directionX === 0 && directionY === -1) index = 4; // Down
-    else if (directionX === -1 && directionY === -1) index = 5; // Down-Left
+    else if (directionX === 1 && directionY === 1) index = 3; // Down-Right
+    else if (directionX === 0 && directionY === 1) index = 4; // Down
+    else if (directionX === -1 && directionY === 1) index = 5; // Down-Left
     else if (directionX === -1 && directionY === 0) index = 6; // Left
-    else if (directionX === -1 && directionY === 1) index = 7; // Up-Left
+    else if (directionX === -1 && directionY === -1) index = 7; // Up-Left
     else throw new Error('Invalid move vector');
 
     return index; // This will return a number between 0 and 7 indicating the direction as per the orientations array.
@@ -330,55 +341,55 @@ class IndexView extends React.Component {
       console.error('Wallet provider is not available.');
       return;
     }
-  
+
     const provider = this.props.walletProvider;
     const signer = await provider.getSigner();
-  
+
     // Replace with your contract address
     const gameContract = new Contract(contractAddress, starFighterAbi, signer);
-  
+
     try {
       // Call the revealMoves() method on the contract
       const revealTransaction = await gameContract.revealMoves();
-  
+
       console.log('Reveal transaction sent: ', revealTransaction.hash);
-  
+
       // Wait for the transaction to be mined
       const receipt = await revealTransaction.wait();
       console.log('Transaction confirmed in block: ', receipt.blockNumber);
-  
+
       // Reload the game data after the reveal to update the UI
       await this.loadContractData();
-  
+
     } catch (error) {
       console.error('Error sending reveal transaction: ', error);
     }
   }
-  
+
   handleAttack = async () => {
     if (!this.props.walletProvider) {
       console.error('Wallet provider is not available.');
       return;
     }
-  
+
     const provider = this.props.walletProvider;
     const signer = await provider.getSigner();
-  
+
     const gameContract = new Contract(contractAddress, starFighterAbi, signer);
-  
+
     try {
       // Call the attack() method on the contract
       const attackTransaction = await gameContract.attack();
-  
+
       console.log('attack transaction sent: ', attackTransaction.hash);
-  
+
       // Wait for the transaction to be mined
       const receipt = await attackTransaction.wait();
       console.log('Transaction confirmed in block: ', receipt.blockNumber);
-  
+
       // Reload the game data after the attack to update the UI
       await this.loadContractData();
-  
+
     } catch (error) {
       console.error('Error sending attach transaction: ', error);
     }
@@ -447,9 +458,9 @@ class IndexView extends React.Component {
   renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition, isPermanent = false) {
     const { shouldRender, distanceX, distanceY } = this.sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition);
     if (!shouldRender && !isPermanent) return null;
-    // Check if hoverGrid is on a horizontal, vertical, or straight diagonal path within 2 units
-    const isHorizontalOrVertical = (distanceX <= 3 && distanceY === 0) || (distanceX === 0 && distanceY <= 3);
-    const isStraightDiagonal = distanceX === distanceY && distanceX <= 3;
+    // Check if hoverGrid is on a horizontal, vertical, or straight diagonal path within 4 units
+    const isHorizontalOrVertical = (distanceX <= 4 && distanceY === 0) || (distanceX === 0 && distanceY <= 4);
+    const isStraightDiagonal = distanceX === distanceY && distanceX <= 4;
 
     // Apply shadow effect if hoverGrid meets the above condition and the path is not blocked
     if ((isHorizontalOrVertical || isStraightDiagonal) || isPermanent) {
@@ -580,6 +591,11 @@ class IndexView extends React.Component {
     }
   }
 
+  getMoveButtonClass() {
+    const { permanentHoverGrid, permanentAttackGrid } = this.state;
+    return (!permanentHoverGrid || !permanentAttackGrid) ? 'dark-button move-button-text' : 'move-button move-button-text';
+  }
+
   async componentDidMount() {
     const htmlEl = document.querySelector('html')
     htmlEl.dataset['wfPage'] = '660f583e0bf21e7507c46dfe'
@@ -621,34 +637,28 @@ class IndexView extends React.Component {
           <div className="af-class-body">
             <div className="af-class-shooting-game">
               <div className="af-class-button-row">
-                <button onClick={() => this.loadContractData()}>Load data</button>
-                <button onClick={this.handleSetMove}>Set move</button>
-                <button onClick={this.handleSetAttack}>Set attack</button>
-                <button onClick={this.handleMove}>Move</button>
-                <button onClick={this.handleReveal}>Reveal</button>
-                <button onClick={this.handleAttack}>Attack</button>
               </div>
               <div className="af-class-game-header">Star Fighter</div>
               <div className="af-class-game">
                 <div className="af-class-player-col">
-                <div className="frame">
-                  <div className="frame-div">
-                  <div className="frame-text-wrapper">0x</div>
-                    <img className="frame-group" alt="star" src="images/star.svg" />
+                  <div className="frame">
+                    <div className="frame-div">
+                      <div className="frame-text-wrapper">0x</div>
+                      <img className="frame-group" alt="star" src="images/star.svg" />
+                    </div>
+                    <div className="frame-element-orange">
+                      0xACC
+                    </div>
                   </div>
-                  <div className="frame-element-orange">
-                    0xACC
+                  <div className="frame">
+                    <div className="frame-div">
+                      <div className="frame-text-wrapper">1x</div>
+                      <img className="frame-group" alt="star" src="images/star.svg" />
+                    </div>
+                    <div className="frame-element-blue">
+                      0xF7Y
+                    </div>
                   </div>
-                </div>
-                <div className="frame">
-                  <div className="frame-div">
-                  <div className="frame-text-wrapper">1x</div>
-                    <img className="frame-group" alt="star" src="images/star.svg" />
-                  </div>
-                  <div className="frame-element-blue">
-                    0xF7Y
-                  </div>
-                </div>
                 </div>
                 <div className="af-class-main">
                   <div className="af-class-gamebg" onMouseMove={this.handleMouseMove} onClick={this.handleGridClick}>
@@ -694,7 +704,7 @@ class IndexView extends React.Component {
                 </div>
               </div>
               <div className="af-class-button-row">
-                <button className="move-button move-button-text" onClick={this.handleMove}>Move</button>
+                <button className={this.getMoveButtonClass()} onClick={this.handleMove}>Move</button>
               </div>
             </div>
           </div>
