@@ -116,6 +116,7 @@ class IndexView extends React.Component {
 
     const provider = this.props.walletProvider;
 
+    const signer = provider.getSigner(); // Get the signer to perform transactions
     // Create a contract instance
     const gameContract = new Contract(contractAddress, starFighterAbi, provider);
 
