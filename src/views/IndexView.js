@@ -1,22 +1,22 @@
 /* eslint-disable */
 
-import React from 'react'
-import { createScope, map, transformProxies } from './helpers'
-import { BrowserProvider, Contract } from 'ethers';
+import { React, useEffect, useState } from 'react'
+import { transformProxies } from './helpers'
+import { BrowserProvider, Contract, AbiCoder } from 'ethers';
 import { initFhevm, createInstance } from "fhevmjs"
-import { AbiCoder } from 'ethers';
 import starFighterAbi from '../abi/starFighter.json';
+import contractAddresses from '../abi/contractAddresses.json'
 import { LoginButton } from '../ConnectWallet';
 import { LogoutButton } from '../LogoutButton';
-import { useEffect, useState } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import '../css/normalize.css'
 import '../css/webflow.css'
 import '../css/starFighter.css'
 
 initFhevm()
-
 let instance;
+
+const contractAddress = contractAddresses[0].starFighterMain;
 
 function ParentComponent() {
   const { authenticated } = usePrivy(); // Example usage of usePrivy
@@ -115,9 +115,6 @@ class IndexView extends React.Component {
     }
 
     const provider = this.props.walletProvider;
-
-    // TODO hard coded contract address
-    const contractAddress = '0xBfec76C39961b6E39599C68e87ec575be9F4CA83';
 
     // Create a contract instance
     const gameContract = new Contract(contractAddress, starFighterAbi, provider);
@@ -283,12 +280,12 @@ class IndexView extends React.Component {
   handleMove = async () => {
     const { permanentHoverGrid, permanentAttackGrid, shipPositions, mainShip } = this.state;
     if (!permanentHoverGrid || !permanentAttackGrid) {
-      console.log('Move and Attack positions must be set before sending transaction');
+      console.log('Set your move and attack!');
       return;
     }
 
     if (!this.props.walletProvider) {
-      console.error('Wallet provider is not available.');
+      console.error('Connect your wallet');
       return;
     }
 
@@ -301,13 +298,12 @@ class IndexView extends React.Component {
     console.log('Move direction: ', moveDir);
     console.log('Shot direction: ', shotDir);
 
-    // Assume each direction is encoded in 3 bits and distance in 4 bits.
+    // Encode each direction in 3 bits and distance in 4 bits.
     const encodedMove = (moveDist & 0xF) | ((moveDir & 0x7) << 4) | ((shotDir & 0x7) << 7);
     console.log(encodedMove)
 
     const provider = this.props.walletProvider;
     const signer = await provider.getSigner();
-    const contractAddress = '0xBfec76C39961b6E39599C68e87ec575be9F4CA83'; // TODO: replace with your contract address
     const gameContract = new Contract(contractAddress, starFighterAbi, signer);
 
     try {
@@ -338,7 +334,6 @@ class IndexView extends React.Component {
     const signer = await provider.getSigner();
   
     // Replace with your contract address
-    const contractAddress = '0xBfec76C39961b6E39599C68e87ec575be9F4CA83';
     const gameContract = new Contract(contractAddress, starFighterAbi, signer);
   
     try {
@@ -368,8 +363,6 @@ class IndexView extends React.Component {
     const provider = this.props.walletProvider;
     const signer = await provider.getSigner();
   
-    // Replace with your contract address
-    const contractAddress = '0xBfec76C39961b6E39599C68e87ec575be9F4CA83';
     const gameContract = new Contract(contractAddress, starFighterAbi, signer);
   
     try {

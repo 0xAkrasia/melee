@@ -102,7 +102,7 @@
   border-radius: 8px;
   background: #AA56FF;
   box-shadow: 0px 0px 24px 0px #9428FF;
-  display: flex;
+  display: center;
   width: 720px;
   padding: 16px 24px;
   justify-content: center;
@@ -124,7 +124,7 @@
 .waiting-button {
   border-radius: 8px;
   border: 2px solid #AA56FF;
-  display: flex;
+  display: center;
   width: 720px;
   padding: 16px 24px;
   justify-content: center;

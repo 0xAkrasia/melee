@@ -42,7 +42,6 @@ contract starFighter is EIP712WithModifier {
     // events
     event gameOverEmit(address[] winner);
     event playerDeadEmit(address player);
-    event astPosCheckEmit(bool astPosCheck);
 
     // modifiers
     modifier onlyPlayers() {
