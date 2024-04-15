@@ -116,6 +116,8 @@ class IndexView extends React.Component {
     actionType: null,
     permanentHoverGrid: null,
     permanentAttackGrid: null,
+    mainShipName: 'pinkShip',
+    mainShotName: 'pinkShot',
   };
 
   async loadContractData() {
@@ -161,11 +163,29 @@ class IndexView extends React.Component {
       // Find mainShip based on currentAddress
       // index 0: blueShip, index 1: pinkShip, index 2: greenShip, index 3: orangeShip
       let mainShip = this.state.shipPositions.orangeShip;
-      if (addressesArray[0] && currentAddress.toLowerCase() === addressesArray[0].toLowerCase()) mainShip = newShipPositions.blueShip;
-      else if (addressesArray[1] && currentAddress.toLowerCase() === addressesArray[1].toLowerCase()) mainShip = newShipPositions.pinkShip;
-      else if (addressesArray[2] && currentAddress.toLowerCase() === addressesArray[2].toLowerCase()) mainShip = newShipPositions.greenShip;
-      else if (addressesArray[3] && currentAddress.toLowerCase() === addressesArray[3].toLowerCase()) mainShip = newShipPositions.orangeShip;
-      this.setState({ mainShip });
+      let mainShipName = this.state.mainShipName;
+      let mainShotName = this.state.mainShotName;
+      if (addressesArray[0] && currentAddress.toLowerCase() === addressesArray[0].toLowerCase()) {
+        mainShip = newShipPositions.blueShip;
+        mainShipName = 'blueShip';
+        mainShotName = 'blueShot';
+      }
+      else if (addressesArray[1] && currentAddress.toLowerCase() === addressesArray[1].toLowerCase()) {
+        mainShip = newShipPositions.pinkShip;
+        mainShipName = 'pinkShip';
+        mainShotName = 'pinkShot';
+      }
+      else if (addressesArray[2] && currentAddress.toLowerCase() === addressesArray[2].toLowerCase()) {
+        mainShip = newShipPositions.greenShip;
+        mainShipName = 'greenShip';
+        mainShotName = 'greenShot';
+      }
+      else if (addressesArray[3] && currentAddress.toLowerCase() === addressesArray[3].toLowerCase()) {
+        mainShip = newShipPositions.orangeShip;
+        mainShipName = 'orangeShip';
+        mainShotName = 'orangeShot';
+      }
+      this.setState({ mainShip, mainShipName });
       this.handleSetMove();
     } catch (error) {
       console.error("Error fetching player addresses or positions from the contract: ", error);
@@ -455,14 +475,12 @@ class IndexView extends React.Component {
     return { shouldRender: !isPathBlocked, distanceX, distanceY };
   }
 
-  renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition, isPermanent = false) {
+  renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition, isPermanent = false, shotName = null) {
     const { shouldRender, distanceX, distanceY } = this.sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition);
     if (!shouldRender && !isPermanent) return null;
-    // Check if hoverGrid is on a horizontal, vertical, or straight diagonal path within 4 units
     const isHorizontalOrVertical = (distanceX <= 4 && distanceY === 0) || (distanceX === 0 && distanceY <= 4);
     const isStraightDiagonal = distanceX === distanceY && distanceX <= 4;
 
-    // Apply shadow effect if hoverGrid meets the above condition and the path is not blocked
     if ((isHorizontalOrVertical || isStraightDiagonal) || isPermanent) {
       // Calculate the steps needed to draw the path
       const steps = Math.max(Math.abs(hoverGrid.x - mainShip.x), Math.abs(hoverGrid.y - mainShip.y));
@@ -476,50 +494,91 @@ class IndexView extends React.Component {
         const stepY = mainShip.y + deltaY * i;
         const key = `path-${stepX}-${stepY}`;
 
-        pathElements.push(
-          <div
-            key={key}
-            className="af-class-shadow-effect"
+        // JSX for the faded ship image
+        const shotImage = shotName ? (
+          <img
+            src={`images/${shotName}.png`}
+            alt={shotName}
+            className="af-class-objects af-class-faded-ship"
             style={{
-              top: `${stepY * 60}px`,
-              left: `${stepX * 60}px`,
+              top: `${hoverGrid.y * 60}px`, // Positioning based on the hover grid
+              left: `${hoverGrid.x * 60}px`,
               position: 'absolute',
-              width: '60px',
-              height: '60px',
-              backgroundColor: 'rgba(255,0,0, 0.3)', // Distinct color for attack path
-              zIndex: 1 // To ensure it is rendered below the ships and asteroids
+              opacity: 0.5, // Adjust as needed for desired fading
+              zIndex: 2, // Ensure the ship image is on top of the shadow effects
             }}
           />
+        ) : null;
+
+        pathElements.push(
+          <>
+            <div
+              key={key}
+              className="af-class-shadow-effect"
+              style={{
+                top: `${stepY * 60}px`,
+                left: `${stepX * 60}px`,
+                position: 'absolute',
+                width: '60px',
+                height: '60px',
+                backgroundColor: 'rgba(255,0,0, 0.3)', // Distinct color for attack path
+                zIndex: 1 // To ensure it is rendered below the ships and asteroids
+              }}
+            />
+            {shotImage}
+          </>
         );
       }
       return pathElements;
     }
   }
 
-  renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition, isPermanent = false) {
+  renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition, isPermanent = false, shipName = null) {
     const { shouldRender, distanceX, distanceY } = this.sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition);
     if (!shouldRender && !isPermanent) return null;
     // Check if hoverGrid is on a horizontal, vertical, or straight diagonal path within 2 units
     const isHorizontalOrVertical = (distanceX <= 3 && distanceY === 0) || (distanceX === 0 && distanceY <= 3);
     const isStraightDiagonal = distanceX === distanceY && distanceX <= 3;
 
-    // Apply shadow effect if hoverGrid meets the above condition and the path is not blocked
     if ((isHorizontalOrVertical || isStraightDiagonal) || isPermanent) {
-      return (
-        <div
-          className="af-class-shadow-effect"
+      // Add an additional className for fading the image
+      const shipStyle = {
+        opacity: 0.5, // Adjust as needed for desired fading
+        position: 'absolute',
+        zIndex: 2, // Ensure the ship image is on top of the shadow effect
+      };
+
+      // JSX for the faded ship image
+      const fadedShipImage = shipName ? (
+        <img
+          src={`images/${shipName}.svg`}
+          alt={shipName}
+          className="af-class-objects af-class-faded-ship"
           style={{
-            top: `${hoverGrid.y * 60}px`,
+            ...shipStyle,
+            top: `${hoverGrid.y * 60}px`, // Positioning based on the hover grid
             left: `${hoverGrid.x * 60}px`,
-            position: 'absolute',
-            width: '60px',
-            height: '60px',
-            backgroundColor: 'rgba(255,165,0, 0.3)' // Shadow with some transparency
           }}
         />
+      ) : null;
+
+      return (
+        <>
+          <div
+            className="af-class-shadow-effect"
+            style={{
+              top: `${hoverGrid.y * 60}px`,
+              left: `${hoverGrid.x * 60}px`,
+              position: 'absolute',
+              width: '60px',
+              height: '60px',
+              backgroundColor: 'rgba(255,165,0, 0.3)'  // Shadow with some transparency
+            }}
+          />
+          {fadedShipImage}
+        </>
       );
     } else {
-      // If hoverGrid is not on one of the specified paths, render X mark
       return null;
     }
   }
@@ -540,9 +599,9 @@ class IndexView extends React.Component {
 
     if (gridToShow) {
       if (this.state.actionType === 'move') {
-        return this.renderMoveShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition);
+        return this.renderMoveShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, false, this.state.mainShipName);
       } else if (this.state.actionType === 'attack') {
-        return this.renderAttackShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition);
+        return this.renderAttackShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, false, this.state.mainShotName);
       }
     } else {
       return null;
