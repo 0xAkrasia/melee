@@ -112,6 +112,7 @@ class IndexView extends React.Component {
       ...this.asteroidsInState,
     },
     hoverGrid: null,
+    originalMainShip: null,
     mainShip: null,
     actionType: null,
     permanentHoverGrid: null,
@@ -248,6 +249,7 @@ class IndexView extends React.Component {
     if (this.state.actionType === 'move') {
       this.setState({
         permanentHoverGrid: { ...this.state.hoverGrid },
+        originalMainShip: { ...this.state.mainShip },
         mainShip: { ...this.state.hoverGrid, rotation: this.state.mainShip.rotation },
       }, () => {
         this.setState({ actionType: 'attack' });
@@ -310,7 +312,7 @@ class IndexView extends React.Component {
   }
 
   handleMove = async () => {
-    const { permanentHoverGrid, permanentAttackGrid, shipPositions, mainShip } = this.state;
+    const { permanentHoverGrid, permanentAttackGrid, mainShip, originalMainShip } = this.state;
     if (!permanentHoverGrid || !permanentAttackGrid) {
       console.log('Set your move and attack!');
       return;
@@ -322,8 +324,8 @@ class IndexView extends React.Component {
     }
 
     // Create an encoded input for the move
-    const moveDist = this.calculateMoveDistance(mainShip, permanentHoverGrid);
-    const moveDir = this.calculateDirection(mainShip, permanentHoverGrid);
+    const moveDist = this.calculateMoveDistance(originalMainShip, permanentHoverGrid);
+    const moveDir = this.calculateDirection(originalMainShip, permanentHoverGrid);
     const shotDir = this.calculateDirection(mainShip, permanentAttackGrid);
 
     console.log('Move distance: ', moveDist);
