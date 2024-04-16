@@ -246,22 +246,29 @@ class IndexView extends React.Component {
   }
 
   handleGridClick = () => {
-    if (this.state.actionType === 'move') {
-      this.setState({
-        permanentHoverGrid: { ...this.state.hoverGrid },
-        originalMainShip: { ...this.state.mainShip },
-        mainShip: { ...this.state.hoverGrid, rotation: this.state.mainShip.rotation },
-      }, () => {
-        this.setState({ actionType: 'attack' });
-      });
-    } else if (this.state.actionType === 'attack') {
-      this.setState({
-        permanentAttackGrid: { ...this.state.hoverGrid }
-      }, () => {
+    const { shouldRender, distanceX, distanceY } = this.sharedHoverGridLogic(this.state.hoverGrid, this.state.mainShip, this.asteroidPositions, this.state.shipPositions.star);
+    const range = this.state.actionType === 'move' ? 3 : 4;
+    const isHorizontalOrVertical = (distanceX <= range && distanceY === 0) || (distanceX === 0 && distanceY <= range);
+    const isStraightDiagonal = distanceX === distanceY && distanceX <= range;
+    if (!shouldRender) return null;
+    if ((isHorizontalOrVertical || isStraightDiagonal)) {
+      if (this.state.actionType === 'move') {
         this.setState({
-          actionType: 'move',
+          permanentHoverGrid: { ...this.state.hoverGrid },
+          originalMainShip: { ...this.state.mainShip },
+          mainShip: { ...this.state.hoverGrid, rotation: this.state.mainShip.rotation },
+        }, () => {
+          this.setState({ actionType: 'attack' });
         });
-      });
+      } else if (this.state.actionType === 'attack') {
+        this.setState({
+          permanentAttackGrid: { ...this.state.hoverGrid }
+        }, () => {
+          this.setState({
+            actionType: 'move',
+          });
+        });
+      }
     }
   }
 
@@ -463,7 +470,7 @@ class IndexView extends React.Component {
   sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition) {
     const isOnAsteroidOrStar = asteroidPositions.some(
       pos => pos.x === hoverGrid.x && pos.y === hoverGrid.y
-    ) || (starPosition.x === hoverGrid.x && starPosition.y === hoverGrid.y);
+    ); //|| (starPosition.x === hoverGrid.x && starPosition.y === hoverGrid.y);
 
     if (isOnAsteroidOrStar) {
       return { shouldRender: false };
@@ -472,7 +479,7 @@ class IndexView extends React.Component {
     const distanceX = Math.abs(hoverGrid.x - mainShip.x);
     const distanceY = Math.abs(hoverGrid.y - mainShip.y);
 
-    const isPathBlocked = asteroidPositions.some(this.isAsteroidOrStarOnPath) || this.isAsteroidOrStarOnPath(starPosition);
+    const isPathBlocked = asteroidPositions.some(this.isAsteroidOrStarOnPath); // || this.isAsteroidOrStarOnPath(starPosition);
 
     return { shouldRender: !isPathBlocked, distanceX, distanceY };
   }
