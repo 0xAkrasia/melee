@@ -383,7 +383,8 @@ html, body {
 .af-view .af-class-background-video {
   width: 720px;
   height: 720px;
-  position: absolute;
+  z-index: 1;
+  position: relative;
 }
 
 .af-view .af-class-frame-6 {
@@ -405,6 +406,7 @@ html, body {
   align-items: center;
   text-decoration: none;
   display: flex;
+  z-index: 2;
   position: absolute;
 }
 
@@ -416,6 +418,7 @@ html, body {
   bottom: auto;
   left: 0%;
   right: auto;
+  z-index: 3;
 }
 
 @font-face {
