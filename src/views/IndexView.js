@@ -104,11 +104,11 @@ class IndexView extends React.Component {
   // Initialize the React state with the ship positions and the asteroid positions
   state = {
     shipPositions: {
-      blueShip: { x: 0, y: 0, rotation: 45 },
-      pinkShip: { x: 11, y: 0, rotation: 315 },
-      greenShip: { x: 11, y: 11, rotation: 225 },
-      orangeShip: { x: 0, y: 11, rotation: 135 },
-      star: { x: 6, y: 6, rotation: 0 }, // # TODO star is hard coded for now
+      blueShip: { x: 0, y: 0, rotation: 45 , starCount: 0 },
+      pinkShip: { x: 11, y: 0, rotation: 315 , starCount: 0 },
+      greenShip: { x: 11, y: 11, rotation: 225 , starCount: 0 },
+      orangeShip: { x: 0, y: 11, rotation: 135 , starCount: 3 },
+      star: { x: 6, y: 5, rotation: 0 }, // # TODO star is hard coded for now
       ...this.asteroidsInState,
     },
     hoverGrid: null,
@@ -151,6 +151,10 @@ class IndexView extends React.Component {
           y: 11 - Number(yPosition),
         }));
       });
+      
+      // const starCount = ships.map((_, index) => {
+      //   Number(gameContract.starCount(address));
+      // });
 
       const positionsArray = await Promise.all(positionPromises);
 
@@ -704,20 +708,22 @@ class IndexView extends React.Component {
                 <div className="af-class-player-col">
                   <div className="frame">
                     <div className="frame-div">
-                      <div className="frame-text-wrapper">0x</div>
+                      <div className="frame-text-wrapper">
+                        {this.state.shipPositions.orangeShip.starCount}x
+                      </div>
                       <img className="frame-group" alt="star" src="images/star.svg" />
                     </div>
                     <div className="frame-element-orange">
-                      0xACC
+                      Player 1
                     </div>
                   </div>
                   <div className="frame">
                     <div className="frame-div">
-                      <div className="frame-text-wrapper">1x</div>
+                      <div className="frame-text-wrapper">0x</div>
                       <img className="frame-group" alt="star" src="images/star.svg" />
                     </div>
                     <div className="frame-element-blue">
-                      0xF7Y
+                      Player 4
                     </div>
                   </div>
                 </div>
@@ -749,17 +755,16 @@ class IndexView extends React.Component {
                       <div className="frame-text-wrapper">x0</div>
                     </div>
                     <div className="frame-element-green">
-                      mary.eth
+                      Player 3
                     </div>
                   </div>
                   <div className="frame">
                     <div className="frame-div">
                       <img className="frame-group" alt="star" src="images/star.svg" />
-                      <div className="frame-text-wrapper">x1</div>
+                      <div className="frame-text-wrapper">x0</div>
                     </div>
                     <div className="frame-element-pink">
-                      0xABD <br />
-                      (you)
+                      Player 2
                     </div>
                   </div>
                 </div>
