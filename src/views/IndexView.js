@@ -632,7 +632,7 @@ class IndexView extends React.Component {
     const asteroidPositions = this.asteroidPositions;
 
     if (gridToShow) {
-      return this.renderMoveShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, true);
+      return this.renderMoveShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, true, this.state.mainShipName);
     } else {
       return null;
     }
@@ -653,7 +653,7 @@ class IndexView extends React.Component {
     const asteroidPositions = this.asteroidPositions;
 
     if (gridToShow) {
-      return this.renderAttackShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, true);
+      return this.renderAttackShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, true, this.state.mainShotName);
     } else {
       return null;
     }
