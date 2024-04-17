@@ -1,3 +1,10 @@
+html, body {
+  background-color: #000; /* Black */
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
+  height: 100%; /* Ensure the html and body fill the viewport height */
+}
+
 .frame {
   align-items: flex-start;
   display: inline-flex;
@@ -183,6 +190,8 @@
   padding: 40px;
   text-decoration: none;
   display: flex;
+  align-items: center; /* Add this line */
+  justify-content: center; /* Add this line */
 }
 
 .login-button-container {
@@ -230,6 +239,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center; /* Center items vertically */
+  margin-top: 40px; 
 }
 
 .af-class-button-dark {
@@ -239,6 +249,7 @@
 }
 
 .af-view .af-class-game-header {
+  text-align: center;
   color: #9428ff;
   letter-spacing: .04em;
   text-shadow: 0 0 24px rgba(255, 135, 0, .5);
@@ -372,7 +383,8 @@
 .af-view .af-class-background-video {
   width: 720px;
   height: 720px;
-  position: absolute;
+  z-index: 1;
+  position: relative;
 }
 
 .af-view .af-class-frame-6 {
@@ -394,6 +406,7 @@
   align-items: center;
   text-decoration: none;
   display: flex;
+  z-index: 2;
   position: absolute;
 }
 
@@ -405,6 +418,7 @@
   bottom: auto;
   left: 0%;
   right: auto;
+  z-index: 3;
 }
 
 @font-face {

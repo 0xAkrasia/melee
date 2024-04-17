@@ -250,22 +250,29 @@ class IndexView extends React.Component {
   }
 
   handleGridClick = () => {
-    if (this.state.actionType === 'move') {
-      this.setState({
-        permanentHoverGrid: { ...this.state.hoverGrid },
-        originalMainShip: { ...this.state.mainShip },
-        mainShip: { ...this.state.hoverGrid, rotation: this.state.mainShip.rotation },
-      }, () => {
-        this.setState({ actionType: 'attack' });
-      });
-    } else if (this.state.actionType === 'attack') {
-      this.setState({
-        permanentAttackGrid: { ...this.state.hoverGrid }
-      }, () => {
+    const { shouldRender, distanceX, distanceY } = this.sharedHoverGridLogic(this.state.hoverGrid, this.state.mainShip, this.asteroidPositions, this.state.shipPositions.star);
+    const range = this.state.actionType === 'move' ? 3 : 4;
+    const isHorizontalOrVertical = (distanceX <= range && distanceY === 0) || (distanceX === 0 && distanceY <= range);
+    const isStraightDiagonal = distanceX === distanceY && distanceX <= range;
+    if (!shouldRender) return null;
+    if ((isHorizontalOrVertical || isStraightDiagonal)) {
+      if (this.state.actionType === 'move') {
         this.setState({
-          actionType: 'move',
+          permanentHoverGrid: { ...this.state.hoverGrid },
+          originalMainShip: { ...this.state.mainShip },
+          mainShip: { ...this.state.hoverGrid, rotation: this.state.mainShip.rotation },
+        }, () => {
+          this.setState({ actionType: 'attack' });
         });
-      });
+      } else if (this.state.actionType === 'attack') {
+        this.setState({
+          permanentAttackGrid: { ...this.state.hoverGrid }
+        }, () => {
+          this.setState({
+            actionType: 'move',
+          });
+        });
+      }
     }
   }
 
@@ -467,7 +474,7 @@ class IndexView extends React.Component {
   sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition) {
     const isOnAsteroidOrStar = asteroidPositions.some(
       pos => pos.x === hoverGrid.x && pos.y === hoverGrid.y
-    ) || (starPosition.x === hoverGrid.x && starPosition.y === hoverGrid.y);
+    ); //|| (starPosition.x === hoverGrid.x && starPosition.y === hoverGrid.y);
 
     if (isOnAsteroidOrStar) {
       return { shouldRender: false };
@@ -476,7 +483,7 @@ class IndexView extends React.Component {
     const distanceX = Math.abs(hoverGrid.x - mainShip.x);
     const distanceY = Math.abs(hoverGrid.y - mainShip.y);
 
-    const isPathBlocked = asteroidPositions.some(this.isAsteroidOrStarOnPath) || this.isAsteroidOrStarOnPath(starPosition);
+    const isPathBlocked = asteroidPositions.some(this.isAsteroidOrStarOnPath); // || this.isAsteroidOrStarOnPath(starPosition);
 
     return { shouldRender: !isPathBlocked, distanceX, distanceY };
   }
@@ -629,7 +636,7 @@ class IndexView extends React.Component {
     const asteroidPositions = this.asteroidPositions;
 
     if (gridToShow) {
-      return this.renderMoveShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, true);
+      return this.renderMoveShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, true, this.state.mainShipName);
     } else {
       return null;
     }
@@ -650,7 +657,7 @@ class IndexView extends React.Component {
     const asteroidPositions = this.asteroidPositions;
 
     if (gridToShow) {
-      return this.renderAttackShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, true);
+      return this.renderAttackShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, true, this.state.mainShotName);
     } else {
       return null;
     }
@@ -693,7 +700,7 @@ class IndexView extends React.Component {
     return (
       <span>
         <div>
-          <img src="../../public/images/meleeName.png" />
+        <img src="images/meleeName.png" style={{ width: '200px', height: 'auto' }} />
         </div>
         <div className="login-button-container">
           {authenticated ? <LogoutButton /> : <LoginButton />}
@@ -701,8 +708,6 @@ class IndexView extends React.Component {
         <span className="af-view">
           <div className="af-class-body">
             <div className="af-class-shooting-game">
-              <div className="af-class-button-row">
-              </div>
               <div className="af-class-game-header">Star Fighter</div>
               <div className="af-class-game">
                 <div className="af-class-player-col">
@@ -747,6 +752,9 @@ class IndexView extends React.Component {
                     {this.renderPermanentAttackGrid()}
                     {Object.keys(shipPositions).map((name) => this.renderObject(name, shipPositions[name]))}
                   </div>
+                  <div className="af-class-button-row">
+                    <button className={this.getMoveButtonClass()} onClick={this.handleMove}>Move</button>
+                  </div>
                 </div>
                 <div className="af-class-player-col-2">
                   <div className="frame">
@@ -768,9 +776,6 @@ class IndexView extends React.Component {
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="af-class-button-row">
-                <button className={this.getMoveButtonClass()} onClick={this.handleMove}>Move</button>
               </div>
             </div>
           </div>
