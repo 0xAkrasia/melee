@@ -696,7 +696,7 @@ class IndexView extends React.Component {
     return (
       <span>
         <div>
-          <img src="../../public/images/meleeName.png" />
+        <img src="images/meleeName.png" style={{ width: '200px', height: 'auto' }} />
         </div>
         <div className="login-button-container">
           {authenticated ? <LogoutButton /> : <LoginButton />}
@@ -704,8 +704,6 @@ class IndexView extends React.Component {
         <span className="af-view">
           <div className="af-class-body">
             <div className="af-class-shooting-game">
-              <div className="af-class-button-row">
-              </div>
               <div className="af-class-game-header">Star Fighter</div>
               <div className="af-class-game">
                 <div className="af-class-player-col">
@@ -748,6 +746,9 @@ class IndexView extends React.Component {
                     {this.renderPermanentAttackGrid()}
                     {Object.keys(shipPositions).map((name) => this.renderObject(name, shipPositions[name]))}
                   </div>
+                  <div className="af-class-button-row">
+                    <button className={this.getMoveButtonClass()} onClick={this.handleMove}>Move</button>
+                  </div>
                 </div>
                 <div className="af-class-player-col-2">
                   <div className="frame">
@@ -770,9 +771,6 @@ class IndexView extends React.Component {
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="af-class-button-row">
-                <button className={this.getMoveButtonClass()} onClick={this.handleMove}>Move</button>
               </div>
             </div>
           </div>
