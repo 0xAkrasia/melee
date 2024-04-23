@@ -2,10 +2,8 @@
 pragma solidity >=0.8.20 <0.9.0;
 
 import "fhevm/lib/TFHE.sol";
-import "fhevm/abstracts/EIP712WithModifier.sol";
-import "hardhat/console.sol";
 
-contract starFighter is EIP712WithModifier {
+contract starFighter {
     // player data state
     address[] public players;
     mapping(address => uint8) public lives;
@@ -55,7 +53,7 @@ contract starFighter is EIP712WithModifier {
     }
 
     // Constructor
-    constructor(address[] memory _players) EIP712WithModifier("Authorization token", "1") {
+    constructor(address[] memory _players) {
         // initialize game
         require(_players.length <= 4 && _players.length >= 2); // 2-4 players
         gameOver = false;
@@ -76,16 +74,16 @@ contract starFighter is EIP712WithModifier {
         }
 
         // indices of orientation array match directions of travel like a compass
-        orientations = [[int8(0),int8(1)], [int8(1),int8(1)], [int8(1),int8(0)], [int8(1),int8(-1)], [int8(0),int8(-1)], [int8(-1),int8(-1)], [int8(-1),int8(0)], [int8(-1),int8(1)]];
+        orientations = [[int8(0),int8(-1)], [int8(1),int8(-1)], [int8(1),int8(0)], [int8(1),int8(1)], [int8(0),int8(1)], [int8(-1),int8(1)], [int8(-1),int8(0)], [int8(-1),int8(-1)]];
         
         // initial asteroid locations
-        uint8[8] memory astArray = [27,28,32,45,62,90,102,123];
+        uint8[8] memory astArray = [15,42,54,74,105,111,112,116];
         for (uint8 i = 0; i < astArray.length; i++) {
             asteroids[astArray[i]] = true;
         }
 
         // star state
-        starLocation = 78;
+        starLocation = 66;
         starsToWin = 2;
     }
 
@@ -155,7 +153,7 @@ contract starFighter is EIP712WithModifier {
                 int8 newX = int8(position[0]) + j*playerMoveDir[0]; 
                 int8 newY = int8(position[1]) + j*playerMoveDir[1];
                 if (newX >= 0 && newY >= 0 && uint8(newX) < boardDim && uint8(newY) < boardDim) {
-                    if (asteroids[(uint8(newY) * boardDim + uint8(newX))] == true){
+                    if (asteroids[(uint8(newY) * boardDim + uint8(newX))] == true) {
                         asteroidHit = true;
                     }
                     if (asteroidHit) {

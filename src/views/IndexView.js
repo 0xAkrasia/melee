@@ -17,7 +17,7 @@ import '../css/starFighter.css'
 initFhevm()
 let instance;
 
-const contractAddress = contractAddresses[1].starFighterMain;
+const contractAddress = contractAddresses[0].starFighterMain;
 
 function ParentComponent() {
   const { authenticated } = usePrivy(); // Example usage of usePrivy
@@ -89,10 +89,10 @@ class IndexView extends React.Component {
 
   gridWidth = 12;
   // TODO: Load the asteroid positions from the contract
-  astArray = [27, 28, 32, 45, 62, 90, 102, 123];
+  astArray = [15,42,54,74,105,111,112,116];
   asteroidPositions = this.astArray.map((linearPos) => {
     const x = linearPos % this.gridWidth;
-    const y = 11 - Math.floor(linearPos / this.gridWidth);
+    const y = Math.floor(linearPos / this.gridWidth);
     return { x, y, rotation: 0 }; // rotation is set to 0 for simplicity
   });
 
@@ -104,10 +104,10 @@ class IndexView extends React.Component {
   // Initialize the React state with the ship positions and the asteroid positions
   state = {
     shipPositions: {
-      blueShip: { x: 0, y: 0, rotation: 45 , starCount: 0 },
-      pinkShip: { x: 11, y: 0, rotation: 315 , starCount: 0 },
-      greenShip: { x: 11, y: 11, rotation: 225 , starCount: 0 },
-      orangeShip: { x: 0, y: 11, rotation: 135 , starCount: 3 },
+      blueShip: { x: 0, y: 11, rotation: 45 , starCount: 0 },
+      pinkShip: { x: 11, y: 11, rotation: 315 , starCount: 0 },
+      greenShip: { x: 11, y: 0, rotation: 225 , starCount: 0 },
+      orangeShip: { x: 0, y: 0, rotation: 135 , starCount: 0 },
       star: { x: 6, y: 5, rotation: 0 }, // # TODO star is hard coded for now
       ...this.asteroidsInState,
     },
@@ -134,7 +134,7 @@ class IndexView extends React.Component {
     const gameContract = new Contract(contractAddress, starFighterAbi, provider);
 
     // Retrieve positions for each ship
-    const ships = ['blueShip', 'pinkShip', 'greenShip', 'orangeShip'];
+    const ships = ['orangeShip', 'greenShip', 'pinkShip', 'blueShip'];
     // Retrieve addresses for each player from the `players` public array
     const playerAddressesPromises = ships.map((_, index) =>
       gameContract.players(index)
@@ -146,15 +146,13 @@ class IndexView extends React.Component {
       const positionPromises = addressesArray.map((address) => {
         const xPositionPromise = gameContract.positions(address, 0);
         const yPositionPromise = gameContract.positions(address, 1);
-        return Promise.all([xPositionPromise, yPositionPromise]).then(([xPosition, yPosition]) => ({
+        const starCountPromise = gameContract.starCount(address);
+        return Promise.all([xPositionPromise, yPositionPromise, starCountPromise]).then(([xPosition, yPosition, starCountPromise]) => ({
           x: Number(xPosition),
-          y: 11 - Number(yPosition),
+          y: Number(yPosition),
+          starCount: Number(starCountPromise)
         }));
       });
-      
-      // const starCount = ships.map((_, index) => {
-      //   Number(gameContract.starCount(address));
-      // });
 
       const positionsArray = await Promise.all(positionPromises);
 
@@ -162,33 +160,33 @@ class IndexView extends React.Component {
         acc[ship] = positionsArray[index];
         return acc;
       }, { ...this.state.shipPositions });
-
       this.setState({ shipPositions: newShipPositions });
+      
       const currentAddress = this.props.wallets[0].address;
       // Find mainShip based on currentAddress
-      // index 0: blueShip, index 1: pinkShip, index 2: greenShip, index 3: orangeShip
+      // index 0: orangeShip, index 1: greenShip, index 2: pinkShip, index 3: blueShip
       let mainShip = this.state.shipPositions.orangeShip;
       let mainShipName = this.state.mainShipName;
       let mainShotName = this.state.mainShotName;
       if (addressesArray[0] && currentAddress.toLowerCase() === addressesArray[0].toLowerCase()) {
-        mainShip = newShipPositions.blueShip;
-        mainShipName = 'blueShip';
-        mainShotName = 'blueShot';
+        mainShip = newShipPositions.orangeShip;
+        mainShipName = 'orangeShip';
+        mainShotName = 'orangeShot';
       }
       else if (addressesArray[1] && currentAddress.toLowerCase() === addressesArray[1].toLowerCase()) {
-        mainShip = newShipPositions.pinkShip;
-        mainShipName = 'pinkShip';
-        mainShotName = 'pinkShot';
-      }
-      else if (addressesArray[2] && currentAddress.toLowerCase() === addressesArray[2].toLowerCase()) {
         mainShip = newShipPositions.greenShip;
         mainShipName = 'greenShip';
         mainShotName = 'greenShot';
       }
+      else if (addressesArray[2] && currentAddress.toLowerCase() === addressesArray[2].toLowerCase()) {
+        mainShip = newShipPositions.pinkShip;
+        mainShipName = 'pinkShip';
+        mainShotName = 'pinkShot';
+      }
       else if (addressesArray[3] && currentAddress.toLowerCase() === addressesArray[3].toLowerCase()) {
-        mainShip = newShipPositions.orangeShip;
-        mainShipName = 'orangeShip';
-        mainShotName = 'orangeShot';
+        mainShip = newShipPositions.blueShip;
+        mainShipName = 'blueShip';
+        mainShotName = 'blueShot';
       }
       this.setState({ mainShip, mainShipName });
       this.handleSetMove();
@@ -714,7 +712,7 @@ class IndexView extends React.Component {
                   <div className="frame">
                     <div className="frame-div">
                       <div className="frame-text-wrapper">
-                        {this.state.shipPositions.orangeShip.starCount}x
+                        {`${this.state.shipPositions.orangeShip.starCount}x`}
                       </div>
                       <img className="frame-group" alt="star" src="images/star.svg" />
                     </div>
@@ -724,7 +722,7 @@ class IndexView extends React.Component {
                   </div>
                   <div className="frame">
                     <div className="frame-div">
-                      <div className="frame-text-wrapper">0x</div>
+                      <div className="frame-text-wrapper">{`${this.state.shipPositions.blueShip.starCount}x`}</div>
                       <img className="frame-group" alt="star" src="images/star.svg" />
                     </div>
                     <div className="frame-element-blue">
@@ -760,19 +758,19 @@ class IndexView extends React.Component {
                   <div className="frame">
                     <div className="frame-div">
                       <img className="frame-group" alt="star" src="images/star.svg" />
-                      <div className="frame-text-wrapper">x0</div>
+                      <div className="frame-text-wrapper">{`x${this.state.shipPositions.greenShip.starCount}`}</div>
                     </div>
                     <div className="frame-element-green">
-                      Player 3
+                      Player 2
                     </div>
                   </div>
                   <div className="frame">
                     <div className="frame-div">
                       <img className="frame-group" alt="star" src="images/star.svg" />
-                      <div className="frame-text-wrapper">x0</div>
+                      <div className="frame-text-wrapper">{`x${this.state.shipPositions.pinkShip.starCount}`}</div>
                     </div>
                     <div className="frame-element-pink">
-                      Player 2
+                      Player 3
                     </div>
                   </div>
                 </div>
