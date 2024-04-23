@@ -187,6 +187,10 @@ class IndexView extends React.Component {
         mainShip = newShipPositions.blueShip;
         mainShipName = 'blueShip';
         mainShotName = 'blueShot';
+      } else {
+        mainShip = newShipPositions.pinkShip;
+        mainShipName = 'pinkShip';
+        mainShotName = 'pinkShot';
       }
       this.setState({ mainShip, mainShipName });
       this.handleSetMove();
@@ -364,65 +368,6 @@ class IndexView extends React.Component {
 
     } catch (error) {
       console.error('Error sending move transaction: ', error);
-    }
-  }
-
-  handleReveal = async () => {
-    if (!this.props.walletProvider) {
-      console.error('Wallet provider is not available.');
-      return;
-    }
-
-    const provider = this.props.walletProvider;
-    const signer = await provider.getSigner();
-
-    // Replace with your contract address
-    const gameContract = new Contract(contractAddress, starFighterAbi, signer);
-
-    try {
-      // Call the revealMoves() method on the contract
-      const revealTransaction = await gameContract.revealMoves();
-
-      console.log('Reveal transaction sent: ', revealTransaction.hash);
-
-      // Wait for the transaction to be mined
-      const receipt = await revealTransaction.wait();
-      console.log('Transaction confirmed in block: ', receipt.blockNumber);
-
-      // Reload the game data after the reveal to update the UI
-      await this.loadContractData();
-
-    } catch (error) {
-      console.error('Error sending reveal transaction: ', error);
-    }
-  }
-
-  handleAttack = async () => {
-    if (!this.props.walletProvider) {
-      console.error('Wallet provider is not available.');
-      return;
-    }
-
-    const provider = this.props.walletProvider;
-    const signer = await provider.getSigner();
-
-    const gameContract = new Contract(contractAddress, starFighterAbi, signer);
-
-    try {
-      // Call the attack() method on the contract
-      const attackTransaction = await gameContract.attack();
-
-      console.log('attack transaction sent: ', attackTransaction.hash);
-
-      // Wait for the transaction to be mined
-      const receipt = await attackTransaction.wait();
-      console.log('Transaction confirmed in block: ', receipt.blockNumber);
-
-      // Reload the game data after the attack to update the UI
-      await this.loadContractData();
-
-    } catch (error) {
-      console.error('Error sending attach transaction: ', error);
     }
   }
 
