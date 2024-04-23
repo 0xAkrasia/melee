@@ -201,7 +201,7 @@
  * 2. Correct font properties not being inherited.
  * 3. Address margins set differently in Firefox 4+, Safari, and Chrome.
  */
-.af-view button,
+/* .af-view button, */
 .af-view input,
 .af-view optgroup,
 .af-view select,

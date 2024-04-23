@@ -663,7 +663,7 @@ class IndexView extends React.Component {
 
   getMoveButtonClass() {
     const { permanentHoverGrid, permanentAttackGrid } = this.state;
-    return (!permanentHoverGrid || !permanentAttackGrid) ? 'dark-button move-button-text' : 'move-button move-button-text';
+    return (!permanentHoverGrid || !permanentAttackGrid) ? 'waiting-button waiting-button-text' : 'move-button move-button-text';
   }
 
   async componentDidMount() {
