@@ -3,19 +3,19 @@
 import React from 'react'
 import { useEffect, useState, useRef } from 'react'
 import { transformProxies } from './helpers'
-import { BrowserProvider, Contract, AbiCoder } from 'ethers';
-import { initFhevm, createInstance } from "fhevmjs"
+import { BrowserProvider } from 'ethers';
+import { initFhevm } from "fhevmjs"
 import starFighterAbi from '../abi/starFighter.json';
 import contractAddresses from '../abi/contractAddresses.json'
 import { LoginButton } from '../ConnectWallet';
 import { LogoutButton } from '../LogoutButton';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { loadContractData, handleMove } from '../ContractDataProvider';
 import '../css/normalize.css'
 import '../css/webflow.css'
 import '../css/starFighter.css'
 
 initFhevm()
-let instance;
 
 const contractAddress = contractAddresses[0].starFighterMain;
 
@@ -122,77 +122,17 @@ class IndexView extends React.Component {
   };
 
   async loadContractData() {
-    if (!this.props.walletProvider) {
-      console.error('Wallet provider is not available.');
-      return;
-    }
-
-    const provider = this.props.walletProvider;
-
-    const signer = provider.getSigner(); // Get the signer to perform transactions
-    // Create a contract instance
-    const gameContract = new Contract(contractAddress, starFighterAbi, provider);
-
-    // Retrieve positions for each ship
-    const ships = ['orangeShip', 'greenShip', 'pinkShip', 'blueShip'];
-    // Retrieve addresses for each player from the `players` public array
-    const playerAddressesPromises = ships.map((_, index) =>
-      gameContract.players(index)
+    loadContractData(
+      this.props.walletProvider,
+      this.props.wallets[0].address,
+      this.state.shipPositions,
+      contractAddress,
+      starFighterAbi,
+      (newShipPositions) => this.setState({ shipPositions: newShipPositions }),
+      ({mainShip, mainShipName, mainShotName}) => this.setState({ mainShip, mainShipName, mainShotName }),
+      (error) => console.error(error) // You could handle this more gracefully
     );
-
-    try {
-      const addressesArray = await Promise.all(playerAddressesPromises);
-
-      const positionPromises = addressesArray.map((address) => {
-        const xPositionPromise = gameContract.positions(address, 0);
-        const yPositionPromise = gameContract.positions(address, 1);
-        const starCountPromise = gameContract.starCount(address);
-        return Promise.all([xPositionPromise, yPositionPromise, starCountPromise]).then(([xPosition, yPosition, starCountPromise]) => ({
-          x: Number(xPosition),
-          y: Number(yPosition),
-          starCount: Number(starCountPromise)
-        }));
-      });
-
-      const positionsArray = await Promise.all(positionPromises);
-
-      const newShipPositions = ships.reduce((acc, ship, index) => {
-        acc[ship] = positionsArray[index];
-        return acc;
-      }, { ...this.state.shipPositions });
-      this.setState({ shipPositions: newShipPositions });
-      
-      const currentAddress = this.props.wallets[0].address;
-      // Find mainShip based on currentAddress
-      // index 0: orangeShip, index 1: greenShip, index 2: pinkShip, index 3: blueShip
-      let mainShip = this.state.shipPositions.orangeShip;
-      let mainShipName = this.state.mainShipName;
-      let mainShotName = this.state.mainShotName;
-      if (addressesArray[0] && currentAddress.toLowerCase() === addressesArray[0].toLowerCase()) {
-        mainShip = newShipPositions.orangeShip;
-        mainShipName = 'orangeShip';
-        mainShotName = 'orangeShot';
-      }
-      else if (addressesArray[1] && currentAddress.toLowerCase() === addressesArray[1].toLowerCase()) {
-        mainShip = newShipPositions.greenShip;
-        mainShipName = 'greenShip';
-        mainShotName = 'greenShot';
-      }
-      else if (addressesArray[2] && currentAddress.toLowerCase() === addressesArray[2].toLowerCase()) {
-        mainShip = newShipPositions.pinkShip;
-        mainShipName = 'pinkShip';
-        mainShotName = 'pinkShot';
-      }
-      else if (addressesArray[3] && currentAddress.toLowerCase() === addressesArray[3].toLowerCase()) {
-        mainShip = newShipPositions.blueShip;
-        mainShipName = 'blueShip';
-        mainShotName = 'blueShot';
-      }
-      this.setState({ mainShip, mainShipName });
-      this.handleSetMove();
-    } catch (error) {
-      console.error("Error fetching player addresses or positions from the contract: ", error);
-    }
+    this.handleSetMove();
   }
 
   renderObject(name, position) {
@@ -281,149 +221,16 @@ class IndexView extends React.Component {
     });
   }
 
-  calculateMoveDistance(mainShip, hoverGrid) {
-    return Math.max(Math.abs(mainShip.x - hoverGrid.x), Math.abs(mainShip.y - hoverGrid.y));
-  }
-
-  calculateDirection(mainShip, hoverGrid) {
-    let directionX = Math.sign(hoverGrid.x - mainShip.x);
-    let directionY = Math.sign(hoverGrid.y - mainShip.y);
-    let index;
-
-    // Diagonals and straight lines
-    if (directionX === 0 && directionY === -1) index = 0; // Up
-    else if (directionX === 1 && directionY === -1) index = 1; // Up-Right
-    else if (directionX === 1 && directionY === 0) index = 2; // Right
-    else if (directionX === 1 && directionY === 1) index = 3; // Down-Right
-    else if (directionX === 0 && directionY === 1) index = 4; // Down
-    else if (directionX === -1 && directionY === 1) index = 5; // Down-Left
-    else if (directionX === -1 && directionY === 0) index = 6; // Left
-    else if (directionX === -1 && directionY === -1) index = 7; // Up-Left
-    else throw new Error('Invalid move vector');
-
-    return index; // This will return a number between 0 and 7 indicating the direction as per the orientations array.
-  }
-
-  async createInstance(web3Provider) {
-    // Initiate FHE
-    const FHE_LIB_ADDRESS = "0x000000000000000000000000000000000000005d";
-    const network = await web3Provider.getNetwork();
-    const chainId = +network.chainId.toString();
-    const ret = await web3Provider.call({
-      to: FHE_LIB_ADDRESS,
-      data: "0xd9d47bb001",
-    });
-    const decoded = AbiCoder.defaultAbiCoder().decode(["bytes"], ret);
-    const publicKey = decoded[0];
-    instance = await createInstance({ chainId, publicKey });
-    console.log("FHE instance created", instance);
-    return instance;
-  }
-
   handleMove = async () => {
-    const { permanentHoverGrid, permanentAttackGrid, mainShip, originalMainShip } = this.state;
-    if (!permanentHoverGrid || !permanentAttackGrid) {
-      console.log('Set your move and attack!');
-      return;
-    }
-
-    if (!this.props.walletProvider) {
-      console.error('Connect your wallet');
-      return;
-    }
-
-    // Create an encoded input for the move
-    const moveDist = this.calculateMoveDistance(originalMainShip, permanentHoverGrid);
-    const moveDir = this.calculateDirection(originalMainShip, permanentHoverGrid);
-    const shotDir = this.calculateDirection(mainShip, permanentAttackGrid);
-
-    console.log('Move distance: ', moveDist);
-    console.log('Move direction: ', moveDir);
-    console.log('Shot direction: ', shotDir);
-
-    // Encode each direction in 3 bits and distance in 4 bits.
-    const encodedMove = (moveDist & 0xF) | ((moveDir & 0x7) << 4) | ((shotDir & 0x7) << 7);
-    console.log(encodedMove)
-
-    const provider = this.props.walletProvider;
-    const signer = await provider.getSigner();
-    const gameContract = new Contract(contractAddress, starFighterAbi, signer);
-
-    try {
-      instance = await this.createInstance(provider);
-      const encryptedMove = await instance.encrypt16(encodedMove);
-      const moveTransaction = await gameContract.move(encryptedMove);
-      console.log('Move transaction sent: ', moveTransaction.hash);
-
-      // Wait for the transaction to be mined
-      const receipt = await moveTransaction.wait();
-      console.log('Transaction confirmed in block: ', receipt.blockNumber);
-
-      // Reload the ship positions after the move
-      await this.loadContractData();
-
-    } catch (error) {
-      console.error('Error sending move transaction: ', error);
-    }
-  }
-
-  handleReveal = async () => {
-    if (!this.props.walletProvider) {
-      console.error('Wallet provider is not available.');
-      return;
-    }
-
-    const provider = this.props.walletProvider;
-    const signer = await provider.getSigner();
-
-    // Replace with your contract address
-    const gameContract = new Contract(contractAddress, starFighterAbi, signer);
-
-    try {
-      // Call the revealMoves() method on the contract
-      const revealTransaction = await gameContract.revealMoves();
-
-      console.log('Reveal transaction sent: ', revealTransaction.hash);
-
-      // Wait for the transaction to be mined
-      const receipt = await revealTransaction.wait();
-      console.log('Transaction confirmed in block: ', receipt.blockNumber);
-
-      // Reload the game data after the reveal to update the UI
-      await this.loadContractData();
-
-    } catch (error) {
-      console.error('Error sending reveal transaction: ', error);
-    }
-  }
-
-  handleAttack = async () => {
-    if (!this.props.walletProvider) {
-      console.error('Wallet provider is not available.');
-      return;
-    }
-
-    const provider = this.props.walletProvider;
-    const signer = await provider.getSigner();
-
-    const gameContract = new Contract(contractAddress, starFighterAbi, signer);
-
-    try {
-      // Call the attack() method on the contract
-      const attackTransaction = await gameContract.attack();
-
-      console.log('attack transaction sent: ', attackTransaction.hash);
-
-      // Wait for the transaction to be mined
-      const receipt = await attackTransaction.wait();
-      console.log('Transaction confirmed in block: ', receipt.blockNumber);
-
-      // Reload the game data after the attack to update the UI
-      await this.loadContractData();
-
-    } catch (error) {
-      console.error('Error sending attach transaction: ', error);
-    }
+    handleMove({
+      walletProvider: this.props.walletProvider,
+      permanentHoverGrid: this.state.permanentHoverGrid, 
+      permanentAttackGrid: this.state.permanentAttackGrid, 
+      mainShip: this.state.mainShip, 
+      originalMainShip: this.state.originalMainShip,
+      contractAddress: contractAddress,
+      contractAbi: starFighterAbi,
+    });
   }
 
   getButtonClass = (action) => {
