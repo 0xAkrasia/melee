@@ -68,9 +68,7 @@ async function loadContractData(walletProvider, currentAddress, shipPositions, c
           mainShipName = 'blueShip';
           mainShotName = 'blueShot';
         } else {
-          mainShip = newShipPositions.pinkShip;
-          mainShipName = 'pinkShip';
-          mainShotName = 'pinkShot';
+          alert('You are not a player in this game');
         }
   
       // Call setStateCallback to update state of IndexView component
