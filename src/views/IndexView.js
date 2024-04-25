@@ -11,6 +11,7 @@ import { LoginButton } from '../ConnectWallet';
 import { LogoutButton } from '../LogoutButton';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { loadContractData, handleMove } from '../ContractDataProvider';
+import { handleMouseMove, sharedHoverGridLogic, renderGridOverlay, renderPermanentHoverGrid, renderPermanentAttackGrid, renderObject, handleGridClick } from '../GridViews';
 import '../css/normalize.css'
 import '../css/webflow.css'
 import '../css/starFighter.css'
@@ -82,9 +83,6 @@ class IndexView extends React.Component {
 
   constructor(props) {
     super(props);
-    this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.isAsteroidOrStarOnPath = this.isAsteroidOrStarOnPath.bind(this);
-    this.sharedHoverGridLogic = this.sharedHoverGridLogic.bind(this);
   }
 
   gridWidth = 12;
@@ -132,89 +130,6 @@ class IndexView extends React.Component {
       ({mainShip, mainShipName, mainShotName}) => this.setState({ mainShip, mainShipName, mainShotName }),
       (error) => console.error(error) // You could handle this more gracefully
     );
-    this.handleSetMove();
-  }
-
-  renderObject(name, position) {
-    const style = {
-      top: `${(position.y) * 60}px`,
-      left: `${position.x * 60}px`,
-      transform: `rotate(${position.rotation}deg)`
-    };
-
-    const imagePath = name.includes('asteroid') ? 'images/asteroid.svg' : `images/${name}.svg`;
-
-    return (
-      <img
-        key={name}
-        src={imagePath}
-        alt={name}
-        className={`af-class-objects`}
-        style={style}
-      />
-    );
-  }
-
-  handleMouseMove = (event) => {
-    // Assuming the game grid element has a class of 'af-class-gamebg'.
-    const gameGridElement = document.querySelector('.af-class-gamebg');
-
-    if (!gameGridElement) {
-      // Exit early if the game grid element is not found.
-      return;
-    }
-
-    // Get the bounding rectangle for the game grid element.
-    const gridRect = gameGridElement.getBoundingClientRect();
-
-    // Calculate the mouse position relative to the game grid.
-    const relativeX = event.clientX - gridRect.left;
-    const relativeY = event.clientY - gridRect.top;
-
-    // Calculate the grid coordinates.
-    // Use Math.floor to get the lower bound (so 0.1 and 0.9 both align to grid space 0).
-    // Use Math.max to prevent negative grid locations if the cursor is slightly out of bounds.
-    const gridX = Math.max(0, Math.floor(relativeX / 60)); // Assuming grid cell width is 60px.
-    const gridY = Math.max(0, Math.floor(relativeY / 60)); // Assuming grid cell height is 60px.
-
-    // Update hover state if mouse is within grid boundaries.
-    if (gridX >= 0 && gridX < this.gridWidth && gridY >= 0 && gridY < this.gridWidth) {
-      const hoverGrid = { x: gridX, y: gridY };
-      this.setState({ hoverGrid });
-    } else {
-      // Optional: clear hover state if mouse leaves the game grid boundaries.
-      this.setState({ hoverGrid: null });
-    }
-  }
-
-  handleGridClick = () => {
-    const { shouldRender, distanceX, distanceY } = this.sharedHoverGridLogic(this.state.hoverGrid, this.state.mainShip, this.asteroidPositions, this.state.shipPositions.star);
-    const range = this.state.actionType === 'move' ? 3 : 4;
-    const isHorizontalOrVertical = (distanceX <= range && distanceY === 0) || (distanceX === 0 && distanceY <= range);
-    const isStraightDiagonal = distanceX === distanceY && distanceX <= range;
-    if (!shouldRender) return null;
-    if ((isHorizontalOrVertical || isStraightDiagonal)) {
-      if (this.state.actionType === 'move') {
-        this.setState({
-          permanentHoverGrid: { ...this.state.hoverGrid },
-          originalMainShip: { ...this.state.mainShip },
-          mainShip: { ...this.state.hoverGrid, rotation: this.state.mainShip.rotation },
-        }, () => {
-          this.setState({ actionType: 'attack' });
-        });
-      } else if (this.state.actionType === 'attack') {
-        this.setState({
-          permanentAttackGrid: { ...this.state.hoverGrid }
-        }, () => {
-          this.setState({
-            actionType: 'move',
-          });
-        });
-      }
-    }
-  }
-
-  handleSetMove = () => {
     this.setState({
       actionType: 'move',
 
@@ -233,240 +148,23 @@ class IndexView extends React.Component {
     });
   }
 
+  handleGridClickProxy = () => {
+    handleGridClick(
+      this.state.hoverGrid,
+      this.state.mainShip,
+      this.asteroidPositions,
+      this.state.shipPositions.star,
+      this.state.actionType,
+      (permanentHoverGrid) => this.setState(permanentHoverGrid),
+      (permanentHoverGrid) => this.setState(permanentHoverGrid)
+    );
+  }
+
   getButtonClass = (action) => {
     const { actionType } = this.state;
     return ` ${actionType === action ? 'waiting-button waiting-button-text' : 'move-button move-button-text'}`;
   }
 
-  isAsteroidOrStarOnPath(pos) {
-    const mainShip = this.state.mainShip;
-    const hoverGrid = this.state.hoverGrid;
-
-    // Only check if hoverGrid is defined
-    if (!hoverGrid || !mainShip) {
-      return false;
-    }
-
-    // Check if pos is on the same row or column as the mainShip and hoverGrid.
-    const isSameRow = (pos.y === mainShip.y) && (pos.y === hoverGrid.y);
-    const isSameColumn = (pos.x === mainShip.x) && (pos.x === hoverGrid.x);
-
-    if (isSameRow) {
-      // Check if pos.x is between mainShip.x and hoverGrid.x
-      return (pos.x - mainShip.x) * (pos.x - hoverGrid.x) <= 0;
-    } else if (isSameColumn) {
-      // Check if pos.y is between mainShip.y and hoverGrid.y
-      return (pos.y - mainShip.y) * (pos.y - hoverGrid.y) <= 0;
-    }
-
-    // Check if pos is on a diagonal path
-    const deltaX = mainShip.x - hoverGrid.x;
-    const deltaY = mainShip.y - hoverGrid.y;
-
-    // To be on the same diagonal, the differences in x and y from the mainShip to hoverGrid 
-    // should be equal to those to pos (in terms of absolute value)
-    if (deltaX !== 0 && deltaY !== 0 && Math.abs(deltaX) === Math.abs(deltaY)) {
-      // Calculate gradient and check if position follows the line based on the formula y - y1 = m(x - x1)
-      const gradient = deltaY / deltaX;
-      return (pos.y - mainShip.y) === gradient * (pos.x - mainShip.x) &&
-        (pos.x - mainShip.x) * (pos.x - hoverGrid.x) <= 0 &&
-        (pos.y - mainShip.y) * (pos.y - hoverGrid.y) <= 0;
-    }
-
-    return false;
-  }
-
-  sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition) {
-    const isOnAsteroidOrStar = asteroidPositions.some(
-      pos => pos.x === hoverGrid.x && pos.y === hoverGrid.y
-    ); //|| (starPosition.x === hoverGrid.x && starPosition.y === hoverGrid.y);
-
-    if (isOnAsteroidOrStar) {
-      return { shouldRender: false };
-    }
-
-    const distanceX = Math.abs(hoverGrid.x - mainShip.x);
-    const distanceY = Math.abs(hoverGrid.y - mainShip.y);
-
-    const isPathBlocked = asteroidPositions.some(this.isAsteroidOrStarOnPath); // || this.isAsteroidOrStarOnPath(starPosition);
-
-    return { shouldRender: !isPathBlocked, distanceX, distanceY };
-  }
-
-  renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition, isPermanent = false, shotName = null) {
-    const { shouldRender, distanceX, distanceY } = this.sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition);
-    if (!shouldRender && !isPermanent) return null;
-    const isHorizontalOrVertical = (distanceX <= 4 && distanceY === 0) || (distanceX === 0 && distanceY <= 4);
-    const isStraightDiagonal = distanceX === distanceY && distanceX <= 4;
-
-    if ((isHorizontalOrVertical || isStraightDiagonal) || isPermanent) {
-      // Calculate the steps needed to draw the path
-      const steps = Math.max(Math.abs(hoverGrid.x - mainShip.x), Math.abs(hoverGrid.y - mainShip.y));
-      const deltaX = (hoverGrid.x - mainShip.x) / steps;
-      const deltaY = (hoverGrid.y - mainShip.y) / steps;
-      let pathElements = [];
-
-      // Generate divs for each step in the path
-      for (let i = 1; i <= steps; i++) {
-        const stepX = mainShip.x + deltaX * i;
-        const stepY = mainShip.y + deltaY * i;
-        const key = `path-${stepX}-${stepY}`;
-
-        // JSX for the faded ship image
-        const shotImage = shotName ? (
-          <img
-            src={`images/${shotName}.png`}
-            alt={shotName}
-            className="af-class-objects af-class-faded-ship"
-            style={{
-              top: `${hoverGrid.y * 60}px`, // Positioning based on the hover grid
-              left: `${hoverGrid.x * 60}px`,
-              position: 'absolute',
-              opacity: 0.5, // Adjust as needed for desired fading
-              zIndex: 2, // Ensure the ship image is on top of the shadow effects
-            }}
-          />
-        ) : null;
-
-        pathElements.push(
-          <>
-            <div
-              key={key}
-              className="af-class-shadow-effect"
-              style={{
-                top: `${stepY * 60}px`,
-                left: `${stepX * 60}px`,
-                position: 'absolute',
-                width: '60px',
-                height: '60px',
-                backgroundColor: 'rgba(255,0,0, 0.3)', // Distinct color for attack path
-                zIndex: 1 // To ensure it is rendered below the ships and asteroids
-              }}
-            />
-            {shotImage}
-          </>
-        );
-      }
-      return pathElements;
-    }
-  }
-
-  renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition, isPermanent = false, shipName = null) {
-    const { shouldRender, distanceX, distanceY } = this.sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition);
-    if (!shouldRender && !isPermanent) return null;
-    // Check if hoverGrid is on a horizontal, vertical, or straight diagonal path within 2 units
-    const isHorizontalOrVertical = (distanceX <= 3 && distanceY === 0) || (distanceX === 0 && distanceY <= 3);
-    const isStraightDiagonal = distanceX === distanceY && distanceX <= 3;
-
-    if ((isHorizontalOrVertical || isStraightDiagonal) || isPermanent) {
-      // Add an additional className for fading the image
-      const shipStyle = {
-        opacity: 0.5, // Adjust as needed for desired fading
-        position: 'absolute',
-        zIndex: 2, // Ensure the ship image is on top of the shadow effect
-      };
-
-      // JSX for the faded ship image
-      const fadedShipImage = shipName ? (
-        <img
-          src={`images/${shipName}.svg`}
-          alt={shipName}
-          className="af-class-objects af-class-faded-ship"
-          style={{
-            ...shipStyle,
-            top: `${hoverGrid.y * 60}px`, // Positioning based on the hover grid
-            left: `${hoverGrid.x * 60}px`,
-          }}
-        />
-      ) : null;
-
-      return (
-        <>
-          <div
-            className="af-class-shadow-effect"
-            style={{
-              top: `${hoverGrid.y * 60}px`,
-              left: `${hoverGrid.x * 60}px`,
-              position: 'absolute',
-              width: '60px',
-              height: '60px',
-              backgroundColor: 'rgba(255,165,0, 0.3)'  // Shadow with some transparency
-            }}
-          />
-          {fadedShipImage}
-        </>
-      );
-    } else {
-      return null;
-    }
-  }
-
-  renderGridOverlay() {
-    let { hoverGrid, mainShip, shipPositions } = this.state;
-    const gridToShow = hoverGrid;
-
-    if (!mainShip) {
-      mainShip = shipPositions.orangeShip;
-    }
-
-    // Assuming star position is stored in state
-    const starPosition = this.state.shipPositions.star;
-
-    // Assuming asteroid positions are stored in state in a similar format as shipPositions
-    const asteroidPositions = this.asteroidPositions;
-
-    if (gridToShow) {
-      if (this.state.actionType === 'move') {
-        return this.renderMoveShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, false, this.state.mainShipName);
-      } else if (this.state.actionType === 'attack') {
-        return this.renderAttackShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, false, this.state.mainShotName);
-      }
-    } else {
-      return null;
-    }
-  }
-
-  renderPermanentHoverGrid() {
-    let { mainShip, shipPositions, permanentHoverGrid } = this.state;
-    const gridToShow = permanentHoverGrid;
-
-    if (!mainShip) {
-      mainShip = shipPositions.orangeShip;
-    }
-
-    // Assuming star position is stored in state
-    const starPosition = this.state.shipPositions.star;
-
-    // Assuming asteroid positions are stored in state in a similar format as shipPositions
-    const asteroidPositions = this.asteroidPositions;
-
-    if (gridToShow) {
-      return this.renderMoveShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, true, this.state.mainShipName);
-    } else {
-      return null;
-    }
-  }
-
-  renderPermanentAttackGrid() {
-    let { mainShip, shipPositions, permanentAttackGrid } = this.state;
-    const gridToShow = permanentAttackGrid;
-
-    if (!mainShip) {
-      mainShip = shipPositions.orangeShip;
-    }
-
-    // Assuming star position is stored in state
-    const starPosition = this.state.shipPositions.star;
-
-    // Assuming asteroid positions are stored in state in a similar format as shipPositions
-    const asteroidPositions = this.asteroidPositions;
-
-    if (gridToShow) {
-      return this.renderAttackShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, true, this.state.mainShotName);
-    } else {
-      return null;
-    }
-  }
 
   getMoveButtonClass() {
     const { permanentHoverGrid, permanentAttackGrid } = this.state;
@@ -538,7 +236,7 @@ class IndexView extends React.Component {
                   </div>
                 </div>
                 <div className="af-class-main">
-                  <div className="af-class-gamebg" onMouseMove={this.handleMouseMove} onClick={this.handleGridClick}>
+                  <div className="af-class-gamebg" onMouseMove={(event) => handleMouseMove(event, (hoverGrid) => this.setState({ hoverGrid }), this.gridWidth)} onClick={this.handleGridClickProxy}>
                     <img src="images/Vectors-Wrapper.svg" loading="lazy" width={720} height={720} alt className="af-class-grid" />
                     {/*Looks like there will be a video being played in this division, but seems this piece of code does not take any effect, need double check*/}
                     <div data-poster-url="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-poster-00001.jpg"
@@ -552,10 +250,30 @@ class IndexView extends React.Component {
                         <source src="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.webm" data-wf-ignore="true" />
                       </video>
                     </div>
-                    {this.renderGridOverlay()}
-                    {this.renderPermanentHoverGrid()}
-                    {this.renderPermanentAttackGrid()}
-                    {Object.keys(shipPositions).map((name) => this.renderObject(name, shipPositions[name]))}
+                    {renderGridOverlay(
+                      this.state.hoverGrid, 
+                      this.state.mainShip, 
+                      this.state.shipPositions,
+                      this.asteroidPositions,
+                      this.state.mainShipName, 
+                      this.state.mainShotName, 
+                      this.state.actionType
+                    )}
+                    {renderPermanentHoverGrid(
+                      this.state.mainShip, 
+                      this.state.shipPositions, 
+                      this.asteroidPositions,
+                      this.state.permanentHoverGrid, 
+                      this.state.mainShipName, 
+                    )}
+                    {renderPermanentAttackGrid(
+                      this.state.mainShip, 
+                      this.state.shipPositions, 
+                      this.asteroidPositions,
+                      this.state.permanentAttackGrid, 
+                      this.state.mainShotName, 
+                    )}
+                    {Object.keys(shipPositions).map((name) => renderObject(name, shipPositions[name]))}
                   </div>
                   <div className="af-class-button-row">
                     <button className={this.getMoveButtonClass()} onClick={this.handleMove}>Move</button>
