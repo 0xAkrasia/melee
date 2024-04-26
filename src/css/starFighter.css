@@ -1,3 +1,95 @@
+.navbar {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 24px;
+  position: relative;
+}
+
+.navbar .div {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 60px;
+  position: relative;
+}
+
+.navbar .vector {
+  height: 32px;
+  position: relative;
+  width: 154.68px;
+}
+
+.navbar .div-2 {
+  align-items: flex-start;
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 60px;
+  position: relative;
+  padding: 16px 24px;
+}
+
+.navbar .text-wrapper {
+  color: var(--ff-8700, #FF8700);
+  font-family: "Chakra Petch";
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: normal;
+  margin-top: -1px;
+  position: relative;
+  width: fit-content;
+}
+
+.navbar .text-wrapper-2 {
+  color: var(--ff-8700, #FF8700);
+  font-family: "Chakra Petch";
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: normal;
+  margin-top: -1px;
+  opacity: 0.6;
+  position: relative;
+  width: fit-content;
+}
+
+.navbar .div-3 {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  padding: 16px 24px;
+  gap: 16px;
+  position: relative;
+}
+
+.navbar .img {
+  height: 24px;
+  position: relative;
+  width: 24px;
+}
+
+.navbar .div-wrapper {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  position: relative;
+}
+
+.navbar .text-wrapper-3 {
+  color: var(--ff-8700, #FF8700);
+  font-family: "Chakra Petch";
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 24px;
+  margin-top: -1px;
+  position: relative;
+  white-space: nowrap;
+  width: fit-content;
+}
+
 html, body {
   background-color: #000; /* Black */
   margin: 0; /* Remove default margin */
@@ -83,12 +175,17 @@ html, body {
   width: fit-content;
 }
 
+.connect-wallet-button {
+  border-radius: 100px;
+  border: 1px solid var(--ff-8700, #FF8700);
+}
+
 .connect-wallet-text {
   display: flex;
   padding: 8px 24px;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  /* gap: 8px; */
   color: var(--ff-8700, #FF8700);
   font-family: "Chakra Petch";
   font-size: 16px;
@@ -96,13 +193,6 @@ html, body {
   font-weight: 500;
   line-height: 24px; /* 150% */
   background-color: black;
-}
-
-.connect-wallet-button {
-  border-radius: 100px;
-  border: 1px solid var(--ff-8700, #FF8700);
-  background-color: black;
-  color: black
 }
 
 .move-button {
@@ -212,28 +302,9 @@ html, body {
   flex: 0 auto;
   justify-content: center;
   align-items: center;
-  padding: 12px 24px;
+  padding: 0px 24px;
   text-decoration: none;
   display: flex;
-}
-
-.connect-wallet-button {
-  border-radius: 100px;
-  border: 1px solid var(--ff-8700, #FF8700);
-}
-
-.connect-wallet-text {
-  display: flex;
-  padding: 8px 24px;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  color: var(--ff-8700, #FF8700);
-  font-family: "Chakra Petch";
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 24px; /* 150% */
 }
 
 .af-class-button-row {

@@ -8,10 +8,9 @@ import { initFhevm } from "fhevmjs"
 import starFighterAbi from '../abi/starFighter.json';
 import contractAddresses from '../abi/contractAddresses.json'
 import { LoginButton } from '../ConnectWallet';
-import { LogoutButton } from '../LogoutButton';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { loadContractData, handleMove } from '../ContractDataProvider';
-import { handleMouseMove, sharedHoverGridLogic, renderGridOverlay, renderPermanentHoverGrid, renderPermanentAttackGrid, renderObject, handleGridClick } from '../GridViews';
+import { handleMouseMove, renderGridOverlay, renderPermanentHoverGrid, renderPermanentAttackGrid, renderObject, handleGridClick } from '../GridViews';
 import '../css/normalize.css'
 import '../css/webflow.css'
 import '../css/starFighter.css'
@@ -102,10 +101,10 @@ class IndexView extends React.Component {
   // Initialize the React state with the ship positions and the asteroid positions
   state = {
     shipPositions: {
-      blueShip: { x: 0, y: 11, rotation: 45 , starCount: 0 },
-      pinkShip: { x: 11, y: 11, rotation: 315 , starCount: 0 },
-      greenShip: { x: 11, y: 0, rotation: 225 , starCount: 0 },
-      orangeShip: { x: 0, y: 0, rotation: 135 , starCount: 0 },
+      blueShip: { x: 0, y: 11, rotation: 45 , starCount: 0, lives: 1},
+      pinkShip: { x: 11, y: 11, rotation: 315 , starCount: 0, lives: 1},
+      greenShip: { x: 11, y: 0, rotation: 225 , starCount: 0, lives: 1},
+      orangeShip: { x: 0, y: 0, rotation: 135 , starCount: 0, lives: 1},
       star: { x: 6, y: 5, rotation: 0 }, // # TODO star is hard coded for now
       ...this.asteroidsInState,
     },
@@ -115,8 +114,8 @@ class IndexView extends React.Component {
     actionType: null,
     permanentHoverGrid: null,
     permanentAttackGrid: null,
-    mainShipName: 'pinkShip',
-    mainShotName: 'pinkShot',
+    mainShipName: 'orangeShip',
+    mainShotName: 'orangeShot',
   };
 
   async loadContractData() {
@@ -165,7 +164,6 @@ class IndexView extends React.Component {
     return ` ${actionType === action ? 'waiting-button waiting-button-text' : 'move-button move-button-text'}`;
   }
 
-
   getMoveButtonClass() {
     const { permanentHoverGrid, permanentAttackGrid } = this.state;
     return (!permanentHoverGrid || !permanentAttackGrid) ? 'waiting-button waiting-button-text' : 'move-button move-button-text';
@@ -202,11 +200,23 @@ class IndexView extends React.Component {
 
     return (
       <span>
-        <div>
-        <img src="images/meleeName.png" style={{ width: '200px', height: 'auto' }} />
-        </div>
-        <div className="login-button-container">
-          {authenticated ? <LogoutButton /> : <LoginButton />}
+        <div className="navbar">
+            <div className="div">
+                <img alt="Melee Logo" src="images/meleeName.png" style={{ width: '200px', height: 'auto' }} />
+                <div className="div-2">
+                    <div className="text-wrapper">Games</div>
+                    {/* className="text-wrapper-2" */}
+                    <div className="text-wrapper">Leaderboard</div>
+                    <div className="text-wrapper">History</div>
+                </div>
+            </div>
+            <div className="div-3">
+                <img className="img" alt="X log" src="images/xLogoOrange.svg" />
+                <img className="img" alt="Discord logo" src="images/discordLogoOrange.svg" />
+                <div className="div-wrapper">
+                    <LoginButton authenticated = { authenticated }/>
+                </div>
+            </div>
         </div>
         <span className="af-view">
           <div className="af-class-body">
@@ -223,6 +233,7 @@ class IndexView extends React.Component {
                     </div>
                     <div className="frame-element-orange">
                       Player 1
+                      { this.state.mainShipName === 'orangeShip' ? <div> <br /> (you)</div> : null }
                     </div>
                   </div>
                   <div className="frame">
@@ -232,6 +243,7 @@ class IndexView extends React.Component {
                     </div>
                     <div className="frame-element-blue">
                       Player 4
+                      { this.state.mainShipName === 'blueShip' ? <div> <br /> (you)</div> : null }
                     </div>
                   </div>
                 </div>
@@ -287,6 +299,7 @@ class IndexView extends React.Component {
                     </div>
                     <div className="frame-element-green">
                       Player 2
+                      { this.state.mainShipName === 'greenShip' ? <div> <br /> (you)</div> : null }
                     </div>
                   </div>
                   <div className="frame">
@@ -296,6 +309,7 @@ class IndexView extends React.Component {
                     </div>
                     <div className="frame-element-pink">
                       Player 3
+                      { this.state.mainShipName === 'pinkShip' ? <div> <br /> (you)</div> : null }
                     </div>
                   </div>
                 </div>
