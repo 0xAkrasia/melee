@@ -97,18 +97,24 @@ export function renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions,
         const deltaX = (hoverGrid.x - mainShip.x) / steps;
         const deltaY = (hoverGrid.y - mainShip.y) / steps;
         const angleRadians = Math.atan2(hoverGrid.y - mainShip.y, hoverGrid.x - mainShip.x);
-        let angleDeg =  angleRadians * (180 / Math.PI) + 90 ;
-        
-        if (!isPermanent && angleDeg === 0) {
+        let angleDeg = angleRadians * (180 / Math.PI) + 90;
+
+        if (angleDeg === 0) {
             angleDeg = 1 // FIXME, I don't quite understand this
         }
-        console.log('Angle:', angleDeg);
+
         let pathElements = [];
 
+        const gridSize = 12; // TODO hardcoded grid size
+        let totalSteps = 0;
+        if (!isPermanent || mainShip) {
+            totalSteps = 4; 
+        }
         // Generate divs and images for each step in the path
-        for (let i = 1; i <= steps; i++) {
+        for (let i = 1; i <= totalSteps; i++) {
             const stepX = mainShip.x + deltaX * i;
             const stepY = mainShip.y + deltaY * i;
+            if (!stepX || !stepY || stepX >= gridSize || stepY >= gridSize) continue;
             const key = `path-${stepX}-${stepY}`;
 
             // JSX for the shot image at each step
@@ -149,9 +155,9 @@ export function renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions,
         }
         if (mainShip.rotation !== angleDeg) {
             console.log('Setting mainship rotation:', angleDeg, mainShip.rotation);
-            setMainshipRotation({ 
-                mainShip: { x: mainShip.x, y: mainShip.y, rotation: angleDeg},
-                permanentHoverGrid: { x: mainShip.x, y: mainShip.y, rotation: angleDeg},
+            setMainshipRotation({
+                mainShip: { x: mainShip.x, y: mainShip.y, rotation: angleDeg },
+                permanentHoverGrid: { x: mainShip.x, y: mainShip.y, rotation: angleDeg },
             });
         }
         return pathElements;
@@ -168,8 +174,7 @@ export function renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, s
     if ((isHorizontalOrVertical || isStraightDiagonal) || isPermanent) {
         // Calculate angle
         const angleRadians = Math.atan2(hoverGrid.y - mainShip.y, hoverGrid.x - mainShip.x);
-        const angleDeg = hoverGrid.rotation ? hoverGrid.rotation : angleRadians * (180 / Math.PI) + 90 ;
-        console.log('Angle111:', angleDeg);
+        const angleDeg = hoverGrid.rotation ? hoverGrid.rotation : angleRadians * (180 / Math.PI) + 90;
 
         // Add an additional className for fading the image
         const shipStyle = {
@@ -316,7 +321,7 @@ export function handleGridClick(hoverGrid, mainShip, astPositions, starPosition,
             const angleRadians = Math.atan2(hoverGrid.y - mainShip.y, hoverGrid.x - mainShip.x);
             const angleDeg = angleRadians * (180 / Math.PI) + 90;
             setPermanentHoverGridState({
-                permanentHoverGrid: { ...hoverGrid, rotation: angleDeg},
+                permanentHoverGrid: { ...hoverGrid, rotation: angleDeg },
                 originalMainShip: { ...mainShip },
                 mainShip: { ...hoverGrid, rotation: angleDeg },
                 actionType: 'attack',
