@@ -85,7 +85,7 @@ export function sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions) {
     return { shouldRender: !isPathBlocked, distanceX, distanceY };
 }
 
-export function renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition, isPermanent = false, shotName = null) {
+export function renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition, isPermanent = false, shotName = null, setMainshipRotation) {
     const { shouldRender, distanceX, distanceY } = sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition);
     if (!shouldRender && !isPermanent) return null;
     const isHorizontalOrVertical = (distanceX <= 4 && distanceY === 0) || (distanceX === 0 && distanceY <= 4);
@@ -96,66 +96,92 @@ export function renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions,
         const steps = Math.max(Math.abs(hoverGrid.x - mainShip.x), Math.abs(hoverGrid.y - mainShip.y));
         const deltaX = (hoverGrid.x - mainShip.x) / steps;
         const deltaY = (hoverGrid.y - mainShip.y) / steps;
+        const angleRadians = Math.atan2(hoverGrid.y - mainShip.y, hoverGrid.x - mainShip.x);
+        let angleDeg = angleRadians * (180 / Math.PI) + 90;
+
+        if (angleDeg === 0) {
+            angleDeg = 1 // FIXME, I don't quite understand this
+        }
+
         let pathElements = [];
 
-        // Generate divs for each step in the path
-        for (let i = 1; i <= steps; i++) {
+        const gridSize = 12; // TODO hardcoded grid size
+        let totalSteps = 0;
+        if (!isPermanent || mainShip) {
+            totalSteps = 4; 
+        }
+        // Generate divs and images for each step in the path
+        for (let i = 1; i <= totalSteps; i++) {
             const stepX = mainShip.x + deltaX * i;
             const stepY = mainShip.y + deltaY * i;
+            if (!stepX || !stepY || stepX >= gridSize || stepY >= gridSize) continue;
             const key = `path-${stepX}-${stepY}`;
 
-            // JSX for the faded ship image
+            // JSX for the shot image at each step
             const shotImage = shotName ? (
                 <img
+                    key={`shot-${key}`}
                     src={`images/${shotName}.png`}
                     alt={shotName}
                     className="af-class-objects af-class-faded-ship"
                     style={{
-                        top: `${hoverGrid.y * 60}px`, // Positioning based on the hover grid
-                        left: `${hoverGrid.x * 60}px`,
+                        top: `${stepY * 60}px`,
+                        left: `${stepX * 60}px`,
                         position: 'absolute',
-                        opacity: 0.5, // Adjust as needed for desired fading
-                        zIndex: 2, // Ensure the ship image is on top of the shadow effects
+                        opacity: 0.5, // Adjust the opacity as needed for the shot image
+                        zIndex: 2, // Ensure the shot image is on top of the shadow effects
                     }}
                 />
             ) : null;
 
-            pathElements.push(
-                <>
-                    <div
-                        key={key}
-                        className="af-class-shadow-effect"
-                        style={{
-                            top: `${stepY * 60}px`,
-                            left: `${stepX * 60}px`,
-                            position: 'absolute',
-                            width: '60px',
-                            height: '60px',
-                            backgroundColor: 'rgba(255,0,0, 0.3)', // Distinct color for attack path
-                            zIndex: 1 // To ensure it is rendered below the ships and asteroids
-                        }}
-                    />
-                    {shotImage}
-                </>
+            // Shadow effect for the attack path
+            const shadowEffect = (
+                <div
+                    key={`shadow-${key}`}
+                    className="af-class-shadow-effect"
+                    style={{
+                        top: `${stepY * 60}px`,
+                        left: `${stepX * 60}px`,
+                        position: 'absolute',
+                        width: '60px',
+                        height: '60px',
+                        backgroundColor: 'rgba(255,0,0, 0.3)', // Distinct color for attack path
+                        zIndex: 1 // To ensure it is rendered below the shot images
+                    }}
+                />
             );
+
+            pathElements.push(shadowEffect, shotImage);
+        }
+        if (mainShip.rotation !== angleDeg) {
+            console.log('Setting mainship rotation:', angleDeg, mainShip.rotation);
+            setMainshipRotation({
+                mainShip: { x: mainShip.x, y: mainShip.y, rotation: angleDeg },
+                permanentHoverGrid: { x: mainShip.x, y: mainShip.y, rotation: angleDeg },
+            });
         }
         return pathElements;
     }
+    return null;
 }
 
 export function renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition, isPermanent = false, shipName = null) {
     const { shouldRender, distanceX, distanceY } = sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition);
     if (!shouldRender && !isPermanent) return null;
-    // Check if hoverGrid is on a horizontal, vertical, or straight diagonal path within 2 units
     const isHorizontalOrVertical = (distanceX <= 3 && distanceY === 0) || (distanceX === 0 && distanceY <= 3);
     const isStraightDiagonal = distanceX === distanceY && distanceX <= 3;
 
     if ((isHorizontalOrVertical || isStraightDiagonal) || isPermanent) {
+        // Calculate angle
+        const angleRadians = Math.atan2(hoverGrid.y - mainShip.y, hoverGrid.x - mainShip.x);
+        const angleDeg = hoverGrid.rotation ? hoverGrid.rotation : angleRadians * (180 / Math.PI) + 90;
+
         // Add an additional className for fading the image
         const shipStyle = {
             opacity: 0.5, // Adjust as needed for desired fading
             position: 'absolute',
             zIndex: 2, // Ensure the ship image is on top of the shadow effect
+            transform: `rotate(${angleDeg}deg)` // Rotate the ship to face the moving direction
         };
 
         // JSX for the faded ship image
@@ -193,7 +219,7 @@ export function renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, s
     }
 }
 
-export function renderGridOverlay(hoverGrid, mainShip, shipPositions, astPositions, mainShipName, mainShotName, actionType) {
+export function renderGridOverlay(hoverGrid, mainShip, shipPositions, astPositions, mainShipName, mainShotName, actionType, setMainshipRotation) {
     const gridToShow = hoverGrid;
 
     if (!mainShip) {
@@ -210,7 +236,7 @@ export function renderGridOverlay(hoverGrid, mainShip, shipPositions, astPositio
         if (actionType === 'move') {
             return renderMoveShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, false, mainShipName);
         } else if (actionType === 'attack') {
-            return renderAttackShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, false, mainShotName);
+            return renderAttackShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, false, mainShotName, setMainshipRotation);
         }
     } else {
         return null;
@@ -237,7 +263,7 @@ export function renderPermanentHoverGrid(mainShip, shipPositions, astPositions, 
     }
 }
 
-export function renderPermanentAttackGrid(mainShip, shipPositions, astPositions, permanentAttackGrid, mainShotName) {
+export function renderPermanentAttackGrid(mainShip, shipPositions, astPositions, permanentAttackGrid, mainShotName, setMainshipRotation) {
     const gridToShow = permanentAttackGrid;
 
     if (!mainShip) {
@@ -251,7 +277,7 @@ export function renderPermanentAttackGrid(mainShip, shipPositions, astPositions,
     const asteroidPositions = astPositions;
 
     if (gridToShow) {
-        return renderAttackShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, true, mainShotName);
+        return renderAttackShadowEffect(gridToShow, mainShip, asteroidPositions, starPosition, true, mainShotName, setMainshipRotation);
     } else {
         return null;
     }
@@ -291,10 +317,13 @@ export function handleGridClick(hoverGrid, mainShip, astPositions, starPosition,
         if (actionType === 'move') {
             // Return a callback that will be used to update the state in the component.
             console.log('Moving to:', hoverGrid);
+            // Calculate angle
+            const angleRadians = Math.atan2(hoverGrid.y - mainShip.y, hoverGrid.x - mainShip.x);
+            const angleDeg = angleRadians * (180 / Math.PI) + 90;
             setPermanentHoverGridState({
-                permanentHoverGrid: { ...hoverGrid },
+                permanentHoverGrid: { ...hoverGrid, rotation: angleDeg },
                 originalMainShip: { ...mainShip },
-                mainShip: { ...hoverGrid, rotation: mainShip.rotation },
+                mainShip: { ...hoverGrid, rotation: angleDeg },
                 actionType: 'attack',
             });
         } else if (actionType === 'attack') {

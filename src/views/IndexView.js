@@ -269,21 +269,24 @@ class IndexView extends React.Component {
                       this.asteroidPositions,
                       this.state.mainShipName, 
                       this.state.mainShotName, 
-                      this.state.actionType
+                      this.state.actionType,
+                      (mainShipRotation) => this.setState(mainShipRotation),
                     )}
                     {renderPermanentHoverGrid(
                       this.state.mainShip, 
                       this.state.shipPositions, 
                       this.asteroidPositions,
                       this.state.permanentHoverGrid, 
-                      this.state.mainShipName, 
+                      this.state.mainShipName,
+                      (mainShipRotation) => this.setState(mainShipRotation),
                     )}
                     {renderPermanentAttackGrid(
                       this.state.mainShip, 
                       this.state.shipPositions, 
                       this.asteroidPositions,
                       this.state.permanentAttackGrid, 
-                      this.state.mainShotName, 
+                      this.state.mainShotName,
+                      (mainShipRotation) => this.setState(mainShipRotation),
                     )}
                     {Object.keys(shipPositions).map((name) => renderObject(name, shipPositions[name]))}
                   </div>
