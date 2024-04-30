@@ -71,9 +71,9 @@ export function sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions) {
         (pos) => pos.x === hoverGrid.x && pos.y === hoverGrid.y
     );
 
-    if (isOnAsteroidOrStar) {
-        return { shouldRender: false };
-    }
+    //if (isOnAsteroidOrStar) {
+    //    return { shouldRender: false };
+    //}
 
     const distanceX = Math.abs(hoverGrid.x - mainShip.x);
     const distanceY = Math.abs(hoverGrid.y - mainShip.y);
@@ -82,14 +82,15 @@ export function sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions) {
         isAsteroidOrStarOnPath(pos, mainShip, hoverGrid)
     );
 
-    return { shouldRender: !isPathBlocked, distanceX, distanceY };
+    return { shouldRender: !isPathBlocked && !isOnAsteroidOrStar, distanceX, distanceY };
 }
 
 export function renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions, starPosition, isPermanent = false, shotName = null, setMainshipRotation) {
-    const { shouldRender, distanceX, distanceY } = sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition);
-    if (!shouldRender && !isPermanent) return null;
+    const { _, distanceX, distanceY } = sharedHoverGridLogic(hoverGrid, mainShip, asteroidPositions, starPosition);
+    //if (!shouldRender && !isPermanent) return null;
     const isHorizontalOrVertical = (distanceX <= 4 && distanceY === 0) || (distanceX === 0 && distanceY <= 4);
     const isStraightDiagonal = distanceX === distanceY && distanceX <= 4;
+    console.log(isHorizontalOrVertical, isStraightDiagonal)
 
     if ((isHorizontalOrVertical || isStraightDiagonal) || isPermanent) {
         // Calculate the steps needed to draw the path
@@ -115,6 +116,7 @@ export function renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions,
             const stepX = mainShip.x + deltaX * i;
             const stepY = mainShip.y + deltaY * i;
             if (!stepX || !stepY || stepX >= gridSize || stepY >= gridSize) continue;
+            if (asteroidPositions.some((pos) => pos.x === stepX && pos.y === stepY)) break;
             const key = `path-${stepX}-${stepY}`;
 
             // JSX for the shot image at each step
@@ -330,7 +332,7 @@ export function handleGridClick(hoverGrid, mainShip, astPositions, starPosition,
             // Return a callback that will be used to update the state in the component.
             setPermanentAttackGridState({
                 permanentAttackGrid: { ...hoverGrid },
-                actionType: 'move',
+                actionType: 'reset',
             });
         }
     }

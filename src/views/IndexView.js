@@ -148,15 +148,25 @@ class IndexView extends React.Component {
   }
 
   handleGridClickProxy = () => {
-    handleGridClick(
-      this.state.hoverGrid,
-      this.state.mainShip,
-      this.asteroidPositions,
-      this.state.shipPositions.star,
-      this.state.actionType,
-      (permanentHoverGrid) => this.setState(permanentHoverGrid),
-      (permanentHoverGrid) => this.setState(permanentHoverGrid)
-    );
+    const {actionType} = this.state;
+    if (actionType === 'reset') {
+      this.loadContractData();
+      this.setState({ 
+        actionType: 'move',
+        permanentHoverGrid: null,
+        permanentAttackGrid: null,
+      });
+    } else {
+      handleGridClick(
+        this.state.hoverGrid,
+        this.state.mainShip,
+        this.asteroidPositions,
+        this.state.shipPositions.star,
+        this.state.actionType,
+        (permanentHoverGrid) => this.setState(permanentHoverGrid),
+        (permanentHoverGrid) => this.setState(permanentHoverGrid)
+      );
+    }
   }
 
   getButtonClass = (action) => {
