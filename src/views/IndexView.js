@@ -232,6 +232,16 @@ class IndexView extends React.Component {
                       <img className="frame-group" alt="star" src="images/star.svg" />
                     </div>
                     <div className="frame-element-orange">
+                      {[...Array(3)].map((_, index) => (
+                        <img
+                          key={index}
+                          src={
+                            index < this.state.shipPositions.orangeShip.lives ? "images/orangeHeart.svg" : "images/orangeBrokenHeart.svg"
+                          }
+                        />
+                      ))}
+                    </div>
+                    <div className="frame-element-orange">
                       Player 1
                       { this.state.mainShipName === 'orangeShip' ? <div> <br /> (you)</div> : null }
                     </div>
@@ -240,6 +250,16 @@ class IndexView extends React.Component {
                     <div className="frame-div">
                       <div className="frame-text-wrapper">{`${this.state.shipPositions.blueShip.starCount}x`}</div>
                       <img className="frame-group" alt="star" src="images/star.svg" />
+                    </div>
+                    <div className="frame-element-blue">
+                      {[...Array(3)].map((_, index) => (
+                        <img
+                          key={index}
+                          src={
+                            index < this.state.shipPositions.blueShip.lives ? "images/blueHeart.svg" : "images/blueBrokenHeart.svg"
+                          }
+                        />
+                      ))}
                     </div>
                     <div className="frame-element-blue">
                       Player 4
@@ -301,6 +321,16 @@ class IndexView extends React.Component {
                       <div className="frame-text-wrapper">{`x${this.state.shipPositions.greenShip.starCount}`}</div>
                     </div>
                     <div className="frame-element-green">
+                      {[...Array(3)].map((_, index) => (
+                        <img
+                          key={index}
+                          src={
+                            index < this.state.shipPositions.greenShip.lives ? "images/greenHeart.svg" : "images/greenBrokenHeart.svg"
+                          }
+                        />
+                      ))}
+                    </div>
+                    <div className="frame-element-green">
                       Player 2
                       { this.state.mainShipName === 'greenShip' ? <div> <br /> (you)</div> : null }
                     </div>
@@ -309,6 +339,16 @@ class IndexView extends React.Component {
                     <div className="frame-div">
                       <img className="frame-group" alt="star" src="images/star.svg" />
                       <div className="frame-text-wrapper">{`x${this.state.shipPositions.pinkShip.starCount}`}</div>
+                    </div>
+                    <div className="frame-element-pink">
+                      {[...Array(3)].map((_, index) => (
+                        <img
+                          key={index}
+                          src={
+                            index < this.state.shipPositions.pinkShip.lives ? "images/pinkHeart.svg" : "images/pinkBrokenHeart.svg"
+                          }
+                        />
+                      ))}
                     </div>
                     <div className="frame-element-pink">
                       Player 3

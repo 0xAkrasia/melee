@@ -1,0 +1,45 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g opacity="0.5">
+<path d="M9.25 6.5H7.875V5.125H3.75V6.5H2.375V10.625H3.75V12H5.125V13.375H6.5V14.75H7.875V16.125H9.25V12H7.875V9.25H9.25V6.5Z" fill="#339CFE"/>
+<path d="M21.625 6.5H20.25V5.125H16.125V6.5H14.75V9.25H13.375V12H14.75V14.75H13.375V17.5H14.75V16.125H16.125V14.75H17.5V13.375H18.875V12H20.25V10.625H21.625V6.5Z" fill="#339CFE"/>
+<path d="M2.375 5.125H3.75V6.5H2.375V5.125Z" fill="#339CFE"/>
+<path d="M3.75 3.75H7.875V5.125H3.75V3.75Z" fill="#339CFE"/>
+<path d="M7.875 5.125H9.25V6.5H7.875V5.125Z" fill="#339CFE"/>
+<path d="M13.375 12H14.75V14.75H13.375V12Z" fill="#339CFE"/>
+<mask id="mask0_127_416" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="1" y="6" width="2" height="5">
+<path d="M1 6.5H2.38594V10.625H1V6.5Z" fill="white"/>
+</mask>
+<g mask="url(#mask0_127_416)">
+<path d="M1 6.5H2.375V10.625H1V6.5Z" fill="#339CFE"/>
+</g>
+<path d="M2.375 10.625H3.75V12H2.375V10.625Z" fill="#339CFE"/>
+<path d="M3.75 12H5.125V13.375H3.75V12Z" fill="#339CFE"/>
+<path d="M5.125 13.375H6.5V14.75H5.125V13.375Z" fill="#339CFE"/>
+<path d="M6.5 14.75H7.875V16.125H6.5V14.75Z" fill="#339CFE"/>
+<path d="M7.875 16.125H9.25V17.5H7.875V16.125Z" fill="#339CFE"/>
+<mask id="mask1_127_416" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="21" y="6" width="2" height="5">
+<path d="M21.585 6.5H22.9999V10.625H21.585V6.5Z" fill="white"/>
+</mask>
+<g mask="url(#mask1_127_416)">
+<path d="M21.625 6.5H23V10.625H21.625V6.5Z" fill="#339CFE"/>
+</g>
+<path d="M20.25 5.125H21.625V6.5H20.25V5.125Z" fill="#339CFE"/>
+<path d="M16.125 3.75H20.25V5.125H16.125V3.75Z" fill="#339CFE"/>
+<path d="M14.75 5.125H16.125V6.5H14.75V5.125Z" fill="#339CFE"/>
+<path d="M20.25 10.625H21.625V12H20.25V10.625Z" fill="#339CFE"/>
+<path d="M18.875 12H20.25V13.375H18.875V12Z" fill="#339CFE"/>
+<path d="M17.5 13.375H18.875V14.75H17.5V13.375Z" fill="#339CFE"/>
+<path d="M16.125 14.75H17.5V16.125H16.125V14.75Z" fill="#339CFE"/>
+<path d="M14.75 16.125H16.125V17.5H14.75V16.125Z" fill="#339CFE"/>
+<path d="M10.625 18.875H12V20.25H10.625V18.875Z" fill="#339CFE"/>
+<path d="M9.25 6.5H10.625V9.25H9.25V6.5Z" fill="#339CFE"/>
+<path d="M7.875 9.25H9.25V12H7.875V9.25Z" fill="#339CFE"/>
+<path d="M9.25 12H10.625V16.125H9.25V12Z" fill="#339CFE"/>
+<path d="M3.75 5.125H7.875V6.5H3.75V5.125Z" fill="#339CFE"/>
+<path d="M2.375 6.5H3.75V7.875H2.375V6.5Z" fill="#339CFE"/>
+<path d="M7.875 6.5H9.25V7.875H7.875V6.5Z" fill="#339CFE"/>
+<path d="M16.125 5.125H20.25V6.5H16.125V5.125Z" fill="#339CFE"/>
+<path d="M14.75 6.5H16.125V7.875H14.75V6.5Z" fill="#339CFE"/>
+<path d="M20.25 6.5H21.625V7.875H20.25V6.5Z" fill="#339CFE"/>
+</g>
+</svg>
