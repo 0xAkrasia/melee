@@ -2,9 +2,9 @@
 
 import React from 'react'
 import { useEffect, useState, useRef } from 'react'
-import { transformProxies } from './helpers'
 import { BrowserProvider } from 'ethers';
 import { initFhevm } from "fhevmjs"
+import { useParams } from 'react-router-dom'
 import starFighterAbi from '../abi/starFighter.json';
 import contractAddresses from '../abi/contractAddresses.json'
 import { LoginButton } from '../ConnectWallet';
@@ -17,14 +17,18 @@ import '../css/starFighter.css'
 
 initFhevm()
 
-const contractAddress = contractAddresses[0].starFighterMain;
-
 function ParentComponent() {
   const { authenticated } = usePrivy(); // Example usage of usePrivy
   const { wallets } = useWallets(); // Example usage of useWallets
 
+  // Extract contractAddress from URL params
+  const { contractAddress: paramContractAddress } = useParams();
+
+  // Use the parameter if it exists; otherwise, fall back to the default
+  const contractAddress = paramContractAddress || contractAddresses[0].starFighterMain;
+
   const [walletProvider, setWalletProvider] = useState(null);
-  const indexViewRef = useRef(); // Create a ref to IndexView to call its methods
+  const indexViewRef = useRef();
 
   useEffect(() => {
     async function connectWallet() {
@@ -48,7 +52,7 @@ function ParentComponent() {
   }, [walletProvider]);
 
   return (
-    <IndexView ref={indexViewRef} authenticated={authenticated} walletProvider={walletProvider} wallets={wallets} />
+    <IndexView ref={indexViewRef} authenticated={authenticated} walletProvider={walletProvider} wallets={wallets} contractAddress={contractAddress} />
   );
 }
 
@@ -72,7 +76,7 @@ class IndexView extends React.Component {
     catch (e) {
       if (e.code == 'MODULE_NOT_FOUND') {
         Controller = IndexView
-
+        
         return Controller
       }
 
@@ -123,7 +127,7 @@ class IndexView extends React.Component {
       this.props.walletProvider,
       this.props.wallets[0].address,
       this.state.shipPositions,
-      contractAddress,
+      this.props.contractAddress,
       starFighterAbi,
       (newShipPositions) => this.setState({ shipPositions: newShipPositions }),
       ({mainShip, mainShipName, mainShotName}) => this.setState({ mainShip, mainShipName, mainShotName }),
@@ -131,18 +135,17 @@ class IndexView extends React.Component {
     );
     this.setState({
       actionType: 'move',
-
     });
   }
 
   handleMove = async () => {
     handleMove({
       walletProvider: this.props.walletProvider,
-      permanentHoverGrid: this.state.permanentHoverGrid, 
-      permanentAttackGrid: this.state.permanentAttackGrid, 
-      mainShip: this.state.mainShip, 
+      permanentHoverGrid: this.state.permanentHoverGrid,
+      permanentAttackGrid: this.state.permanentAttackGrid,
+      mainShip: this.state.mainShip,
       originalMainShip: this.state.originalMainShip,
-      contractAddress: contractAddress,
+      contractAddress: this.props.contractAddress,
       contractAbi: starFighterAbi,
     });
   }
@@ -211,22 +214,22 @@ class IndexView extends React.Component {
     return (
       <span>
         <div className="navbar">
-            <div className="div">
-                <img alt="Melee Logo" src="images/meleeName.png" style={{ width: '200px', height: 'auto' }} />
-                <div className="div-2">
-                    <div className="text-wrapper">Games</div>
-                    {/* className="text-wrapper-2" */}
-                    <div className="text-wrapper">Leaderboard</div>
-                    <div className="text-wrapper">History</div>
-                </div>
+          <div className="div">
+            <img alt="Melee Logo" src="images/meleeName.png" style={{ width: '200px', height: 'auto' }} />
+            <div className="div-2">
+              <div className="text-wrapper">Games</div>
+              {/* className="text-wrapper-2" */}
+              <div className="text-wrapper">Leaderboard</div>
+              <div className="text-wrapper">History</div>
             </div>
-            <div className="div-3">
-                <img className="img" alt="X log" src="images/xLogoOrange.svg" />
-                <img className="img" alt="Discord logo" src="images/discordLogoOrange.svg" />
-                <div className="div-wrapper">
-                    <LoginButton authenticated = { authenticated }/>
-                </div>
+          </div>
+          <div className="div-3">
+            <img className="img" alt="X log" src="images/xLogoOrange.svg" />
+            <img className="img" alt="Discord logo" src="images/discordLogoOrange.svg" />
+            <div className="div-wrapper">
+              <LoginButton authenticated = { authenticated }/>
             </div>
+          </div>
         </div>
         <span className="af-view">
           <div className="af-class-body">
@@ -293,28 +296,28 @@ class IndexView extends React.Component {
                       </video>
                     </div>
                     {renderGridOverlay(
-                      this.state.hoverGrid, 
-                      this.state.mainShip, 
+                      this.state.hoverGrid,
+                      this.state.mainShip,
                       this.state.shipPositions,
                       this.asteroidPositions,
-                      this.state.mainShipName, 
-                      this.state.mainShotName, 
+                      this.state.mainShipName,
+                      this.state.mainShotName,
                       this.state.actionType,
                       (mainShipRotation) => this.setState(mainShipRotation),
                     )}
                     {renderPermanentHoverGrid(
-                      this.state.mainShip, 
-                      this.state.shipPositions, 
+                      this.state.mainShip,
+                      this.state.shipPositions,
                       this.asteroidPositions,
-                      this.state.permanentHoverGrid, 
+                      this.state.permanentHoverGrid,
                       this.state.mainShipName,
                       (mainShipRotation) => this.setState(mainShipRotation),
                     )}
                     {renderPermanentAttackGrid(
-                      this.state.mainShip, 
-                      this.state.shipPositions, 
+                      this.state.mainShip,
+                      this.state.shipPositions,
                       this.asteroidPositions,
-                      this.state.permanentAttackGrid, 
+                      this.state.permanentAttackGrid,
                       this.state.mainShotName,
                       (mainShipRotation) => this.setState(mainShipRotation),
                     )}
