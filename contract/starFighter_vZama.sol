@@ -1,9 +1,10 @@
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.8.20 <0.9.0;
+// SPDX-License-Identifier: BSD-3-Clause
+pragma solidity ^0.8.20;
 
 import "fhevm/lib/TFHE.sol";
+import "fhevm/oracle/OracleCaller.sol";
 
-contract starFighter {
+contract starFighter is OracleCaller {
     // player data state
     address[] public players;
     mapping(address => uint8) public lives;
@@ -17,12 +18,10 @@ contract starFighter {
     mapping(uint8 => bool) public asteroids;
     uint8[8] public asteroidsArray;
     mapping(address => uint8[2]) public positions;
+    mapping(address => euint16) private enInput;
     mapping(address => uint8) public moveDist;
-    mapping(address => euint8) private enMoveDist;
     mapping(address => uint8) public moveDir;
-    mapping(address => euint8) private enMoveDir;
     mapping(address => uint8) public shots;
-    mapping(address => euint8) private enShots;
 
     // star state
     uint8 public starLocation;
@@ -93,49 +92,6 @@ contract starFighter {
         starsToWin = 2;
     }
 
-    function move(bytes calldata input) public onlyPlayers gameLive{
-        // check if move is within move window
-        require(block.timestamp - lastAttackTimestamp < moveTimeout, "Timeout: Move too late");
-
-        // receive bitwise encrypted move and shot from player, check validity, and store data
-        address player = msg.sender;
-        require(moved[player] == false);
-        require(moveCount < uint8(players.length));
-
-        // data is encrypted in 16 bits from right to left, the first four represent move distance, the next three represent move direction (0-7 on orientations array),
-        // the next three represent shot direction (0-7 on orientations array)
-        euint16 enInput = TFHE.asEuint16(input);
-        enMoveDist[player] = TFHE.asEuint8(TFHE.and(enInput, TFHE.asEuint16(0xF)));
-        enMoveDir[player] = TFHE.asEuint8(TFHE.and(TFHE.shr(enInput, 4), TFHE.asEuint16(0x7)));
-        enShots[player] = TFHE.asEuint8(TFHE.and(TFHE.shr(enInput, 7), TFHE.asEuint16(0x7)));
-
-        // check if move distance is within ship range
-        TFHE.optReq(TFHE.le(enMoveDist[player], TFHE.asEuint8(shipRange)));
-
-        // update move state
-        moved[player] = true;
-        moveCount ++;
-    }
-
-    function revealMoves() public gameLive {
-        require(movesRevealed == false);
-        // once all players have moved or time has run out, decrypt the results
-        require(moveCount == players.length || block.timestamp - lastAttackTimestamp > moveTimeout, "Awaiting other players");
-        for (uint8 i = 0; i < players.length; i++) {
-            address player = players[i];
-            if (moved[player] == true) {
-                moveDist[player] = TFHE.decrypt(enMoveDist[player]);
-                moveDir[player] = TFHE.decrypt(enMoveDir[player]);
-                shots[player] = TFHE.decrypt(enShots[player]);
-            } else {
-                moveDist[player] = 0;
-                moveDir[player] = 0;
-                shots[player] = 0;
-            }
-        }
-        movesRevealed = true;
-    }
-
     function _removePlayer(address _player) private {
         // handle dead players
         for (uint8 i = 0; i < players.length; i++) {
@@ -148,14 +104,60 @@ contract starFighter {
         }
     }
 
-    function attack() public gameLive {
-        // this function handles attacks for all players
+    function move(bytes calldata input) public onlyPlayers gameLive{
+        // check if move is within move window
+        require(block.timestamp - lastAttackTimestamp < moveTimeout, "Timeout: Move too late");
 
-        // confirm and reset move state
-        require(movesRevealed == true);
+        // receive bitwise encrypted move and shot from player, check validity, and store data
+        address player = msg.sender;
+        require(moved[player] == false);
+        require(moveCount < uint8(players.length));
+
+        // data is encrypted in 16 bits from right to left, the first four represent move distance, the next three represent move direction (0-7 on orientations array),
+        // the next three represent shot direction (0-7 on orientations array)
+        enInput[msg.sender] = TFHE.asEuint16(input);
+
+        // update move state
+        moved[player] = true;
+        moveCount ++;
+    }
+
+    function decryptMoves() public gameLive {
+        // once all players have moved or time has run out, decrypt the results
+        require(moveCount == players.length || block.timestamp - lastAttackTimestamp > moveTimeout, "Awaiting other players");
+        
+        euint16[] memory cts = new euint16[](players.length);
+
+        for (uint8 i = 0; i < players.length; i++) {
+            address player = players[i];
+            if (moved[player] == true) {
+                cts[i] = (enInput[player]);
+            } else {
+                cts[i] = (TFHE.asEuint16(0));
+            }
+        }
+
+        uint256 requestID = Oracle.requestDecryption(cts, this.moveCallback.selector, 0, block.timestamp + 100);
+
+        for (uint8 i = 0; i < players.length; i++) {
+            addParamsAddress(requestID, players[i]);
+        }
+    }
+
+    function moveCallback(uint256 _requestID, uint16 _decryptedInputP1, uint16 _decryptedInputP2, uint16 _decryptedInputP3, uint16 _decryptedInputP4) public onlyOracle {
         moveCount = 0;
-        movesRevealed = false;
         lastAttackTimestamp = block.timestamp;
+
+        address[] memory livePlayers = getParamsAddress(_requestID);
+        uint16[4] memory decryptedInputs = [_decryptedInputP1, _decryptedInputP2, _decryptedInputP3, _decryptedInputP4];
+
+        for (uint8 i = 0; i < livePlayers.length; i++) {
+            uint16 playerMove = decryptedInputs[i];
+            address player = livePlayers[i];
+            moveDist[player] = uint8(playerMove & 0xF);
+            moveDir[player] = uint8((playerMove >> 4) & 0x7);
+            shots[player] = uint8((playerMove >> 7) & 0x7);
+        }
 
         // check if player hit an asteroid or is off map. Kill if true.
         address[] memory deadPlayers = new address[](players.length);
@@ -264,16 +266,20 @@ contract starFighter {
         }
 
         if (starFound) {
-            bool onAsteroid = true;
-            uint8 newStar = uint8(TFHE.decrypt(TFHE.randEuint32()) % 144);
-            while (onAsteroid) {
-                if (asteroids[newStar] == true) {
-                    newStar = uint8(TFHE.decrypt(TFHE.randEuint32()) % 144);
-                } else {
-                    onAsteroid = false;
-                }
-            }
-            starLocation = newStar;
+            uint256 requestID = Oracle.requestDecryption(TFHE.randEuint32(), this.starCallBack.selector, 0, block.timestamp + 100);
         }
+    }
+
+    function starCallBack(uint256 /*_requestID*/, uint32 _decryptedRNG) public onlyOracle {
+        bool onAsteroid = true;
+        uint8 newStar = uint8(_decryptedRNG % 144);
+        while (onAsteroid) {
+            if (asteroids[newStar] == true) {
+                newStar += 1;
+            } else {
+                onAsteroid = false;
+            }
+        }
+        starLocation = newStar;
     }
 }

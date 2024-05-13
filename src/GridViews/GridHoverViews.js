@@ -125,35 +125,20 @@ export function renderAttackShadowEffect(hoverGrid, mainShip, asteroidPositions,
                     key={`shot-${key}`}
                     src={`images/${shotName}.png`}
                     alt={shotName}
-                    className="af-class-objects af-class-faded-ship"
+                    className="af-class-objects af-class-shot"
                     style={{
-                        top: `${stepY * 60}px`,
-                        left: `${stepX * 60}px`,
+                        top: `${stepY * 60 + 21}px`,
+                        left: `${stepX * 60 + 21}px`,
                         position: 'absolute',
-                        opacity: 0.5, // Adjust the opacity as needed for the shot image
-                        zIndex: 2, // Ensure the shot image is on top of the shadow effects
+                        width: '18px',
+                        height: '18px',
+                        opacity: 0.75,
+                        zIndex: 5, // Ensure the shot image is on top of the shadow effects
                     }}
                 />
             ) : null;
 
-            // Shadow effect for the attack path
-            const shadowEffect = (
-                <div
-                    key={`shadow-${key}`}
-                    className="af-class-shadow-effect"
-                    style={{
-                        top: `${stepY * 60}px`,
-                        left: `${stepX * 60}px`,
-                        position: 'absolute',
-                        width: '60px',
-                        height: '60px',
-                        backgroundColor: 'rgba(255,0,0, 0.3)', // Distinct color for attack path
-                        zIndex: 1 // To ensure it is rendered below the shot images
-                    }}
-                />
-            );
-
-            pathElements.push(shadowEffect, shotImage);
+            pathElements.push(shotImage);
         }
         if (mainShip.rotation !== angleDeg) {
             console.log('Setting mainship rotation:', angleDeg, mainShip.rotation);
@@ -180,7 +165,7 @@ export function renderMoveShadowEffect(hoverGrid, mainShip, asteroidPositions, s
 
         // Add an additional className for fading the image
         const shipStyle = {
-            opacity: 0.5, // Adjust as needed for desired fading
+            opacity: 0.75, // Adjust as needed for desired fading
             position: 'absolute',
             zIndex: 2, // Ensure the ship image is on top of the shadow effect
             transform: `rotate(${angleDeg}deg)` // Rotate the ship to face the moving direction
