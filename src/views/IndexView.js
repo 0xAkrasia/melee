@@ -6,11 +6,11 @@ import { BrowserProvider } from 'ethers';
 import { initFhevm } from "fhevmjs"
 import { useParams } from 'react-router-dom'
 import starFighterAbi from '../abi/starFighter.json';
-import contractAddresses from '../abi/contractAddresses.json'
 import { LoginButton } from '../ConnectWallet';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { loadContractData, handleMove } from '../ContractDataProvider';
 import { handleMouseMove, renderGridOverlay, renderPermanentHoverGrid, renderPermanentAttackGrid, renderObject, handleGridClick } from '../GridViews';
+import GameRoom from './GameRoom';
 import '../css/normalize.css'
 import '../css/webflow.css'
 import '../css/starFighter.css'
@@ -21,11 +21,8 @@ function ParentComponent() {
   const { authenticated } = usePrivy(); // Example usage of usePrivy
   const { wallets } = useWallets(); // Example usage of useWallets
 
-  // Extract contractAddress from URL params
   const { contractAddress: paramContractAddress } = useParams();
-
-  // Use the parameter if it exists; otherwise, fall back to the default
-  const contractAddress = paramContractAddress || contractAddresses[0].starFighterMain;
+  const contractAddress = paramContractAddress;
 
   const [walletProvider, setWalletProvider] = useState(null);
   const indexViewRef = useRef();
@@ -76,7 +73,7 @@ class IndexView extends React.Component {
     catch (e) {
       if (e.code == 'MODULE_NOT_FOUND') {
         Controller = IndexView
-        
+
         return Controller
       }
 
@@ -123,6 +120,9 @@ class IndexView extends React.Component {
   };
 
   async loadContractData() {
+    if (!this.props.contractAddress) {
+      return;
+    }
     loadContractData(
       this.props.walletProvider,
       this.props.wallets[0].address,
@@ -204,12 +204,10 @@ class IndexView extends React.Component {
   }
 
   render() {
-    const proxies = IndexView.Controller !== IndexView ? transformProxies(this.props.children) : {
-
-    }
+    const proxies = IndexView.Controller !== IndexView ? transformProxies(this.props.children) : {};
 
     const { shipPositions } = this.state;
-    const { authenticated } = this.props;
+    const { authenticated, contractAddress, walletProvider, wallets } = this.props;
 
     return (
       <span>
@@ -227,154 +225,158 @@ class IndexView extends React.Component {
             <img className="img" alt="X log" src="images/xLogoOrange.svg" />
             <img className="img" alt="Discord logo" src="images/discordLogoOrange.svg" />
             <div className="div-wrapper">
-              <LoginButton authenticated = { authenticated }/>
+              <LoginButton authenticated={authenticated} />
             </div>
           </div>
         </div>
-        <span className="af-view">
-          <div className="af-class-body">
-            <div className="af-class-shooting-game">
-              <div className="af-class-game-header">Star Fighter</div>
-              <div className="af-class-game">
-                <div className="af-class-player-col">
-                  <div className="frame">
-                    <div className="frame-div">
-                      <div className="frame-text-wrapper">
-                        {`${this.state.shipPositions.orangeShip.starCount}x`}
+        {contractAddress ? (
+          <span className="af-view">
+            <div className="af-class-body">
+              <div className="af-class-shooting-game">
+                <div className="af-class-game-header">Star Fighter</div>
+                <div className="af-class-game">
+                  <div className="af-class-player-col">
+                    <div className="frame">
+                      <div className="frame-div">
+                        <div className="frame-text-wrapper">
+                          {`${this.state.shipPositions.orangeShip.starCount}x`}
+                        </div>
+                        <img className="frame-group" alt="star" src="images/star.svg" />
                       </div>
-                      <img className="frame-group" alt="star" src="images/star.svg" />
+                      <div className="frame-element-orange">
+                        {[...Array(3)].map((_, index) => (
+                          <img
+                            key={index}
+                            src={
+                              index < this.state.shipPositions.orangeShip.lives ? "images/orangeHeart.svg" : "images/orangeBrokenHeart.svg"
+                            }
+                          />
+                        ))}
+                      </div>
+                      <div className="frame-element-orange">
+                        Player 1
+                        {this.state.mainShipName === 'orangeShip' ? <div> <br /> (you)</div> : null}
+                      </div>
                     </div>
-                    <div className="frame-element-orange">
-                      {[...Array(3)].map((_, index) => (
-                        <img
-                          key={index}
-                          src={
-                            index < this.state.shipPositions.orangeShip.lives ? "images/orangeHeart.svg" : "images/orangeBrokenHeart.svg"
-                          }
-                        />
-                      ))}
-                    </div>
-                    <div className="frame-element-orange">
-                      Player 1
-                      { this.state.mainShipName === 'orangeShip' ? <div> <br /> (you)</div> : null }
-                    </div>
-                  </div>
-                  <div className="frame">
-                    <div className="frame-div">
-                      <div className="frame-text-wrapper">{`${this.state.shipPositions.blueShip.starCount}x`}</div>
-                      <img className="frame-group" alt="star" src="images/star.svg" />
-                    </div>
-                    <div className="frame-element-blue">
-                      {[...Array(3)].map((_, index) => (
-                        <img
-                          key={index}
-                          src={
-                            index < this.state.shipPositions.blueShip.lives ? "images/blueHeart.svg" : "images/blueBrokenHeart.svg"
-                          }
-                        />
-                      ))}
-                    </div>
-                    <div className="frame-element-blue">
-                      Player 4
-                      { this.state.mainShipName === 'blueShip' ? <div> <br /> (you)</div> : null }
-                    </div>
-                  </div>
-                </div>
-                <div className="af-class-main">
-                  <div className="af-class-gamebg" onMouseMove={(event) => handleMouseMove(event, (hoverGrid) => this.setState({ hoverGrid }), this.gridWidth)} onClick={this.handleGridClickProxy}>
-                    <img src="images/Vectors-Wrapper.svg" loading="lazy" width={720} height={720} alt className="af-class-grid" />
-                    {/*Looks like there will be a video being played in this division, but seems this piece of code does not take any effect, need double check*/}
-                    <div data-poster-url="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-poster-00001.jpg"
-                      data-video-urls="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.mp4,https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.webm"
-                      data-autoplay="true"
-                      data-loop="true"
-                      data-wf-ignore="true"
-                      className="af-class-background-video w-background-video w-background-video-atom">
-                      <video id="7030711c-69a7-544c-8ec1-2cdfd7a165b4-video" autoPlay loop style={{ backgroundImage: 'url("https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-poster-00001.jpg")' }} muted playsInline data-wf-ignore="true" data-object-fit="cover">
-                        <source src="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.mp4" data-wf-ignore="true" />
-                        <source src="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.webm" data-wf-ignore="true" />
-                      </video>
-                    </div>
-                    {renderGridOverlay(
-                      this.state.hoverGrid,
-                      this.state.mainShip,
-                      this.state.shipPositions,
-                      this.asteroidPositions,
-                      this.state.mainShipName,
-                      this.state.mainShotName,
-                      this.state.actionType,
-                      (mainShipRotation) => this.setState(mainShipRotation),
-                    )}
-                    {renderPermanentHoverGrid(
-                      this.state.mainShip,
-                      this.state.shipPositions,
-                      this.asteroidPositions,
-                      this.state.permanentHoverGrid,
-                      this.state.mainShipName,
-                      (mainShipRotation) => this.setState(mainShipRotation),
-                    )}
-                    {renderPermanentAttackGrid(
-                      this.state.mainShip,
-                      this.state.shipPositions,
-                      this.asteroidPositions,
-                      this.state.permanentAttackGrid,
-                      this.state.mainShotName,
-                      (mainShipRotation) => this.setState(mainShipRotation),
-                    )}
-                    {Object.keys(shipPositions).map((name) => renderObject(name, shipPositions[name]))}
-                  </div>
-                  <div className="af-class-button-row">
-                    <button className={this.getMoveButtonClass()} onClick={this.handleMove}>Move</button>
-                  </div>
-                </div>
-                <div className="af-class-player-col-2">
-                  <div className="frame">
-                    <div className="frame-div">
-                      <img className="frame-group" alt="star" src="images/star.svg" />
-                      <div className="frame-text-wrapper">{`x${this.state.shipPositions.greenShip.starCount}`}</div>
-                    </div>
-                    <div className="frame-element-green">
-                      {[...Array(3)].map((_, index) => (
-                        <img
-                          key={index}
-                          src={
-                            index < this.state.shipPositions.greenShip.lives ? "images/greenHeart.svg" : "images/greenBrokenHeart.svg"
-                          }
-                        />
-                      ))}
-                    </div>
-                    <div className="frame-element-green">
-                      Player 2
-                      { this.state.mainShipName === 'greenShip' ? <div> <br /> (you)</div> : null }
+                    <div className="frame">
+                      <div className="frame-div">
+                        <div className="frame-text-wrapper">{`${this.state.shipPositions.blueShip.starCount}x`}</div>
+                        <img className="frame-group" alt="star" src="images/star.svg" />
+                      </div>
+                      <div className="frame-element-blue">
+                        {[...Array(3)].map((_, index) => (
+                          <img
+                            key={index}
+                            src={
+                              index < this.state.shipPositions.blueShip.lives ? "images/blueHeart.svg" : "images/blueBrokenHeart.svg"
+                            }
+                          />
+                        ))}
+                      </div>
+                      <div className="frame-element-blue">
+                        Player 4
+                        {this.state.mainShipName === 'blueShip' ? <div> <br /> (you)</div> : null}
+                      </div>
                     </div>
                   </div>
-                  <div className="frame">
-                    <div className="frame-div">
-                      <img className="frame-group" alt="star" src="images/star.svg" />
-                      <div className="frame-text-wrapper">{`x${this.state.shipPositions.pinkShip.starCount}`}</div>
+                  <div className="af-class-main">
+                    <div className="af-class-gamebg" onMouseMove={(event) => handleMouseMove(event, (hoverGrid) => this.setState({ hoverGrid }), this.gridWidth)} onClick={this.handleGridClickProxy}>
+                      <img src="images/Vectors-Wrapper.svg" loading="lazy" width={720} height={720} alt className="af-class-grid" />
+                      {/*Looks like there will be a video being played in this division, but seems this piece of code does not take any effect, need double check*/}
+                      <div data-poster-url="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-poster-00001.jpg"
+                        data-video-urls="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.mp4,https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.webm"
+                        data-autoplay="true"
+                        data-loop="true"
+                        data-wf-ignore="true"
+                        className="af-class-background-video w-background-video w-background-video-atom">
+                        <video id="7030711c-69a7-544c-8ec1-2cdfd7a165b4-video" autoPlay loop style={{ backgroundImage: 'url("https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-poster-00001.jpg")' }} muted playsInline data-wf-ignore="true" data-object-fit="cover">
+                          <source src="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.mp4" data-wf-ignore="true" />
+                          <source src="https://uploads-ssl.webflow.com/660f583e0bf21e7507c46de9/660f5a18864a6da9fc9c7b9a_Untitled design (6)-transcode.webm" data-wf-ignore="true" />
+                        </video>
+                      </div>
+                      {renderGridOverlay(
+                        this.state.hoverGrid,
+                        this.state.mainShip,
+                        this.state.shipPositions,
+                        this.asteroidPositions,
+                        this.state.mainShipName,
+                        this.state.mainShotName,
+                        this.state.actionType,
+                        (mainShipRotation) => this.setState(mainShipRotation),
+                      )}
+                      {renderPermanentHoverGrid(
+                        this.state.mainShip,
+                        this.state.shipPositions,
+                        this.asteroidPositions,
+                        this.state.permanentHoverGrid,
+                        this.state.mainShipName,
+                        (mainShipRotation) => this.setState(mainShipRotation),
+                      )}
+                      {renderPermanentAttackGrid(
+                        this.state.mainShip,
+                        this.state.shipPositions,
+                        this.asteroidPositions,
+                        this.state.permanentAttackGrid,
+                        this.state.mainShotName,
+                        (mainShipRotation) => this.setState(mainShipRotation),
+                      )}
+                      {Object.keys(shipPositions).map((name) => renderObject(name, shipPositions[name]))}
                     </div>
-                    <div className="frame-element-pink">
-                      {[...Array(3)].map((_, index) => (
-                        <img
-                          key={index}
-                          src={
-                            index < this.state.shipPositions.pinkShip.lives ? "images/pinkHeart.svg" : "images/pinkBrokenHeart.svg"
-                          }
-                        />
-                      ))}
+                    <div className="af-class-button-row">
+                      <button className={this.getMoveButtonClass()} onClick={this.handleMove}>Move</button>
                     </div>
-                    <div className="frame-element-pink">
-                      Player 3
-                      { this.state.mainShipName === 'pinkShip' ? <div> <br /> (you)</div> : null }
+                  </div>
+                  <div className="af-class-player-col-2">
+                    <div className="frame">
+                      <div className="frame-div">
+                        <img className="frame-group" alt="star" src="images/star.svg" />
+                        <div className="frame-text-wrapper">{`x${this.state.shipPositions.greenShip.starCount}`}</div>
+                      </div>
+                      <div className="frame-element-green">
+                        {[...Array(3)].map((_, index) => (
+                          <img
+                            key={index}
+                            src={
+                              index < this.state.shipPositions.greenShip.lives ? "images/greenHeart.svg" : "images/greenBrokenHeart.svg"
+                            }
+                          />
+                        ))}
+                      </div>
+                      <div className="frame-element-green">
+                        Player 2
+                        {this.state.mainShipName === 'greenShip' ? <div> <br /> (you)</div> : null}
+                      </div>
+                    </div>
+                    <div className="frame">
+                      <div className="frame-div">
+                        <img className="frame-group" alt="star" src="images/star.svg" />
+                        <div className="frame-text-wrapper">{`x${this.state.shipPositions.pinkShip.starCount}`}</div>
+                      </div>
+                      <div className="frame-element-pink">
+                        {[...Array(3)].map((_, index) => (
+                          <img
+                            key={index}
+                            src={
+                              index < this.state.shipPositions.pinkShip.lives ? "images/pinkHeart.svg" : "images/pinkBrokenHeart.svg"
+                            }
+                          />
+                        ))}
+                      </div>
+                      <div className="frame-element-pink">
+                        Player 3
+                        {this.state.mainShipName === 'pinkShip' ? <div> <br /> (you)</div> : null}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </span>
+          </span>
+        ) : (
+          <GameRoom walletProvider={walletProvider} wallets={wallets} />
+        )}
       </span>
-    )
+    );
   }
 }
 

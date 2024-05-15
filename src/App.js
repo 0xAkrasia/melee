@@ -1,7 +1,7 @@
 import './App.css';
 import WebFont from 'webfontloader';
-import IndexView from './views/IndexView';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import IndexView from './views/IndexView';
 
 function App() {
 
@@ -19,10 +19,11 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<IndexView />} />
         <Route path="/:contractAddress" element={<IndexView />} />
       </Routes>
     </Router>
-  )
+  );
 }
 
 export default App;
