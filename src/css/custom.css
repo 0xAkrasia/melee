@@ -1,0 +1,38 @@
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border-radius: 5px;
+    /* To match the overall style */
+}
+
+.dropdown-content .dropdown-item {
+    color: var(--ff-8700, #FF8700);
+    /* Same color as text-wrapper */
+    font-family: "Chakra Petch";
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    cursor: pointer;
+    white-space: nowrap;
+    /* Prevent text from wrapping */
+}
+
+.dropdown-content .dropdown-item:hover {
+    background-color: var(--ff-8700, #FF8700);
+    color: var(--ff-ffffff, #FFFFFF);
+    /* Invert colors on hover */
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
