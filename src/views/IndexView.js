@@ -1,21 +1,22 @@
 /* eslint-disable */
 
-import React from 'react'
-import { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react';
 import { BrowserProvider } from 'ethers';
-import { initFhevm } from "fhevmjs"
-import { useParams } from 'react-router-dom'
+import { initFhevm } from 'fhevmjs';
+import { useParams } from 'react-router-dom';
 import starFighterAbi from '../abi/starFighter.json';
 import { LoginButton } from '../ConnectWallet';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { loadContractData, handleMove } from '../ContractDataProvider';
 import { handleMouseMove, renderGridOverlay, renderPermanentHoverGrid, renderPermanentAttackGrid, renderObject, handleGridClick } from '../GridViews';
 import GameRoom from './GameRoom';
-import '../css/normalize.css'
-import '../css/webflow.css'
-import '../css/starFighter.css'
+import KeynesianGame from '../KeynesianGame/KeynesianGame';
+import '../css/normalize.css';
+import '../css/webflow.css';
+import '../css/starFighter.css';
+import '../css/custom.css'; // Make sure to import custom CSS
 
-initFhevm()
+initFhevm();
 
 function ParentComponent() {
   const { authenticated } = usePrivy(); // Example usage of usePrivy
@@ -25,6 +26,7 @@ function ParentComponent() {
   const contractAddress = paramContractAddress;
 
   const [walletProvider, setWalletProvider] = useState(null);
+  const [selectedGame, setSelectedGame] = useState(null); // State variable for selected game
   const indexViewRef = useRef();
 
   useEffect(() => {
@@ -49,7 +51,45 @@ function ParentComponent() {
   }, [walletProvider]);
 
   return (
-    <IndexView ref={indexViewRef} authenticated={authenticated} walletProvider={walletProvider} wallets={wallets} contractAddress={contractAddress} />
+    <div>
+      <div className="navbar">
+        <div className="div">
+          <img alt="Melee Logo" src="images/meleeName.png" style={{ width: '200px', height: 'auto' }} />
+          <div className="div-2">
+            <div className="dropdown">
+              <div className="text-wrapper">Games</div>
+              <div className="dropdown-content">
+                <div className="dropdown-item" onClick={() => setSelectedGame('star-fighter')}>Star Fighter</div>
+                <div className="dropdown-item" onClick={() => setSelectedGame('keynesian')}>Keynesian Game</div>
+                {/* Add more game options here */}
+              </div>
+            </div>
+            <div className="text-wrapper">Leaderboard</div>
+            <div className="text-wrapper">History</div>
+          </div>
+        </div>
+        <div className="div-3">
+          <img className="img" alt="X log" src="images/xLogoOrange.svg" />
+          <img className="img" alt="Discord logo" src="images/discordLogoOrange.svg" />
+          <div className="div-wrapper">
+            <LoginButton authenticated={authenticated} />
+          </div>
+        </div>
+      </div>
+      {/* Render the selected game */}
+      {selectedGame === 'star-fighter' && (
+        <IndexView
+          ref={indexViewRef}
+          authenticated={authenticated}
+          walletProvider={walletProvider}
+          wallets={wallets}
+          contractAddress={contractAddress}
+        />
+      )}
+      {selectedGame === 'keynesian' && (
+        <KeynesianGame walletProvider={walletProvider} wallets={wallets} />
+      )}
+    </div>
   );
 }
 
@@ -183,7 +223,7 @@ class IndexView extends React.Component {
   }
 
   async componentDidMount() {
-    const htmlEl = document.querySelector('html')
+    /*const htmlEl = document.querySelector('html')
     htmlEl.dataset['wfPage'] = '660f583e0bf21e7507c46dfe'
     htmlEl.dataset['wfSite'] = '660f583e0bf21e7507c46de9'
 
@@ -199,7 +239,7 @@ class IndexView extends React.Component {
       })
 
       return active.isAsync ? next : loading
-    }))
+    }))*/
     //await this.loadContractData();
   }
 
@@ -211,24 +251,6 @@ class IndexView extends React.Component {
 
     return (
       <span>
-        <div className="navbar">
-          <div className="div">
-            <img alt="Melee Logo" src="images/meleeName.png" style={{ width: '200px', height: 'auto' }} />
-            <div className="div-2">
-              <div className="text-wrapper">Games</div>
-              {/* className="text-wrapper-2" */}
-              <div className="text-wrapper">Leaderboard</div>
-              <div className="text-wrapper">History</div>
-            </div>
-          </div>
-          <div className="div-3">
-            <img className="img" alt="X log" src="images/xLogoOrange.svg" />
-            <img className="img" alt="Discord logo" src="images/discordLogoOrange.svg" />
-            <div className="div-wrapper">
-              <LoginButton authenticated={authenticated} />
-            </div>
-          </div>
-        </div>
         {contractAddress ? (
           <span className="af-view">
             <div className="af-class-body">
