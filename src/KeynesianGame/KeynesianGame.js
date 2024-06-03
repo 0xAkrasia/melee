@@ -70,7 +70,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
     setSelectedImages(updatedImages);
   };
 
-  const convertToUint8 = useCallback((selectedImageIdsArray) => {
+  const convertToUint32 = useCallback((selectedImageIdsArray) => {
     let result = 0;
     const imageIds = ['img', 'img_1', 'img_2', 'img_3', 'img_4', 'img_5', 'img_6', 'img_7'];
 
@@ -85,7 +85,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
         throw new Error('Image ID is out of range. It should be between 0 and 7, inclusive.');
       }
     });
-
+    
     return result;
   }, []);
 
@@ -93,16 +93,18 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
     const imageIds = [ 'img', 'img_1', 'img_2', 'img_3', 'img_4', 'img_5', 'img_6', 'img_7' ];
     const selectedImageIdsArray = [];
 
+    const voteUint8Num = Number(voteUint8);
+  
     for (let i = 0; i < imageIds.length; i++) {
       // Extract 3 bits for each image ID
-      const imageIndex = (voteUint8 >> (i * 3)) & 0x07;  // 0x07 (binary 00000111) masks out all but the 3 lowest-order bits
-
+      const imageIndex = (voteUint8Num >> (i * 3)) & 0x07;  // 0x07 (binary 00000111) masks out all but the 3 lowest-order bits
+  
       // Check if the image index is within the valid range (0 to 7)
       if (imageIndex < imageIds.length) {
         selectedImageIdsArray.push(imageIds[imageIndex]);
       }
     }
-
+  
     return selectedImageIdsArray;
   };
 
@@ -163,8 +165,8 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
       // Ensure to reorder images to specific order if needed
       const orderedImages = selectedImages.slice();
 
-      const voteUint8 = convertToUint8(orderedImages);
-      const encryptedVote = instance.encrypt8(voteUint8);
+      const voteUint8 = convertToUint32(orderedImages);
+      const encryptedVote = instance.encrypt32(voteUint8);
       const tx = await contract.castVote(encryptedVote);
       await tx.wait();
       alert('Vote cast successfully');
@@ -175,7 +177,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
       console.error('Error casting vote:', error);
       alert('Failed to cast vote');
     }
-  }, [selectedImages, convertToUint8, createFHEInstance, walletProvider]);
+  }, [selectedImages, convertToUint32, createFHEInstance, walletProvider]);
 
   const handleViewOwnVote = useCallback(async (event) => {
     event.preventDefault();
@@ -217,6 +219,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
     try {
       const encryptedVote = await contract.viewOwnVote(reencryptPublicKeyHexString, reencrypt.signature);
       const voteUint8 = await cInstance.decrypt(CONTRACT_ADDRESS, encryptedVote);
+      //const selectedImageIdsArray = uint8ToSelectedImageIds(14489440);
       const selectedImageIdsArray = uint8ToSelectedImageIds(voteUint8);
       setSelectedImages(selectedImageIdsArray);  // You can reset or keep as handled earlier
     } catch (error) {
