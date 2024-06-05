@@ -57,15 +57,15 @@ function ParentComponent() {
           <img alt="Melee Logo" src="images/meleeName.png" style={{ width: '200px', height: 'auto' }} />
           <div className="div-2">
             <div className="dropdown">
-              <div className="text-wrapper">Games</div>
+              <div className="text-wrapper" style={{ cursor: 'pointer' }}>Games</div>
               <div className="dropdown-content">
-                <div className="dropdown-item" onClick={() => setSelectedGame('star-fighter')}>Star Fighter</div>
-                <div className="dropdown-item" onClick={() => setSelectedGame('keynesian')}>Keynesian Game</div>
+                <div className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => setSelectedGame('star-fighter')}>Star Fighter</div>
+                <div className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => setSelectedGame('keynesian')}>Keynesian Game</div>
                 {/* Add more game options here */}
               </div>
             </div>
-            <div className="text-wrapper">Leaderboard</div>
-            <div className="text-wrapper">History</div>
+            <div className="text-wrapper" style={{ cursor: 'pointer' }} onClick={() => window.open('https://melees-organization.gitbook.io/melee-games', '_blank')}>Docs</div>
+            <div className="text-wrapper" style={{ cursor: 'pointer' }}>History</div>
           </div>
         </div>
         <div className="div-3">
@@ -127,7 +127,7 @@ class IndexView extends React.Component {
 
   gridWidth = 12;
   // TODO: Load the asteroid positions from the contract
-  astArray = [15,42,54,74,105,111,112,116];
+  astArray = [15, 42, 54, 74, 105, 111, 112, 116];
   asteroidPositions = this.astArray.map((linearPos) => {
     const x = linearPos % this.gridWidth;
     const y = Math.floor(linearPos / this.gridWidth);
@@ -142,10 +142,10 @@ class IndexView extends React.Component {
   // Initialize the React state with the ship positions and the asteroid positions
   state = {
     shipPositions: {
-      blueShip: { x: 0, y: 11, rotation: 45 , starCount: 0, lives: 1},
-      pinkShip: { x: 11, y: 11, rotation: 315 , starCount: 0, lives: 1},
-      greenShip: { x: 11, y: 0, rotation: 225 , starCount: 0, lives: 1},
-      orangeShip: { x: 0, y: 0, rotation: 135 , starCount: 0, lives: 1},
+      blueShip: { x: 0, y: 11, rotation: 45, starCount: 0, lives: 1 },
+      pinkShip: { x: 11, y: 11, rotation: 315, starCount: 0, lives: 1 },
+      greenShip: { x: 11, y: 0, rotation: 225, starCount: 0, lives: 1 },
+      orangeShip: { x: 0, y: 0, rotation: 135, starCount: 0, lives: 1 },
       star: { x: 6, y: 5, rotation: 0 }, // # TODO star is hard coded for now
       ...this.asteroidsInState,
     },
@@ -170,7 +170,7 @@ class IndexView extends React.Component {
       this.props.contractAddress,
       starFighterAbi,
       (newShipPositions) => this.setState({ shipPositions: newShipPositions }),
-      ({mainShip, mainShipName, mainShotName}) => this.setState({ mainShip, mainShipName, mainShotName }),
+      ({ mainShip, mainShipName, mainShotName }) => this.setState({ mainShip, mainShipName, mainShotName }),
       (error) => console.error(error) // You could handle this more gracefully
     );
     this.setState({
@@ -191,10 +191,10 @@ class IndexView extends React.Component {
   }
 
   handleGridClickProxy = () => {
-    const {actionType} = this.state;
+    const { actionType } = this.state;
     if (actionType === 'reset') {
       this.loadContractData();
-      this.setState({ 
+      this.setState({
         actionType: 'move',
         permanentHoverGrid: null,
         permanentAttackGrid: null,
@@ -255,7 +255,7 @@ class IndexView extends React.Component {
           <span className="af-view">
             <div className="af-class-body">
               <div className="af-class-shooting-game">
-                <div className="af-class-game-header">Star Fighter</div>
+                <div className="af-class-game-header">Melee</div>
                 <div className="af-class-game">
                   <div className="af-class-player-col">
                     <div className="frame">
