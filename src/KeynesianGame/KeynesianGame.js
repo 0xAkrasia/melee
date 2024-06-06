@@ -7,6 +7,8 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import contractAbi from '../abi/KeynsianBeautyContest.json';
 import '../css/KeynesianGame.css';
+import { FetchBalance } from './FetchBalance';
+
 
 initFhevm();
 
@@ -85,26 +87,26 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
         throw new Error('Image ID is out of range. It should be between 0 and 7, inclusive.');
       }
     });
-    
+
     return result;
   }, []);
 
   const uint8ToSelectedImageIds = (voteUint8) => {
-    const imageIds = [ 'img', 'img_1', 'img_2', 'img_3', 'img_4', 'img_5', 'img_6', 'img_7' ];
+    const imageIds = ['img', 'img_1', 'img_2', 'img_3', 'img_4', 'img_5', 'img_6', 'img_7'];
     const selectedImageIdsArray = [];
 
     const voteUint8Num = Number(voteUint8);
-  
+
     for (let i = 0; i < imageIds.length; i++) {
       // Extract 3 bits for each image ID
       const imageIndex = (voteUint8Num >> (i * 3)) & 0x07;  // 0x07 (binary 00000111) masks out all but the 3 lowest-order bits
-  
+
       // Check if the image index is within the valid range (0 to 7)
       if (imageIndex < imageIds.length) {
         selectedImageIdsArray.push(imageIds[imageIndex]);
       }
     }
-  
+
     return selectedImageIdsArray;
   };
 
@@ -282,10 +284,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
                 <div className="af-class-p_body">Select the four most popular faces from the crowd to win the pot.</div>
               </div>
               <div className="af-class-game-stats">
-                <div className="af-class-typehead">
-                  <div className="af-class-p_body">Total Pot</div>
-                  <div className="af-class-h2">$40,000,000</div>
-                </div>
+                <FetchBalance className="af-class-typehead" />
                 <div className="af-class-typehead">
                   <div className="af-class-p_body">Time to reveal</div>
                   <div className="af-class-h2">{renderCountdown()}</div>
