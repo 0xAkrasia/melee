@@ -1,0 +1,30 @@
+.footer-bottom {
+  padding: 1.5rem 1rem; /* Tailwind's py-6 px-4 */
+  background-color: #000000; /* Tailwind's bg-neutral-900 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-copyright {
+  color: #d1d5db; /* Tailwind's text-gray-300 */
+  font-size: 0.875rem; /* Tailwind's text-sm */
+}
+
+.footer-icons {
+  display: flex;
+  margin-top: 1rem; /* Tailwind's mt-4 */
+  gap: 1.5rem; /* Tailwind's space-x-6 */
+}
+
+.footer-icon-link {
+  color: #9CA3AF; /* Tailwind's text-gray-400 */
+}
+
+.footer-icon-link:hover {
+  color: #fff; /* Tailwind's hover:text-white */
+}
+
+.footer-bottom-icon {
+  margin-right: 0.5rem; /* Tailwind's mr-2 */
+}

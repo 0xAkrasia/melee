@@ -10,6 +10,7 @@ import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { loadContractData, handleMove } from '../ContractDataProvider';
 import { handleMouseMove, renderGridOverlay, renderPermanentHoverGrid, renderPermanentAttackGrid, renderObject, handleGridClick } from '../GridViews';
 import GameRoom from './GameRoom';
+import Footer from './footer'; // Import the Footer component
 import KeynesianGame from '../KeynesianGame/KeynesianGame';
 import '../css/normalize.css';
 import '../css/webflow.css';
@@ -19,8 +20,8 @@ import '../css/custom.css'; // Make sure to import custom CSS
 initFhevm();
 
 function ParentComponent() {
-  const { authenticated } = usePrivy(); // Example usage of usePrivy
-  const { wallets } = useWallets(); // Example usage of useWallets
+  const { authenticated } = usePrivy();
+  const { wallets } = useWallets();
 
   const { contractAddress: paramContractAddress } = useParams();
   const contractAddress = paramContractAddress;
@@ -51,8 +52,8 @@ function ParentComponent() {
   }, [walletProvider]);
 
   return (
-    <div>
-      <div className="navbar">
+    <div className="main-container">
+      <div className="navbar header">
         <div className="div">
           <img alt="Melee Logo" src="images/meleeName.png" style={{ width: '200px', height: 'auto' }} />
           <div className="div-2">
@@ -60,12 +61,14 @@ function ParentComponent() {
               <div className="text-wrapper" style={{ cursor: 'pointer' }}>Games</div>
               <div className="dropdown-content">
                 <div className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => setSelectedGame('star-fighter')}>Star Fighter</div>
-                <div className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => setSelectedGame('keynesian')}>Keynesian Game</div>
+                <div className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => setSelectedGame('keynesian')}>Keynesian Beauty Contest</div>
                 {/* Add more game options here */}
               </div>
             </div>
             <div className="text-wrapper" style={{ cursor: 'pointer' }} onClick={() => window.open('https://melees-organization.gitbook.io/melee-games', '_blank')}>Docs</div>
+            {/* comment for now 
             <div className="text-wrapper" style={{ cursor: 'pointer' }}>History</div>
+            */}
           </div>
         </div>
         <div className="div-3">
@@ -77,18 +80,21 @@ function ParentComponent() {
         </div>
       </div>
       {/* Render the selected game */}
-      {selectedGame === 'star-fighter' && (
-        <IndexView
-          ref={indexViewRef}
-          authenticated={authenticated}
-          walletProvider={walletProvider}
-          wallets={wallets}
-          contractAddress={contractAddress}
-        />
-      )}
-      {selectedGame === 'keynesian' && (
-        <KeynesianGame walletProvider={walletProvider} wallets={wallets} />
-      )}
+      <div className="content">
+        {selectedGame === 'star-fighter' && (
+          <IndexView
+            ref={indexViewRef}
+            authenticated={authenticated}
+            walletProvider={walletProvider}
+            wallets={wallets}
+            contractAddress={contractAddress}
+          />
+        )}
+        {selectedGame === 'keynesian' && (
+          <KeynesianGame walletProvider={walletProvider} wallets={wallets} />
+        )}
+      </div>
+      <Footer className="footer" /> {/* Add Footer here */}
     </div>
   );
 }

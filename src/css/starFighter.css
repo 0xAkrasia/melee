@@ -1,3 +1,31 @@
+/* Ensure the body and html take full height */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+/* Make the main container take full height */
+.main-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header (if you have one) */
+.header {
+  flex-shrink: 0;
+}
+
+/* Main content should grow to take up remaining space */
+.content {
+  flex: 1;
+}
+
+/* Footer should sit at the bottom */
+.footer {
+  flex-shrink: 0;
+}
+
 .navbar {
   align-items: flex-start;
   display: flex;

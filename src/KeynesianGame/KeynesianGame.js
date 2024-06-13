@@ -280,7 +280,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
           <div className="af-class-game-container">
             <div className="af-class-game-header">
               <div className="af-class-game-title">
-                <div className="af-class-h1">Keynesian contest</div>
+                <div className="af-class-h1">Keynesian Beauty Contest</div>
                 <div className="af-class-p_body">Select the four most popular faces from the crowd to win the pot.</div>
               </div>
               <div className="af-class-game-stats">
