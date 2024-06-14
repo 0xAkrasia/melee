@@ -1,21 +1,28 @@
 .footer-bottom {
-  padding: 1.5rem 1rem; /* Tailwind's py-6 px-4 */
-  background-color: #000000; /* Tailwind's bg-neutral-900 */
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+  background-color: #000000;
 }
 
-.footer-copyright {
-  color: #d1d5db; /* Tailwind's text-gray-300 */
-  font-size: 0.875rem; /* Tailwind's text-sm */
+.footer-bottom-icon {
+  font-size: 24px; /* Increase the size of the logos */
+  margin: 0 10px;
 }
 
 .footer-icons {
-  display: flex;
-  margin-top: 1rem; /* Tailwind's mt-4 */
-  gap: 1.5rem; /* Tailwind's space-x-6 */
+  margin-top: 10px;
 }
+
+.footer-copyright {
+  display: block;
+  margin-bottom: 10px;
+}
+
+
+
 
 .footer-icon-link {
   color: #9CA3AF; /* Tailwind's text-gray-400 */
@@ -25,6 +32,3 @@
   color: #fff; /* Tailwind's hover:text-white */
 }
 
-.footer-bottom-icon {
-  margin-right: 0.5rem; /* Tailwind's mr-2 */
-}

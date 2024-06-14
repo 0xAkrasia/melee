@@ -30,12 +30,13 @@ export default function Footer() {
             />
             <span className="sr-only">YouTube channel</span>
           </a>
-          <a href="#" className="footer-icon-link" target="_blank" rel="noopener noreferrer">
+          <a href="https://x.com/MeleeCrypto" className="footer-icon-link" target="_blank" rel="noopener noreferrer">
             <FontAwesomeIcon
               icon={faTwitter}
               className="footer-bottom-icon"
             />
             <span className="sr-only">Twitter page</span>
+            {/* TODO update to X logo tracking https://github.com/FortAwesome/Font-Awesome/issues/20249. */}
           </a>
           <a href="#" className="footer-icon-link" target="_blank" rel="noopener noreferrer">
             <FontAwesomeIcon

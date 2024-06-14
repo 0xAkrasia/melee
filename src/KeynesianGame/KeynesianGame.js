@@ -41,14 +41,15 @@ const ImageItem = ({ id, index, imagePath, moveImage }) => {
   return (
     <div
       ref={ref}
-      className={`af-class-item${isDragging ? ' af-class-dragging' : ''}`}
+      className={`af-class-item image-item${isDragging ? ' af-class-dragging' : ''}`}
       style={{ opacity: isDragging ? 0.5 : 1 }}
     >
+      <div className="image-item-number">
+        <div>{index + 1}</div> {/* Display the index number */}
+      </div>
       <img
         src={imagePath}
         loading="lazy"
-        width={211}
-        height={211}
         alt=""
         className="af-class-img"
       />

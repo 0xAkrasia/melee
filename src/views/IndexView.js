@@ -27,7 +27,7 @@ function ParentComponent() {
   const contractAddress = paramContractAddress;
 
   const [walletProvider, setWalletProvider] = useState(null);
-  const [selectedGame, setSelectedGame] = useState(null); // State variable for selected game
+  const [selectedGame, setSelectedGame] = useState('keynesian');
   const indexViewRef = useRef();
 
   useEffect(() => {
@@ -65,15 +65,17 @@ function ParentComponent() {
                 {/* Add more game options here */}
               </div>
             </div>
-            <div className="text-wrapper" style={{ cursor: 'pointer' }} onClick={() => window.open('https://melees-organization.gitbook.io/melee-games', '_blank')}>Docs</div>
+            <div className="text-wrapper" style={{ cursor: 'pointer' }} onClick={() => window.open('https://docs.melee.game', '_blank')}>Docs</div>
             {/* comment for now 
             <div className="text-wrapper" style={{ cursor: 'pointer' }}>History</div>
             */}
           </div>
         </div>
         <div className="div-3">
+          {/* 
           <img className="img" alt="X log" src="images/xLogoOrange.svg" />
           <img className="img" alt="Discord logo" src="images/discordLogoOrange.svg" />
+          */}
           <div className="div-wrapper">
             <LoginButton authenticated={authenticated} />
           </div>
