@@ -1,19 +1,29 @@
 .footer-bottom {
-  position: relative;
-  bottom: 0;
-  width: 100%;
-  text-align: center;
-  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
   background-color: #000000;
 }
 
+.footer-bottom-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+  gap: 2rem;
+}
+
+
 .footer-bottom-icon {
-  font-size: 24px; /* Increase the size of the logos */
-  margin: 0 10px;
+  font-size: 1.5rem;
+  color: #333; /* Customize the icon color as needed */
 }
 
 .footer-icons {
-  margin-top: 10px;
+  display: flex;
+  gap: 1rem;
 }
 
 .footer-copyright {
@@ -21,14 +31,16 @@
   margin-bottom: 10px;
 }
 
-
+.footer-bottom * {
+  display: flex;
+  align-items: center;
+}
 
 
 .footer-icon-link {
-  color: #9CA3AF; /* Tailwind's text-gray-400 */
+  color: inherit; /* Make links inherit text color */
 }
 
 .footer-icon-link:hover {
   color: #fff; /* Tailwind's hover:text-white */
 }
-

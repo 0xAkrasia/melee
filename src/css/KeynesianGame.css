@@ -516,8 +516,8 @@ html, body {
 
 .image-item-number {
   position: absolute;
-  top: 8px;
-  left: 8px;
+  top: -16px; /* Offset by half the height to make it come out */
+  left: -16px; /* Offset by half the width to make it come out */
   width: 40px;
   height: 40px;
   padding: 8px;
@@ -538,7 +538,32 @@ html, body {
   word-wrap: break-word;
 }
 
-.af-class-img {
-  width: 211px;
-  height: 211px;
+
+.af-class-item {
+  position: relative;
 }
+
+.af-class-img {
+  transition: opacity 0.2s ease; /* Smooth transition for opacity change */
+}
+
+.af-class-dragging .af-class-img {
+  opacity: 0 !important; /* Force opacity to 0 when dragging */
+}
+
+.af-class-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  border-radius: inherit; /* Match the border radius of the item */
+  display: none; /* Hide placeholder by default */
+}
+
+.af-class-dragging .af-class-placeholder {
+  display: block !important; /* Show placeholder when dragging */
+}
+
+

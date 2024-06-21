@@ -13,7 +13,7 @@ import { FetchBalance } from './FetchBalance';
 initFhevm();
 
 const FHE_LIB_ADDRESS = "0x000000000000000000000000000000000000005d";
-const CONTRACT_ADDRESS = '0x04eDd932fDc43Bb14861462Fd9ab9fab4C3a6c2c';
+const CONTRACT_ADDRESS = '0xcf9eB5790e8402933b6ee640b2E1a6c91F8b07AC';
 
 const ImageItem = ({ id, index, imagePath, moveImage }) => {
   const ref = React.useRef(null);
@@ -42,20 +42,23 @@ const ImageItem = ({ id, index, imagePath, moveImage }) => {
     <div
       ref={ref}
       className={`af-class-item image-item${isDragging ? ' af-class-dragging' : ''}`}
-      style={{ opacity: isDragging ? 0.5 : 1 }}
+      style={{ opacity: isDragging ? 0 : 1 }} // Make sure the parent div itself doesn't change opacity
     >
       <div className="image-item-number">
         <div>{index + 1}</div> {/* Display the index number */}
       </div>
+      <div className="af-class-placeholder"></div>
       <img
         src={imagePath}
         loading="lazy"
         alt=""
         className="af-class-img"
+        style={{ opacity: isDragging ? 0 : 1 }} 
       />
     </div>
   );
 };
+
 
 const KeynesianGame = ({ walletProvider, wallets }) => {
   const [selectedImages, setSelectedImages] = useState([

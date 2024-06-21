@@ -521,6 +521,13 @@ html, body {
   z-index: 3;
 }
 
+.coming-soon-message {
+  font-size: 2rem;
+  color: var(--ff-8700, #FF8700);
+  text-align: center;
+  padding: 3rem;
+}
+
 @font-face {
   font-family: 'Casino 3 Dlines';
   src: url('../fonts/Casino3DLines.ttf') format('truetype');

@@ -84,13 +84,17 @@ function ParentComponent() {
       {/* Render the selected game */}
       <div className="content">
         {selectedGame === 'star-fighter' && (
+          /*
           <IndexView
-            ref={indexViewRef}
-            authenticated={authenticated}
-            walletProvider={walletProvider}
-            wallets={wallets}
-            contractAddress={contractAddress}
-          />
+          ref={indexViewRef}
+          authenticated={authenticated}
+          walletProvider={walletProvider}
+          wallets={wallets}
+          contractAddress={contractAddress}
+        />*/
+          <div className="coming-soon-message">
+            Coming Soon....
+          </div>
         )}
         {selectedGame === 'keynesian' && (
           <KeynesianGame walletProvider={walletProvider} wallets={wallets} />
