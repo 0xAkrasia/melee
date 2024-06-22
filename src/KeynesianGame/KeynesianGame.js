@@ -8,6 +8,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import contractAbi from '../abi/KeynsianBeautyContest.json';
 import '../css/KeynesianGame.css';
 import { FetchBalance } from './FetchBalance';
+import { parseEther } from 'ethers';
 
 
 initFhevm();
@@ -53,7 +54,7 @@ const ImageItem = ({ id, index, imagePath, moveImage }) => {
         loading="lazy"
         alt=""
         className="af-class-img"
-        style={{ opacity: isDragging ? 0 : 1 }} 
+        style={{ opacity: isDragging ? 0 : 1 }}
       />
     </div>
   );
@@ -122,8 +123,14 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
     return hasVoted;
   }, []);
 
-  const handleConnectWallet = useCallback(async () => {
+  const handleConnectWallet = useCallback(async (walletProvider, wallets) => {
     try {
+      if (!walletProvider) {
+        console.error('Wallet provider not found');
+        setIsWalletConnected(false);
+        setUserHasVoted(false);
+        return;
+      }
       console.log('Connecting wallet...');
       const signer = await walletProvider.getSigner();
       if (signer) {
@@ -173,7 +180,10 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
 
       const voteUint8 = convertToUint32(orderedImages);
       const encryptedVote = instance.encrypt32(voteUint8);
-      const tx = await contract.castVote(encryptedVote);
+
+      const tx = await contract.castVote(encryptedVote, {
+        value: parseEther('0.01')
+      });
       await tx.wait();
       alert('Vote cast successfully');
 
@@ -227,6 +237,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
       const voteUint8 = await cInstance.decrypt(CONTRACT_ADDRESS, encryptedVote);
       //const selectedImageIdsArray = uint8ToSelectedImageIds(14489440);
       const selectedImageIdsArray = uint8ToSelectedImageIds(voteUint8);
+      console.log('Selected image IDs:', selectedImageIdsArray);
       setSelectedImages(selectedImageIdsArray);  // You can reset or keep as handled earlier
     } catch (error) {
       console.error('Error viewing own vote:', error);
@@ -255,7 +266,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   const handlePayWinners = useCallback((event) => handleAction('payWinners', 'Pay winners transaction sent', 'Failed to pay winners', event), [handleAction]);
 
   useEffect(() => {
-    handleConnectWallet();
+    handleConnectWallet(walletProvider, wallets);
   }, [walletProvider, wallets]);
 
   const renderCountdown = useCallback(() => {
