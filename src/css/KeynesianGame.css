@@ -350,6 +350,11 @@ html, body {
   visibility: hidden;
   opacity: 0;
 }
+
+.af-class-button__placeholder {
+  visibility: hidden; /* This ensures the span takes up space but doesn't display any content */
+}
+
 .af-view .af-class-submit-button--loading::after {
   content: "";
   position: absolute;
