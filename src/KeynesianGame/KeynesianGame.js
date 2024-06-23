@@ -10,7 +10,6 @@ import '../css/KeynesianGame.css';
 import { FetchBalance } from './FetchBalance';
 import { parseEther } from 'ethers';
 
-
 initFhevm();
 
 const FHE_LIB_ADDRESS = "0x000000000000000000000000000000000000005d";
@@ -68,6 +67,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   const [countdownTime, setCountdownTime] = useState(12 * 3600 + 23 * 60 + 41);
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [userHasVoted, setUserHasVoted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // State for loading effect
   const [instance, setInstance] = useState(null); // Global state for instance
 
   const moveImage = (fromIndex, toIndex) => {
@@ -197,53 +197,85 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
 
   const handleViewOwnVote = useCallback(async (event) => {
     event.preventDefault();
+    setIsLoading(true); // Start the loading indicator
     const signer = await walletProvider.getSigner();
     const userAddress = await signer.getAddress();
     let reencrypt = null;
     let cInstance = null;
+    console.log("handleViewOwnVote initiated");
 
     try {
-      cInstance = await createFHEInstance(walletProvider);
-      if (!cInstance.hasKeypair(CONTRACT_ADDRESS)) {
-        const eip712Domain = {
-          name: 'Authorization token',
-          version: '1',
-          chainId: 9090,
-          verifyingContract: CONTRACT_ADDRESS,
-        };
+        cInstance = await createFHEInstance(walletProvider);
+        if (!cInstance) {
+            throw new Error("createFHEInstance returned null");
+        }
 
-        const reencryption = cInstance.generatePublicKey(eip712Domain);
-        const params = [userAddress, JSON.stringify(reencryption.eip712)];
-        const sig = await window.ethereum.request({
-          method: "eth_signTypedData_v4",
-          params,
-        });
+        // Re-initializing or generating needed keys only if not already done
+        if (!cInstance.hasKeypair(CONTRACT_ADDRESS)) {
+            const eip712Domain = {
+                name: 'Authorization token',
+                version: '1',
+                chainId: 9090,
+                verifyingContract: CONTRACT_ADDRESS,
+            };
 
-        cInstance.setSignature(CONTRACT_ADDRESS, sig);
-        reencrypt = cInstance.getPublicKey(CONTRACT_ADDRESS);
-      }
+            const reencryption = cInstance.generatePublicKey(eip712Domain);
+            if (!reencryption) {
+                throw new Error("generatePublicKey returned null");
+            }
+
+            const params = [userAddress, JSON.stringify(reencryption.eip712)];
+            const sig = await window.ethereum.request({
+                method: "eth_signTypedData_v4",
+                params,
+            });
+
+            if (!sig) {
+                throw new Error("Signature request failed");
+            }
+
+            cInstance.setSignature(CONTRACT_ADDRESS, sig);
+            reencrypt = cInstance.getPublicKey(CONTRACT_ADDRESS);
+            if (!reencrypt) {
+                throw new Error("getPublicKey returned null");
+            }
+            console.log('Re-encryption public key:', reencrypt);
+        } else {
+            reencrypt = cInstance.getPublicKey(CONTRACT_ADDRESS);
+            if (!reencrypt) {
+                throw new Error("getPublicKey from existing keypair returned null");
+            }
+            console.log('Re-encryption public key (retrieved from existing keypair):', reencrypt);
+        }
     } catch (error) {
-      console.error('Error getting re-encryption public key:', error);
-      alert('Failed to get re-encryption public key');
-      return;
+        console.error('Error getting re-encryption public key:', error);
+        alert('Failed to get re-encryption public key');
+        setIsLoading(false); // Stop loading on error
+        return;
     }
 
-    const reencryptPublicKeyHexString = "0x" + Array.from(reencrypt.publicKey)
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-    const contract = new Contract(CONTRACT_ADDRESS, contractAbi, signer);
     try {
-      const encryptedVote = await contract.viewOwnVote(reencryptPublicKeyHexString, reencrypt.signature);
-      const voteUint8 = await cInstance.decrypt(CONTRACT_ADDRESS, encryptedVote);
-      //const selectedImageIdsArray = uint8ToSelectedImageIds(14489440);
-      const selectedImageIdsArray = uint8ToSelectedImageIds(voteUint8);
-      console.log('Selected image IDs:', selectedImageIdsArray);
-      setSelectedImages(selectedImageIdsArray);  // You can reset or keep as handled earlier
+        const reencryptPublicKeyHexString = "0x" + Array.from(reencrypt.publicKey)
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('');
+        const contract = new Contract(CONTRACT_ADDRESS, contractAbi, signer);
+        const encryptedVote = await contract.viewOwnVote(reencryptPublicKeyHexString, reencrypt.signature);
+
+        if (!encryptedVote) {
+            throw new Error("viewOwnVote returned null");
+        }
+
+        const voteUint8 = await cInstance.decrypt(CONTRACT_ADDRESS, encryptedVote);
+        const selectedImageIdsArray = uint8ToSelectedImageIds(voteUint8);
+        console.log('Selected image IDs:', selectedImageIdsArray);
+        setSelectedImages(selectedImageIdsArray); // Reset or maintain as needed
+        setIsLoading(false); // Stop loading after success
     } catch (error) {
-      console.error('Error viewing own vote:', error);
-      alert('Failed to view own vote');
+        console.error('Error viewing own vote:', error);
+        alert('Failed to view own vote');
+        setIsLoading(false); // Stop loading on error
     }
-  }, [uint8ToSelectedImageIds, createFHEInstance, walletProvider]);
+}, [uint8ToSelectedImageIds, createFHEInstance, walletProvider]);
 
   const handleAction = useCallback(async (contractMethod, successMessage, failureMessage, event) => {
     event.preventDefault();
@@ -316,8 +348,8 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
                   ) : (
                     <div>
                       <div className="af-class-entry-received-message">Your entry has been received!</div>
-                      <button type="button" className="af-class-submit-button w-button" onClick={handleViewOwnVote}>
-                        View Your Vote
+                      <button type="button" className={`af-class-submit-button w-button${isLoading ? ' af-class-submit-button--loading' : ''}`} onClick={handleViewOwnVote}>
+                        <span className="af-class-button__text">View Your Vote</span>
                       </button>
                     </div>
                   )}

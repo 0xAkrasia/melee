@@ -263,7 +263,6 @@ html, body {
   outline-offset: -2px; /* Optional: Pull the outline closer to the border edge */
 }
 
-
 .af-view .af-class-img {
   object-fit: cover;
   border-radius: 16px;
@@ -336,15 +335,43 @@ html, body {
   line-height: 1.4; /* you could also use a unit like '24px' if preferred */
   cursor: pointer; /* make it clear it's a button */
   transition: all 0.2s ease-in-out; /* smooth transition for interactive states */
+  position: relative; /* Ensure proper positioning for the loading spinner */
 }
-
 /* Add interactive states for the button */
-.af-view .af-class-submit-button:hover,
-.af-view .af-class-submit-button:focus {
-  background-color: var(--white); /* change the background color on hover/focus */
-  color: var(--brand); /* change text color to brand color on hover/focus */
-  border: 2px solid var(--brand); /* make the border brand color for consistency */
-  outline: none; /* remove the outline to prevent double borders on focus */
+/*.af-view .af-class-submit-button:hover, */
+.af-view .af-class-submit-button:hover {
+  background-color: var(--white);
+  color: var(--brand);
+  border: 2px solid var(--brand); 
+  outline: none;
+}
+/* Loading Spinner CSS */
+.af-view .af-class-submit-button--loading .af-class-button__text {
+  visibility: hidden;
+  opacity: 0;
+}
+.af-view .af-class-submit-button--loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  border: 4px solid transparent;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: button-loading-spinner 1s ease infinite;
+}
+@keyframes button-loading-spinner {
+  from {
+    transform: rotate(0turn);
+  }
+  to {
+    transform: rotate(1turn);
+  }
 }
 
 .af-class-entry-received-message {
