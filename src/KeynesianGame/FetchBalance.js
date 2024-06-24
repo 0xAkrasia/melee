@@ -3,7 +3,7 @@ import { formatEther, JsonRpcProvider } from 'ethers';
 //import contractAddresses from '../Contracts/contractAddresses.json';
 
 const provider = new JsonRpcProvider('https://testnet.inco.org');
-const CONTRACT_ADDRESS = '0x04eDd932fDc43Bb14861462Fd9ab9fab4C3a6c2c';
+const CONTRACT_ADDRESS = '0xcf9eB5790e8402933b6ee640b2E1a6c91F8b07AC';
 //const contractAddress = contractAddresses[0].twoThirdsGame_vInco;
 
 export const FetchBalance = (props) => {

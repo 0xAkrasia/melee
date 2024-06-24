@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { initFhevm, createInstance } from 'fhevmjs';
 import { BrowserProvider, Contract, AbiCoder } from 'ethers';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
@@ -69,6 +69,23 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   const [isBetLoading, setIsBetLoading] = useState(false); // State for loading effect during vote cast
   const [isLoading, setIsLoading] = useState(false); // State for loading effect during view own vote
   const [instance, setInstance] = useState(null); // Global state for instance
+  const intervalRef = useRef(null);  // Reference to store the interval ID
+
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setCountdownTime(prevCount => {
+        if (prevCount <= 0) {
+          clearInterval(intervalRef.current);
+          return 0;
+        }
+        return prevCount - 1;
+      });
+    }, 1000);
+
+    // Cleanup function to clear the interval
+    return () => clearInterval(intervalRef.current);
+
+  }, []);
 
   const moveImage = (fromIndex, toIndex) => {
     const updatedImages = [...selectedImages];
