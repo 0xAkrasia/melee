@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { initFhevm, createInstance } from 'fhevmjs';
 import { BrowserProvider, Contract, AbiCoder } from 'ethers';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
@@ -14,6 +14,7 @@ initFhevm();
 
 const FHE_LIB_ADDRESS = "0x000000000000000000000000000000000000005d";
 const CONTRACT_ADDRESS = '0xcf9eB5790e8402933b6ee640b2E1a6c91F8b07AC';
+const TARGETDATE = new Date('2024-10-25T00:00:00Z'); // Replace with your target date-time
 
 const ImageItem = ({ id, index, imagePath, moveImage }) => {
   const ref = React.useRef(null);
@@ -63,12 +64,29 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   const [selectedImages, setSelectedImages] = useState([
     'img', 'img_1', 'img_2', 'img_3', 'img_4', 'img_5', 'img_6', 'img_7'
   ]);
-  const [countdownTime, setCountdownTime] = useState(12 * 3600 + 23 * 60 + 41);
+  const [countdownTime, setCountdownTime] = useState(Math.floor((TARGETDATE - new Date()) / 1000)); // Calculate initial countdown time
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [userHasVoted, setUserHasVoted] = useState(false);
   const [isBetLoading, setIsBetLoading] = useState(false); // State for loading effect during vote cast
   const [isLoading, setIsLoading] = useState(false); // State for loading effect during view own vote
   const [instance, setInstance] = useState(null); // Global state for instance
+  const intervalRef = useRef(null);  // Reference to store the interval ID
+
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setCountdownTime(prevCount => {
+        if (prevCount <= 0) {
+          clearInterval(intervalRef.current);
+          return 0;
+        }
+        return prevCount - 1;
+      });
+    }, 1000);
+
+    // Cleanup function to clear the interval
+    return () => clearInterval(intervalRef.current);
+
+  }, []);
 
   const moveImage = (fromIndex, toIndex) => {
     const updatedImages = [...selectedImages];
@@ -265,7 +283,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
       const reencryptPublicKeyHexString = "0x" + Array.from(reencrypt.publicKey)
         .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
-      const contract = new Contract(CONTRACT_ADDRESS, contractAbi, signer);
+        const contract = new Contract(CONTRACT_ADDRESS, contractAbi, signer);
       const encryptedVote = await contract.viewOwnVote(
         reencryptPublicKeyHexString,
         reencrypt.signature
@@ -312,10 +330,11 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   }, [walletProvider, wallets]);
 
   const renderCountdown = useCallback(() => {
-    const hours = Math.floor(countdownTime / 3600);
+    const days = Math.floor(countdownTime / (3600 * 24));
+    const hours = Math.floor((countdownTime % (3600 * 24)) / 3600);
     const minutes = Math.floor((countdownTime % 3600) / 60);
     const seconds = countdownTime % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    return `${days.toString().padStart(2, '0')}d ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }, [countdownTime]);
 
   const renderImageItems = useCallback(() => {
