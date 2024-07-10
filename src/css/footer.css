@@ -1,46 +1,41 @@
 .footer-bottom {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
-  background-color: #000000;
+  background-color: #000; /* ensure the background is dark to contrast with white text */
+  color: #fff; /* set text color to white */
+  padding: 10px 20px; /* add some padding */
 }
 
-.footer-bottom-content {
+.footer-bottom .footer-bottom-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 500px;
-  gap: 2rem;
 }
 
-
-.footer-bottom-icon {
-  font-size: 1.5rem;
-  color: #333; /* Customize the icon color as needed */
+.footer-copyright {
+  color: #fff; /* ensure the copyright text is white */
 }
 
 .footer-icons {
   display: flex;
-  gap: 1rem;
+  gap: 15px; /* space between the icons */
 }
-
-.footer-copyright {
-  display: block;
-  margin-bottom: 10px;
-}
-
-.footer-bottom * {
-  display: flex;
-  align-items: center;
-}
-
 
 .footer-icon-link {
-  color: inherit; /* Make links inherit text color */
+  color: #fff; /* ensure the icon links are white */
 }
 
-.footer-icon-link:hover {
-  color: #fff; /* Tailwind's hover:text-white */
+.footer-bottom-icon {
+  font-size: 24px; /* adjust icon size as needed */
+}
+
+/* Additional styling for responsive design, if desired */
+@media (max-width: 768px) {
+  .footer-bottom .footer-bottom-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-icons {
+    margin-top: 10px;
+  }
 }

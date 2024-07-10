@@ -283,7 +283,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
       const reencryptPublicKeyHexString = "0x" + Array.from(reencrypt.publicKey)
         .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
-        const contract = new Contract(CONTRACT_ADDRESS, contractAbi, signer);
+      const contract = new Contract(CONTRACT_ADDRESS, contractAbi, signer);
       const encryptedVote = await contract.viewOwnVote(
         reencryptPublicKeyHexString,
         reencrypt.signature
@@ -357,7 +357,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
             <div className="af-class-game-header">
               <div className="af-class-game-title">
                 <div className="af-class-h1">Keynesian Beauty Contest</div>
-                <div className="af-class-p_body">Select the four most popular faces from the crowd to win the pot.</div>
+                <div className="af-class-p_body">Rank the candidates from most popular to least popular. If your vote matches the average of all votes then you win the pot.</div>
               </div>
               <div className="af-class-game-stats">
                 <FetchBalance className="af-class-typehead" />
