@@ -11,7 +11,7 @@ export default function Footer() {
     <div className="footer-bottom">
       <div className="footer-bottom-content">
         <span className="footer-copyright">
-          © 2024 <a href="#">Melee</a>. All Rights Reserved.
+          © 2024 Melee. All Rights Reserved.
         </span>
         <div className="footer-icons">
           <a href="#" className="footer-icon-link" target="_blank" rel="noopener noreferrer">

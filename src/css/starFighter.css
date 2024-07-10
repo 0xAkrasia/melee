@@ -522,10 +522,15 @@ html, body {
 }
 
 .coming-soon-message {
-  font-size: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 80vh;
+  font-family: Casino, sans-serif;
+  font-size: 3em;
   color: var(--ff-8700, #FF8700);
   text-align: center;
-  padding: 3rem;
 }
 
 @font-face {
