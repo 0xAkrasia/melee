@@ -8,6 +8,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import contractAbi from '../abi/KeynsianBeautyContest.json';
 import '../css/KeynesianGame.css';
 import { FetchBalance } from './FetchBalance';
+import BetInput from './betInput';
 import { parseEther } from 'ethers';
 
 initFhevm();
@@ -40,21 +41,17 @@ const ImageItem = ({ id, index, imagePath, moveImage }) => {
   drag(drop(ref));
 
   return (
-    <div
-      ref={ref}
-      className={`af-class-item image-item${isDragging ? ' af-class-dragging' : ''}`}
-      style={{ opacity: isDragging ? 0 : 1 }} // Make sure the parent div itself doesn't change opacity
-    >
+    <div className={`af-class-item${isDragging ? ' af-class-dragging' : ''}`}>
       <div className="image-item-number">
         <div>{index + 1}</div> {/* Display the index number */}
       </div>
       <div className="af-class-placeholder"></div>
       <img
+        ref={ref} // Apply drag and drop to img element
         src={imagePath}
         loading="lazy"
         alt=""
         className="af-class-img"
-        style={{ opacity: isDragging ? 0 : 1 }}
       />
     </div>
   );
@@ -70,6 +67,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   const [isBetLoading, setIsBetLoading] = useState(false); // State for loading effect during vote cast
   const [isLoading, setIsLoading] = useState(false); // State for loading effect during view own vote
   const [instance, setInstance] = useState(null); // Global state for instance
+  const [betAmount, setBetAmount] = useState('0.01'); // Set default value to 0.01
   const intervalRef = useRef(null);  // Reference to store the interval ID
 
   useEffect(() => {
@@ -201,7 +199,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
       const encryptedVote = instance.encrypt32(voteUint8);
 
       const tx = await contract.castVote(encryptedVote, {
-        value: parseEther('0.01'),
+        value: parseEther(betAmount),
       });
       await tx.wait();
       alert('Vote cast successfully');
@@ -217,8 +215,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
     } finally {
       setIsBetLoading(false); // Stop the loading indicator
     }
-  }, [selectedImages, convertToUint32, createFHEInstance, walletProvider, handleConnectWallet, wallets]);
-
+  }, [betAmount, selectedImages, convertToUint32, createFHEInstance, walletProvider, handleConnectWallet, wallets]);
 
   const handleViewOwnVote = useCallback(async (event) => {
     event.preventDefault();
@@ -325,6 +322,16 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   const handleRevealResult = useCallback((event) => handleAction('revealResult', 'Result reveal transaction sent', 'Failed to reveal result', event), [handleAction]);
   const handlePayWinners = useCallback((event) => handleAction('payWinners', 'Pay winners transaction sent', 'Failed to pay winners', event), [handleAction]);
 
+  const handleBetAmountChange = useCallback((event) => {
+    setBetAmount(event.target.value);
+  }, []);
+
+  const handleMaxClick = useCallback((event) => {
+    event.preventDefault(); // Prevent form submission
+    const maxBetAmount = '1.0'; // Replace with actual logic to get the max balance from the user's wallet
+    setBetAmount(maxBetAmount);
+  }, []);
+
   useEffect(() => {
     handleConnectWallet(walletProvider, wallets);
   }, [walletProvider, wallets]);
@@ -370,6 +377,12 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
             <div className="af-class-bet-input">
               <div className="af-class-form-block w-form">
                 <form id="wf-form-amount" name="wf-form-amount" data-name="amount" method="get" className="af-class-form">
+                  <BetInput
+                    value={betAmount}
+                    onValueChange={handleBetAmountChange}
+                    maxValue="1.0" // Replace with actual max value logic
+                    onMaxClick={handleMaxClick}
+                  />
                   {!userHasVoted ? (
                     <button
                       type="submit"

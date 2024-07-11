@@ -1,0 +1,44 @@
+.bet-input-container {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ff9900;
+  border-radius: 10px;
+  padding: 10px;
+  background-color: #000000;
+  color: #ff9900;
+  height: 60px; /* Add or adjust height to your preference */
+}
+
+.bet-input-icon {
+  font-size: 1.2em;
+  margin-right: 10px;
+}
+
+.bet-input {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  font-size: 1em;
+  color: #ff9900;
+}
+
+.bet-input:focus {
+  outline: none;
+}
+
+.bet-input-max {
+  display: flex;
+  align-items: center;
+}
+
+.max-button {
+  background: transparent;
+  border: none;
+  color: #ff9900;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.max-button:hover {
+  color: #ffffff;
+}

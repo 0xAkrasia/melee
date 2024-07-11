@@ -573,6 +573,7 @@ html, body {
 
 .af-class-item {
   position: relative;
+  z-index: 1;
 }
 
 .af-class-img {
@@ -580,7 +581,11 @@ html, body {
 }
 
 .af-class-dragging .af-class-img {
-  opacity: 0 !important; /* Force opacity to 0 when dragging */
+  opacity: 1 !important; /* Force opacity to 0 when dragging */
+}
+
+.af-class-dragging .image-item-number {
+  display: none; /* Hide the number circle while dragging */
 }
 
 .af-class-placeholder {
@@ -592,6 +597,7 @@ html, body {
   background-color: black;
   border-radius: inherit; /* Match the border radius of the item */
   display: none; /* Hide placeholder by default */
+  z-index: 2; /* Ensure the placeholder is above the item */
 }
 
 .af-class-dragging .af-class-placeholder {
