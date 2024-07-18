@@ -1,7 +1,7 @@
 import './App.css';
 import WebFont from 'webfontloader';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import IndexView from './views/IndexView';
+import Landing from './landing/landing';
 
 function App() {
 
@@ -19,8 +19,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<IndexView />} />
-        <Route path="/:contractAddress" element={<IndexView />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/:contractAddress" element={<Landing />} />
       </Routes>
     </Router>
   );

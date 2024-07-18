@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import "fhevm/lib/TFHE.sol";
 import "fhevm/abstracts/EIP712WithModifier.sol";
 
-contract KeynsianBeautyContest is EIP712WithModifier {
+contract KeynesianBeautyContest is EIP712WithModifier {
     address public owner;
     mapping(address => bool) public hasVoted;
     mapping(address => euint32) private encryptedVotes;

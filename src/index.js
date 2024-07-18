@@ -50,17 +50,39 @@ export const baseMainnet = defineChain({
   },
 });
 
+export const sepolia = defineChain({
+  id: 11155111,
+  name: 'Sepolia Mainnet',
+  network: 'Sepolia Mainnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'ETH',
+    symbol: 'ETH',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://1rpc.io/sepolia']
+    },
+    public: {
+      http: ['https://1rpc.io/sepolia']
+    },
+  },
+  blockExplorers: {
+    default: { name: 'SepoliaScan', url: 'https://sepolia.etherscan.io/'},
+  },
+});
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <PrivyProvider
     appId={"clsay39yw04tv13s57t7fig9f"}
     config={{
       loginMethods: ['email', 'google', 'discord', 'wallet'],
       defaultChain: inco,
-      supportedChains: [inco, baseMainnet],
+      supportedChains: [inco, baseMainnet, sepolia],
       appearance: {
         theme: 'dark',
         accentColor: '#3673f5',
-        logo: 'https://raw.githubusercontent.com/0xAkrasia/Star-Fighter/main/public/images/meleeIcon.png',
+        logo: 'https://raw.githubusercontent.com/0xAkrasia/Melee/main/public/images/meleeIcon.png',
         showWalletLoginFirst: false,
         walletList: ['coinbase_wallet', 'wallet_connect', 'metamask'],
       },

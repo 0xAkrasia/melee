@@ -5,16 +5,17 @@ import { initFhevm, createInstance } from 'fhevmjs';
 import { BrowserProvider, Contract, AbiCoder } from 'ethers';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import contractAbi from '../abi/KeynsianBeautyContest.json';
-import '../css/KeynesianGame.css';
-import { FetchBalance } from './FetchBalance';
+import contractAbi from '../contracts/keynesianBeautyContestABI.json';
+import { FetchBalance } from './fetchBalance';
 import BetInput from './betInput';
 import { parseEther } from 'ethers';
+import contractAddresses from '../contracts/contractAddresses.json';
+import '../css/KeynesianGame.css';
 
 initFhevm();
 
-const FHE_LIB_ADDRESS = "0x000000000000000000000000000000000000005d";
-const CONTRACT_ADDRESS = '0xcf9eB5790e8402933b6ee640b2E1a6c91F8b07AC';
+const FHELibAddress = contractAddresses[0].FHELibAddress;
+const kbcAddress = contractAddresses[0].keynesianBeautyContest;
 const TARGETDATE = new Date('2024-10-25T00:00:00Z'); // Replace with your target date-time
 
 const ImageItem = ({ id, index, imagePath, moveImage }) => {
@@ -58,9 +59,7 @@ const ImageItem = ({ id, index, imagePath, moveImage }) => {
 };
 
 const KeynesianGame = ({ walletProvider, wallets }) => {
-  const [selectedImages, setSelectedImages] = useState([
-    'img', 'img_1', 'img_2', 'img_3', 'img_4', 'img_5', 'img_6', 'img_7'
-  ]);
+  const [selectedImages, setSelectedImages] = useState(['kbc0', 'kbc1', 'img_2', 'img_3', 'img_4', 'img_5', 'img_6', 'img_7']);
   const [countdownTime, setCountdownTime] = useState(Math.floor((TARGETDATE - new Date()) / 1000)); // Calculate initial countdown time
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [userHasVoted, setUserHasVoted] = useState(false);
@@ -95,7 +94,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
 
   const convertToUint32 = useCallback((selectedImageIdsArray) => {
     let result = 0;
-    const imageIds = ['img', 'img_1', 'img_2', 'img_3', 'img_4', 'img_5', 'img_6', 'img_7'];
+    const imageIds = ['kbc0', 'kbc1', 'img_2', 'img_3', 'img_4', 'img_5', 'img_6', 'img_7'];
 
     selectedImageIdsArray.forEach((id, index) => {
       // Find the index of the current image id
@@ -113,7 +112,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   }, []);
 
   const uint8ToSelectedImageIds = (voteUint8) => {
-    const imageIds = ['img', 'img_1', 'img_2', 'img_3', 'img_4', 'img_5', 'img_6', 'img_7'];
+    const imageIds = ['kbc0', 'kbc1', 'img_2', 'img_3', 'img_4', 'img_5', 'img_6', 'img_7'];
     const selectedImageIdsArray = [];
 
     const voteUint8Num = Number(voteUint8);
@@ -132,7 +131,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   };
 
   const checkVotingStatus = useCallback(async (signer) => {
-    const contract = new Contract(CONTRACT_ADDRESS, contractAbi, signer);
+    const contract = new Contract(kbcAddress, contractAbi, signer);
     const userAddress = await signer.getAddress();
     const hasVoted = await contract.hasVoted(userAddress);
     console.log('User has voted:', hasVoted);
@@ -173,7 +172,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
     const network = await web3Provider.getNetwork();
     const chainId = +network.chainId.toString();
     const ret = await web3Provider.call({
-      to: FHE_LIB_ADDRESS,
+      to: FHELibAddress,
       data: "0xd9d47bb001",
     });
     const decoded = AbiCoder.defaultAbiCoder().decode(["bytes"], ret);
@@ -190,7 +189,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
     try {
       const instance = await createFHEInstance(walletProvider);
       const signer = await walletProvider.getSigner();
-      const contract = new Contract(CONTRACT_ADDRESS, contractAbi, signer);
+      const contract = new Contract(kbcAddress, contractAbi, signer);
 
       // Ensure to reorder images to specific order if needed
       const orderedImages = selectedImages.slice();
@@ -233,12 +232,12 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
       }
 
       // Re-initializing or generating needed keys only if not already done
-      if (!cInstance.hasKeypair(CONTRACT_ADDRESS)) {
+      if (!cInstance.hasKeypair(kbcAddress)) {
         const eip712Domain = {
           name: 'Authorization token',
           version: '1',
           chainId: 9090,
-          verifyingContract: CONTRACT_ADDRESS,
+          verifyingContract: kbcAddress,
         };
 
         const reencryption = cInstance.generatePublicKey(eip712Domain);
@@ -256,14 +255,14 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
           throw new Error("Signature request failed");
         }
 
-        cInstance.setSignature(CONTRACT_ADDRESS, sig);
-        reencrypt = cInstance.getPublicKey(CONTRACT_ADDRESS);
+        cInstance.setSignature(kbcAddress, sig);
+        reencrypt = cInstance.getPublicKey(kbcAddress);
         if (!reencrypt) {
           throw new Error("getPublicKey returned null");
         }
         console.log('Re-encryption public key:', reencrypt);
       } else {
-        reencrypt = cInstance.getPublicKey(CONTRACT_ADDRESS);
+        reencrypt = cInstance.getPublicKey(kbcAddress);
         if (!reencrypt) {
           throw new Error("getPublicKey from existing keypair returned null");
         }
@@ -280,7 +279,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
       const reencryptPublicKeyHexString = "0x" + Array.from(reencrypt.publicKey)
         .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
-      const contract = new Contract(CONTRACT_ADDRESS, contractAbi, signer);
+      const contract = new Contract(kbcAddress, contractAbi, signer);
       const encryptedVote = await contract.viewOwnVote(
         reencryptPublicKeyHexString,
         reencrypt.signature
@@ -290,7 +289,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
         throw new Error("viewOwnVote returned null");
       }
 
-      const voteUint8 = await cInstance.decrypt(CONTRACT_ADDRESS, encryptedVote);
+      const voteUint8 = await cInstance.decrypt(kbcAddress, encryptedVote);
       const selectedImageIdsArray = uint8ToSelectedImageIds(voteUint8);
       console.log('Selected image IDs:', selectedImageIdsArray);
       setSelectedImages(selectedImageIdsArray); // Reset or maintain as needed
@@ -308,7 +307,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
       const walletProvider = await modal.getWalletProvider();
       const web3Provider = new BrowserProvider(walletProvider);
       const signer = await web3Provider.getSigner();
-      const contract = new Contract(CONTRACT_ADDRESS, contractAbi, signer);
+      const contract = new Contract(kbcAddress, contractAbi, signer);
       const tx = await contract[contractMethod](...(contractMethod === 'payWinners' ? [0, 10] : []));
       await tx.wait();
       alert(successMessage);
@@ -364,10 +363,13 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
             <div className="af-class-game-header">
               <div className="af-class-game-title">
                 <div className="af-class-h1">Keynesian Beauty Contest</div>
-                <div className="af-class-p_body">Rank the candidates from most popular to least popular. If your vote matches the average of all votes then you win the pot.</div>
+                <div className="af-class-p_body">Drag and drop to rank the candidates from most popular to least popular. If your vote matches the average of all votes then you win the pot.</div>
               </div>
               <div className="af-class-game-stats">
-                <FetchBalance className="af-class-typehead" />
+                <div className="af-class-typehead">
+                  <div className="af-class-p_body">Total Pot</div>
+                  <FetchBalance contractAddress={kbcAddress} factor="0.97"/>
+                </div>
                 <div className="af-class-typehead">
                   <div className="af-class-p_body">Time to reveal</div>
                   <div className="af-class-h2">{renderCountdown()}</div>
