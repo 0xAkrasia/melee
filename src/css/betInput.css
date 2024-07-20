@@ -7,6 +7,7 @@
   background-color: #000000;
   color: #ff9900;
   height: 60px; /* Add or adjust height to your preference */
+  /* gap: 10px; Space between BetInput and button */
 }
 
 .bet-input-icon {

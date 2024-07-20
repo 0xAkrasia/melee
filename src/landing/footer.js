@@ -5,7 +5,7 @@ export default function Footer() {
     <div className="footer-bottom">
       <div className="footer-bottom-content">
         <span className="footer-copyright">
-          © 2024 Melee. All Rights Reserved.
+          {/* © 2024 Melee. All Rights Reserved. */}
         </span>
       </div>
     </div>

@@ -1,22 +1,23 @@
 /* eslint-disable */
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { initFhevm, createInstance } from 'fhevmjs';
 import { BrowserProvider, Contract, AbiCoder } from 'ethers';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import contractAbi from '../contracts/keynesianBeautyContestABI.json';
-import { FetchBalance } from './fetchBalance';
+import contractAbi from '../contracts/KBCSepoliaABI.json';
+import { FetchBalance, fetchBalance } from './fetchBalance';
 import BetInput from './betInput';
 import { parseEther } from 'ethers';
 import contractAddresses from '../contracts/contractAddresses.json';
 import '../css/KeynesianGame.css';
+import { postCiphertext } from '../ciphertextBriding/ciphertextToCCIP';
 
 initFhevm();
 
 const FHELibAddress = contractAddresses[0].FHELibAddress;
-const kbcAddress = contractAddresses[0].keynesianBeautyContest;
-const TARGETDATE = new Date('2024-10-25T00:00:00Z'); // Replace with your target date-time
+const kbcAddress = contractAddresses[0].KBCSepolia;
+const TARGETDATE = new Date('2024-07-20T00:00:00Z'); // Replace with your target date-time
+const IMAGE_NAMES = ['apple', 'banana', 'blueberry', 'cherry', 'mango', 'strawberry', 'orange', 'watermelon'];
 
 const ImageItem = ({ id, index, imagePath, moveImage }) => {
   const ref = React.useRef(null);
@@ -59,7 +60,7 @@ const ImageItem = ({ id, index, imagePath, moveImage }) => {
 };
 
 const KeynesianGame = ({ walletProvider, wallets }) => {
-  const [selectedImages, setSelectedImages] = useState(['kbc0', 'kbc1', 'img_2', 'img_3', 'img_4', 'img_5', 'img_6', 'img_7']);
+  const [selectedImages, setSelectedImages] = useState(IMAGE_NAMES);
   const [countdownTime, setCountdownTime] = useState(Math.floor((TARGETDATE - new Date()) / 1000)); // Calculate initial countdown time
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [userHasVoted, setUserHasVoted] = useState(false);
@@ -70,6 +71,9 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   const intervalRef = useRef(null);  // Reference to store the interval ID
 
   useEffect(() => {
+    console.log('Wallet provider:', walletProvider); // Debug statement
+    console.log('Wallets:', wallets); // Debug statement
+
     intervalRef.current = setInterval(() => {
       setCountdownTime(prevCount => {
         if (prevCount <= 0) {
@@ -94,7 +98,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
 
   const convertToUint32 = useCallback((selectedImageIdsArray) => {
     let result = 0;
-    const imageIds = ['kbc0', 'kbc1', 'img_2', 'img_3', 'img_4', 'img_5', 'img_6', 'img_7'];
+    const imageIds = IMAGE_NAMES;
 
     selectedImageIdsArray.forEach((id, index) => {
       // Find the index of the current image id
@@ -112,7 +116,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   }, []);
 
   const uint8ToSelectedImageIds = (voteUint8) => {
-    const imageIds = ['kbc0', 'kbc1', 'img_2', 'img_3', 'img_4', 'img_5', 'img_6', 'img_7'];
+    const imageIds = IMAGE_NAMES;
     const selectedImageIdsArray = [];
 
     const voteUint8Num = Number(voteUint8);
@@ -133,7 +137,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   const checkVotingStatus = useCallback(async (signer) => {
     const contract = new Contract(kbcAddress, contractAbi, signer);
     const userAddress = await signer.getAddress();
-    const hasVoted = await contract.hasVoted(userAddress);
+    const hasVoted = await contract.hasVotedBase(userAddress);
     console.log('User has voted:', hasVoted);
     return hasVoted;
   }, []);
@@ -152,9 +156,11 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
         console.log("checkVotingStatus");
         const userHasVoted = await checkVotingStatus(signer);
         setIsWalletConnected(true);
+        console.log("wallet connected", isWalletConnected);
         setUserHasVoted(userHasVoted);
       } else {
         setIsWalletConnected(false);
+        console.log("wallet connected", isWalletConnected);
         setUserHasVoted(false);
       }
     } catch (error) {
@@ -164,30 +170,43 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
     }
   }, [checkVotingStatus]);
 
-  const createFHEInstance = useCallback(async (web3Provider) => {
+  const createFHEInstance = useCallback(async () => {
     if (instance) {
       return instance;
     }
 
-    const network = await web3Provider.getNetwork();
-    const chainId = +network.chainId.toString();
-    const ret = await web3Provider.call({
-      to: FHELibAddress,
-      data: "0xd9d47bb001",
-    });
-    const decoded = AbiCoder.defaultAbiCoder().decode(["bytes"], ret);
-    const publicKey = decoded[0];
+    const chainId = 9090;
+    const publicKey = contractAddresses[0].IncoPubKey;
     const newInstance = await createInstance({ chainId, publicKey });
     console.log("FHE instance created", newInstance);
     setInstance(newInstance);
     return newInstance;
   }, [instance]);
 
+  // const createFHEInstance = useCallback(async (web3Provider) => {
+  //   if (instance) {
+  //     return instance;
+  //   }
+
+  //   const network = await web3Provider.getNetwork();
+  //   const chainId = +network.chainId.toString();
+  //   const ret = await web3Provider.call({
+  //     to: FHELibAddress,
+  //     data: "0xd9d47bb001",
+  //   });
+  //   const decoded = AbiCoder.defaultAbiCoder().decode(["bytes"], ret);
+  //   const publicKey = decoded[0];
+  //   const newInstance = await createInstance({ chainId, publicKey });
+  //   console.log("FHE instance created", newInstance);
+  //   setInstance(newInstance);
+  //   return newInstance;
+  // }, [instance]);
+
   const handleBet = useCallback(async (event) => {
     event.preventDefault();
     setIsBetLoading(true); // Start the loading indicator
     try {
-      const instance = await createFHEInstance(walletProvider);
+      const instance = await createFHEInstance();
       const signer = await walletProvider.getSigner();
       const contract = new Contract(kbcAddress, contractAbi, signer);
 
@@ -196,12 +215,14 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
 
       const voteUint8 = convertToUint32(orderedImages);
       const encryptedVote = instance.encrypt32(voteUint8);
+      console.log('Encrypted vote:', encryptedVote);
+      // const hash = await postCiphertext(encryptedVote);
+      // console.log('Hash:', hash);
 
       const tx = await contract.castVote(encryptedVote, {
         value: parseEther(betAmount),
       });
       await tx.wait();
-      alert('Vote cast successfully');
 
       // Set selected images as required post-casting
       setSelectedImages(orderedImages);  // You can reset or keep as handled earlier
@@ -325,9 +346,12 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
     setBetAmount(event.target.value);
   }, []);
 
-  const handleMaxClick = useCallback((event) => {
+  const handleMaxClick = useCallback(async (event) => {
     event.preventDefault(); // Prevent form submission
-    const maxBetAmount = '1.0'; // Replace with actual logic to get the max balance from the user's wallet
+    const signer = await walletProvider.getSigner();
+    const userAddress = await signer.getAddress();
+    const userBalance = await fetchBalance(userAddress, 1);
+    const maxBetAmount = userBalance; // Replace with actual logic to get the max balance from the user's wallet
     setBetAmount(maxBetAmount);
   }, []);
 
@@ -349,7 +373,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
         key={id}
         id={id}
         index={index}
-        imagePath={`images/${id}.png`}
+        imagePath={`images/fruit/${id}.png`}
         moveImage={moveImage}
       />
     ));
@@ -363,12 +387,15 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
             <div className="af-class-game-header">
               <div className="af-class-game-title">
                 <div className="af-class-h1">Keynesian Beauty Contest</div>
-                <div className="af-class-p_body">Drag and drop to rank the candidates from most popular to least popular. If your vote matches the average of all votes then you win the pot.</div>
+                <div></div>
+                <h2 className="af-class-p_body_big">Fruit Edition</h2>
+                <div></div>
+                <div className="af-class-p_body">Drag and drop to rank the images below from best to worst. If your vote matches the average of all votes then you win the pot!</div>
               </div>
               <div className="af-class-game-stats">
                 <div className="af-class-typehead">
                   <div className="af-class-p_body">Total Pot</div>
-                  <FetchBalance contractAddress={kbcAddress} factor="0.97"/>
+                  <FetchBalance contractAddress={kbcAddress} factor="1"/>
                 </div>
                 <div className="af-class-typehead">
                   <div className="af-class-p_body">Time to reveal</div>
@@ -379,40 +406,39 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
             <div className="af-class-bet-input">
               <div className="af-class-form-block w-form">
                 <form id="wf-form-amount" name="wf-form-amount" data-name="amount" method="get" className="af-class-form">
-                  <BetInput
-                    value={betAmount}
-                    onValueChange={handleBetAmountChange}
-                    maxValue="1.0" // Replace with actual max value logic
-                    onMaxClick={handleMaxClick}
-                  />
                   {!userHasVoted ? (
-                    <button
-                      type="submit"
-                      data-wait="Please wait..."
-                      className={`af-class-submit-button w-button${isBetLoading ? ' af-class-submit-button--loading' : ''}`}
-                      onClick={handleBet}
-                    >
-                      {!isBetLoading ? (
-                        <span className="af-class-button__text">Cast Vote</span>
-                      ) : (
-                        <span className="af-class-button__placeholder">Cast Vote</span>
-                      )}
-                    </button>
-                  ) : (
                     <div>
-                      <div className="af-class-entry-received-message">Your entry has been received!</div>
+                      <BetInput
+                        value={betAmount}
+                        onValueChange={handleBetAmountChange}
+                        onMaxClick={handleMaxClick}
+                      />
                       <button
-                        type="button"
-                        className={`af-class-submit-button w-button${isLoading ? ' af-class-submit-button--loading' : ''}`}
-                        onClick={handleViewOwnVote}
+                        type="submit"
+                        data-wait="Please wait..."
+                        className={`af-class-submit-button w-button${isBetLoading ? ' af-class-submit-button--loading' : ''}`}
+                        onClick={handleBet}
                       >
-                        {!isLoading ? (
-                          <span className="af-class-button__text">View Your Vote</span>
+                        {!isBetLoading ? (
+                          <span className="af-class-button__text">Cast Vote</span>
                         ) : (
-                          <span className="af-class-button__placeholder">View Your Vote</span>
+                          <span className="af-class-button__placeholder">Cast Vote</span>
                         )}
                       </button>
                     </div>
+                  ) : (
+                    <div className="af-class-entry-received-message">Vote received!</div>
+                      // <button
+                      //   type="button"
+                      //   className={`af-class-submit-button w-button${isLoading ? ' af-class-submit-button--loading' : ''}`}
+                      //   onClick={handleViewOwnVote}
+                      // >
+                      //   {!isLoading ? (
+                      //     <span className="af-class-button__text">View Your Vote</span>
+                      //   ) : (
+                      //     <span className="af-class-button__placeholder">View Your Vote</span>
+                      //   )}
+                      // </button>
                   )}
                 </form>
               </div>

@@ -16,7 +16,7 @@ const BetInput = ({ value, onValueChange, maxValue, onMaxClick }) => {
           onChange={onValueChange}
         />
         <div className="bet-input-max">
-          <span>{maxValue} ETH</span>
+          <span>{maxValue}</span>
           <button className="max-button" onClick={onMaxClick}>Max</button>
         </div>
       </div>

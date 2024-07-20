@@ -77,7 +77,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     appId={"clsay39yw04tv13s57t7fig9f"}
     config={{
       loginMethods: ['email', 'google', 'discord', 'wallet'],
-      defaultChain: inco,
+      defaultChain: sepolia,
       supportedChains: [inco, baseMainnet, sepolia],
       appearance: {
         theme: 'dark',

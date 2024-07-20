@@ -1,7 +1,7 @@
-const axios = require('axios');
+import axios from 'axios';
 
 // Function to send POST request with ciphertext
-const postCiphertext = async (ciphertext) => {
+export const postCiphertext = async (ciphertext) => {
     try {
         const response = await axios.post('https://hyperlane-ccip.vercel.app/token', {
             ciphertext: ciphertext
@@ -15,7 +15,7 @@ const postCiphertext = async (ciphertext) => {
 };
 
 // Function to send GET request with hash
-const getCiphertextByHash = async (hash) => {
+export const getCiphertextByHash = async (hash) => {
     try {
         const response = await axios.get('https://hyperlane-ccip.vercel.app/token', {
             params: {
@@ -30,11 +30,8 @@ const getCiphertextByHash = async (hash) => {
 };
 
 // Example usage
-const main = async () => {
-    //call API and commit hash to contract
-    const hash = await postCiphertext('CIPHERTEXT_HERE');
-    console.log('Hash:', hash);
-};
-
-// Run the main function
-main();
+// const main = async () => {
+//     //call API and commit hash to contract
+//     const hash = await postCiphertext('CIPHERTEXT_HERE');
+//     console.log('Hash:', hash);
+// };

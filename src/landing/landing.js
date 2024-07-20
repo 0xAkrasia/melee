@@ -1,5 +1,4 @@
 /* eslint-disable */
-
 import React, { useEffect, useState, useRef } from 'react';
 import { BrowserProvider } from 'ethers';
 import { initFhevm } from 'fhevmjs';
@@ -24,13 +23,23 @@ function ParentComponent() {
 
   useEffect(() => {
     async function connectWallet() {
-      if (wallets && wallets.length > 0) {
-        const isConnected = await wallets[0]?.isConnected();
-        if (isConnected) {
-          const currentWallet = await wallets[0]?.getEthereumProvider();
-          const provider = new BrowserProvider(currentWallet);
-          setWalletProvider(provider);
+      try {
+        if (wallets && wallets.length > 0) {
+          console.log('Wallets:', wallets); // Debug statement
+          const isConnected = await wallets[0]?.isConnected();
+          if (isConnected) {
+            const currentWallet = await wallets[0]?.getEthereumProvider();
+            const provider = new BrowserProvider(currentWallet);
+            setWalletProvider(provider);
+            console.log('Wallet provider set:', provider); // Debug statement
+          } else {
+            console.error('Wallet is not connected');
+          }
+        } else {
+          console.error('No wallets found');
         }
+      } catch (error) {
+        console.error('Error connecting wallet:', error);
       }
     }
 
