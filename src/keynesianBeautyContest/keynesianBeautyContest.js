@@ -1,29 +1,39 @@
 /* eslint-disable */
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { initFhevm, createInstance } from 'fhevmjs';
-import { BrowserProvider, Contract, AbiCoder } from 'ethers';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import contractAbi from '../contracts/KBCSepoliaABI.json';
-import { FetchBalance, fetchBalance } from './fetchBalance';
-import BetInput from './betInput';
-import { parseEther } from 'ethers';
-import contractAddresses from '../contracts/contractAddresses.json';
-import '../css/KeynesianGame.css';
-import { postCiphertext } from '../ciphertextBriding/ciphertextToCCIP';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { initFhevm, createInstance } from "fhevmjs";
+import { BrowserProvider, Contract, AbiCoder } from "ethers";
+import { DndProvider, useDrag, useDrop } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import contractAbi from "../contracts/KBCSepoliaABI.json";
+import { FetchBalance, fetchBalance } from "./fetchBalance";
+import BetInput from "./betInput";
+import { parseEther } from "ethers";
+import contractAddresses from "../contracts/contractAddresses.json";
+import "../css/KeynesianGame.css";
+import { postCiphertext } from "../ciphertextBriding/ciphertextToCCIP";
+import toast from "react-hot-toast";
 
 initFhevm();
 
 const FHELibAddress = contractAddresses[0].FHELibAddress;
 const kbcAddress = contractAddresses[0].KBCSepolia;
-const TARGETDATE = new Date('2024-07-20T00:00:00Z'); // Replace with your target date-time
-const IMAGE_NAMES = ['apple', 'banana', 'blueberry', 'cherry', 'mango', 'strawberry', 'orange', 'watermelon'];
+const TARGETDATE = new Date("2024-07-20T00:00:00Z"); // Replace with your target date-time
+const IMAGE_NAMES = [
+  "apple",
+  "banana",
+  "blueberry",
+  "cherry",
+  "mango",
+  "strawberry",
+  "orange",
+  "watermelon",
+];
 
 const ImageItem = ({ id, index, imagePath, moveImage }) => {
   const ref = React.useRef(null);
 
   const [, drop] = useDrop({
-    accept: 'image',
+    accept: "image",
     hover: (item) => {
       if (item.index !== index) {
         moveImage(item.index, index);
@@ -33,7 +43,7 @@ const ImageItem = ({ id, index, imagePath, moveImage }) => {
   });
 
   const [{ isDragging }, drag] = useDrag({
-    type: 'image',
+    type: "image",
     item: { id, index },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
@@ -43,7 +53,7 @@ const ImageItem = ({ id, index, imagePath, moveImage }) => {
   drag(drop(ref));
 
   return (
-    <div className={`af-class-item${isDragging ? ' af-class-dragging' : ''}`}>
+    <div className={`af-class-item${isDragging ? " af-class-dragging" : ""}`}>
       <div className="image-item-number">
         <div>{index + 1}</div> {/* Display the index number */}
       </div>
@@ -58,24 +68,26 @@ const ImageItem = ({ id, index, imagePath, moveImage }) => {
     </div>
   );
 };
-
+// background-color: rgba(25, 13, 0, 0.5);
 const KeynesianGame = ({ walletProvider, wallets }) => {
   const [selectedImages, setSelectedImages] = useState(IMAGE_NAMES);
-  const [countdownTime, setCountdownTime] = useState(Math.floor((TARGETDATE - new Date()) / 1000)); // Calculate initial countdown time
+  const [countdownTime, setCountdownTime] = useState(
+    Math.floor((TARGETDATE - new Date()) / 1000)
+  ); // Calculate initial countdown time
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [userHasVoted, setUserHasVoted] = useState(false);
   const [isBetLoading, setIsBetLoading] = useState(false); // State for loading effect during vote cast
   const [isLoading, setIsLoading] = useState(false); // State for loading effect during view own vote
   const [instance, setInstance] = useState(null); // Global state for instance
-  const [betAmount, setBetAmount] = useState('0.01'); // Set default value to 0.01
-  const intervalRef = useRef(null);  // Reference to store the interval ID
+  const [betAmount, setBetAmount] = useState("0.01"); // Set default value to 0.01
+  const intervalRef = useRef(null); // Reference to store the interval ID
 
   useEffect(() => {
-    console.log('Wallet provider:', walletProvider); // Debug statement
-    console.log('Wallets:', wallets); // Debug statement
+    console.log("Wallet provider:", walletProvider); // Debug statement
+    console.log("Wallets:", wallets); // Debug statement
 
     intervalRef.current = setInterval(() => {
-      setCountdownTime(prevCount => {
+      setCountdownTime((prevCount) => {
         if (prevCount <= 0) {
           clearInterval(intervalRef.current);
           return 0;
@@ -86,7 +98,6 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
 
     // Cleanup function to clear the interval
     return () => clearInterval(intervalRef.current);
-
   }, []);
 
   const moveImage = (fromIndex, toIndex) => {
@@ -108,7 +119,9 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
         // Shift the image index to the appropriate position (3 bits for each image index)
         result |= imageIndex << (index * 3);
       } else {
-        throw new Error('Image ID is out of range. It should be between 0 and 7, inclusive.');
+        throw new Error(
+          "Image ID is out of range. It should be between 0 and 7, inclusive."
+        );
       }
     });
 
@@ -123,7 +136,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
 
     for (let i = 0; i < imageIds.length; i++) {
       // Extract 3 bits for each image ID
-      const imageIndex = (voteUint8Num >> (i * 3)) & 0x07;  // 0x07 (binary 00000111) masks out all but the 3 lowest-order bits
+      const imageIndex = (voteUint8Num >> (i * 3)) & 0x07; // 0x07 (binary 00000111) masks out all but the 3 lowest-order bits
 
       // Check if the image index is within the valid range (0 to 7)
       if (imageIndex < imageIds.length) {
@@ -138,37 +151,40 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
     const contract = new Contract(kbcAddress, contractAbi, signer);
     const userAddress = await signer.getAddress();
     const hasVoted = await contract.hasVotedBase(userAddress);
-    console.log('User has voted:', hasVoted);
+    console.log("User has voted:", hasVoted);
     return hasVoted;
   }, []);
 
-  const handleConnectWallet = useCallback(async (walletProvider, wallets) => {
-    try {
-      if (!walletProvider) {
-        console.error('Wallet provider not found');
+  const handleConnectWallet = useCallback(
+    async (walletProvider, wallets) => {
+      try {
+        if (!walletProvider) {
+          console.error("Wallet provider not found");
+          setIsWalletConnected(false);
+          setUserHasVoted(false);
+          return;
+        }
+        console.log("Connecting wallet...");
+        const signer = await walletProvider.getSigner();
+        if (signer) {
+          console.log("checkVotingStatus");
+          const userHasVoted = await checkVotingStatus(signer);
+          setIsWalletConnected(true);
+          console.log("wallet connected", isWalletConnected);
+          setUserHasVoted(userHasVoted);
+        } else {
+          setIsWalletConnected(false);
+          console.log("wallet connected", isWalletConnected);
+          setUserHasVoted(false);
+        }
+      } catch (error) {
+        console.error("Error connecting wallet:", error);
         setIsWalletConnected(false);
         setUserHasVoted(false);
-        return;
       }
-      console.log('Connecting wallet...');
-      const signer = await walletProvider.getSigner();
-      if (signer) {
-        console.log("checkVotingStatus");
-        const userHasVoted = await checkVotingStatus(signer);
-        setIsWalletConnected(true);
-        console.log("wallet connected", isWalletConnected);
-        setUserHasVoted(userHasVoted);
-      } else {
-        setIsWalletConnected(false);
-        console.log("wallet connected", isWalletConnected);
-        setUserHasVoted(false);
-      }
-    } catch (error) {
-      console.error('Error connecting wallet:', error);
-      setIsWalletConnected(false);
-      setUserHasVoted(false);
-    }
-  }, [checkVotingStatus]);
+    },
+    [checkVotingStatus]
+  );
 
   const createFHEInstance = useCallback(async () => {
     if (instance) {
@@ -202,145 +218,201 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   //   return newInstance;
   // }, [instance]);
 
-  const handleBet = useCallback(async (event) => {
-    event.preventDefault();
-    setIsBetLoading(true); // Start the loading indicator
-    try {
-      const instance = await createFHEInstance();
-      const signer = await walletProvider.getSigner();
-      const contract = new Contract(kbcAddress, contractAbi, signer);
+  const handleBet = useCallback(
+    async (event) => {
+      event.preventDefault();
+      setIsBetLoading(true); // Start the loading indicator
+      try {
+        const instance = await createFHEInstance();
+        const signer = await walletProvider.getSigner();
+        const contract = new Contract(kbcAddress, contractAbi, signer);
 
-      // Ensure to reorder images to specific order if needed
-      const orderedImages = selectedImages.slice();
+        // Ensure to reorder images to specific order if needed
+        const orderedImages = selectedImages.slice();
 
-      const voteUint8 = convertToUint32(orderedImages);
-      const encryptedVote = instance.encrypt32(voteUint8);
-      console.log('Encrypted vote:', encryptedVote);
-      // const hash = await postCiphertext(encryptedVote);
-      // console.log('Hash:', hash);
+        const voteUint8 = convertToUint32(orderedImages);
+        const encryptedVote = instance.encrypt32(voteUint8);
+        console.log("Encrypted vote:", encryptedVote);
+        // const hash = await postCiphertext(encryptedVote);
+        // console.log('Hash:', hash);
 
-      const tx = await contract.castVote(encryptedVote, {
-        value: parseEther(betAmount),
-      });
-      await tx.wait();
-
-      // Set selected images as required post-casting
-      setSelectedImages(orderedImages);  // You can reset or keep as handled earlier
-
-      // Refresh the state by calling handleConnectWallet again
-      handleConnectWallet(walletProvider, wallets);
-    } catch (error) {
-      console.error('Error casting vote:', error);
-      alert('Failed to cast vote');
-    } finally {
-      setIsBetLoading(false); // Stop the loading indicator
-    }
-  }, [betAmount, selectedImages, convertToUint32, createFHEInstance, walletProvider, handleConnectWallet, wallets]);
-
-  const handleViewOwnVote = useCallback(async (event) => {
-    event.preventDefault();
-    setIsLoading(true); // Start the loading indicator
-    const signer = await walletProvider.getSigner();
-    const userAddress = await signer.getAddress();
-    let reencrypt = null;
-    let cInstance = null;
-    console.log("handleViewOwnVote initiated");
-
-    try {
-      cInstance = await createFHEInstance(walletProvider);
-      if (!cInstance) {
-        throw new Error("createFHEInstance returned null");
-      }
-
-      // Re-initializing or generating needed keys only if not already done
-      if (!cInstance.hasKeypair(kbcAddress)) {
-        const eip712Domain = {
-          name: 'Authorization token',
-          version: '1',
-          chainId: 9090,
-          verifyingContract: kbcAddress,
-        };
-
-        const reencryption = cInstance.generatePublicKey(eip712Domain);
-        if (!reencryption) {
-          throw new Error("generatePublicKey returned null");
-        }
-
-        const params = [userAddress, JSON.stringify(reencryption.eip712)];
-        const sig = await window.ethereum.request({
-          method: "eth_signTypedData_v4",
-          params,
+        const tx = await contract.castVote(encryptedVote, {
+          value: parseEther(betAmount),
         });
+        await tx.wait();
 
-        if (!sig) {
-          throw new Error("Signature request failed");
-        }
+        // Set selected images as required post-casting
+        setSelectedImages(orderedImages); // You can reset or keep as handled earlier
 
-        cInstance.setSignature(kbcAddress, sig);
-        reencrypt = cInstance.getPublicKey(kbcAddress);
-        if (!reencrypt) {
-          throw new Error("getPublicKey returned null");
-        }
-        console.log('Re-encryption public key:', reencrypt);
-      } else {
-        reencrypt = cInstance.getPublicKey(kbcAddress);
-        if (!reencrypt) {
-          throw new Error("getPublicKey from existing keypair returned null");
-        }
-        console.log('Re-encryption public key (retrieved from existing keypair):', reencrypt);
+        // Refresh the state by calling handleConnectWallet again
+        handleConnectWallet(walletProvider, wallets);
+      } catch (error) {
+        console.error("Error casting vote:", error);
+        // alert("Failed to cast vote");
+        toast.error("Failed to cast vote");
+      } finally {
+        setIsBetLoading(false); // Stop the loading indicator
       }
-    } catch (error) {
-      console.error('Error getting re-encryption public key:', error);
-      alert('Failed to get re-encryption public key');
-      setIsLoading(false); // Stop loading on error
-      return;
-    }
+    },
+    [
+      betAmount,
+      selectedImages,
+      convertToUint32,
+      createFHEInstance,
+      walletProvider,
+      handleConnectWallet,
+      wallets,
+    ]
+  );
 
-    try {
-      const reencryptPublicKeyHexString = "0x" + Array.from(reencrypt.publicKey)
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
-      const contract = new Contract(kbcAddress, contractAbi, signer);
-      const encryptedVote = await contract.viewOwnVote(
-        reencryptPublicKeyHexString,
-        reencrypt.signature
-      );
+  const handleViewOwnVote = useCallback(
+    async (event) => {
+      event.preventDefault();
+      setIsLoading(true); // Start the loading indicator
+      const signer = await walletProvider.getSigner();
+      const userAddress = await signer.getAddress();
+      let reencrypt = null;
+      let cInstance = null;
+      console.log("handleViewOwnVote initiated");
 
-      if (!encryptedVote) {
-        throw new Error("viewOwnVote returned null");
+      try {
+        cInstance = await createFHEInstance(walletProvider);
+        if (!cInstance) {
+          throw new Error("createFHEInstance returned null");
+        }
+
+        // Re-initializing or generating needed keys only if not already done
+        if (!cInstance.hasKeypair(kbcAddress)) {
+          const eip712Domain = {
+            name: "Authorization token",
+            version: "1",
+            chainId: 9090,
+            verifyingContract: kbcAddress,
+          };
+
+          const reencryption = cInstance.generatePublicKey(eip712Domain);
+          if (!reencryption) {
+            throw new Error("generatePublicKey returned null");
+          }
+
+          const params = [userAddress, JSON.stringify(reencryption.eip712)];
+          const sig = await window.ethereum.request({
+            method: "eth_signTypedData_v4",
+            params,
+          });
+
+          if (!sig) {
+            throw new Error("Signature request failed");
+          }
+
+          cInstance.setSignature(kbcAddress, sig);
+          reencrypt = cInstance.getPublicKey(kbcAddress);
+          if (!reencrypt) {
+            throw new Error("getPublicKey returned null");
+          }
+          console.log("Re-encryption public key:", reencrypt);
+        } else {
+          reencrypt = cInstance.getPublicKey(kbcAddress);
+          if (!reencrypt) {
+            throw new Error("getPublicKey from existing keypair returned null");
+          }
+          console.log(
+            "Re-encryption public key (retrieved from existing keypair):",
+            reencrypt
+          );
+        }
+      } catch (error) {
+        console.error("Error getting re-encryption public key:", error);
+        // alert("Failed to get re-encryption public key");
+        toast.error("Failed to get re-encryption public key");
+        setIsLoading(false); // Stop loading on error
+        return;
       }
 
-      const voteUint8 = await cInstance.decrypt(kbcAddress, encryptedVote);
-      const selectedImageIdsArray = uint8ToSelectedImageIds(voteUint8);
-      console.log('Selected image IDs:', selectedImageIdsArray);
-      setSelectedImages(selectedImageIdsArray); // Reset or maintain as needed
-      setIsLoading(false); // Stop loading after success
-    } catch (error) {
-      console.error('Error viewing own vote:', error);
-      alert('Failed to view own vote');
-      setIsLoading(false); // Stop loading on error
-    }
-  }, [uint8ToSelectedImageIds, createFHEInstance, walletProvider]);
+      try {
+        const reencryptPublicKeyHexString =
+          "0x" +
+          Array.from(reencrypt.publicKey)
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+        const contract = new Contract(kbcAddress, contractAbi, signer);
+        const encryptedVote = await contract.viewOwnVote(
+          reencryptPublicKeyHexString,
+          reencrypt.signature
+        );
 
-  const handleAction = useCallback(async (contractMethod, successMessage, failureMessage, event) => {
-    event.preventDefault();
-    try {
-      const walletProvider = await modal.getWalletProvider();
-      const web3Provider = new BrowserProvider(walletProvider);
-      const signer = await web3Provider.getSigner();
-      const contract = new Contract(kbcAddress, contractAbi, signer);
-      const tx = await contract[contractMethod](...(contractMethod === 'payWinners' ? [0, 10] : []));
-      await tx.wait();
-      alert(successMessage);
-    } catch (error) {
-      console.error(`Error during ${contractMethod}:`, error);
-      alert(failureMessage);
-    }
-  }, []);
+        if (!encryptedVote) {
+          throw new Error("viewOwnVote returned null");
+        }
 
-  const handleWinCheck = useCallback((event) => handleAction('winCheck', 'Win check transaction sent', 'Failed to check wins', event), [handleAction]);
-  const handleRevealResult = useCallback((event) => handleAction('revealResult', 'Result reveal transaction sent', 'Failed to reveal result', event), [handleAction]);
-  const handlePayWinners = useCallback((event) => handleAction('payWinners', 'Pay winners transaction sent', 'Failed to pay winners', event), [handleAction]);
+        const voteUint8 = await cInstance.decrypt(kbcAddress, encryptedVote);
+        const selectedImageIdsArray = uint8ToSelectedImageIds(voteUint8);
+        console.log("Selected image IDs:", selectedImageIdsArray);
+        setSelectedImages(selectedImageIdsArray); // Reset or maintain as needed
+        setIsLoading(false); // Stop loading after success
+      } catch (error) {
+        console.error("Error viewing own vote:", error);
+        // alert("Failed to view own vote");
+        toast.error("Failed to view own vote");
+        setIsLoading(false); // Stop loading on error
+      }
+    },
+    [uint8ToSelectedImageIds, createFHEInstance, walletProvider]
+  );
+
+  const handleAction = useCallback(
+    async (contractMethod, successMessage, failureMessage, event) => {
+      event.preventDefault();
+      try {
+        const walletProvider = await modal.getWalletProvider();
+        const web3Provider = new BrowserProvider(walletProvider);
+        const signer = await web3Provider.getSigner();
+        const contract = new Contract(kbcAddress, contractAbi, signer);
+        const tx = await contract[contractMethod](
+          ...(contractMethod === "payWinners" ? [0, 10] : [])
+        );
+        await tx.wait();
+        // alert(successMessage);
+        toast.success(successMessage);
+      } catch (error) {
+        console.error(`Error during ${contractMethod}:`, error);
+        // alert(failureMessage);
+        toast.error(failureMessage);
+      }
+    },
+    []
+  );
+
+  const handleWinCheck = useCallback(
+    (event) =>
+      handleAction(
+        "winCheck",
+        "Win check transaction sent",
+        "Failed to check wins",
+        event
+      ),
+    [handleAction]
+  );
+  const handleRevealResult = useCallback(
+    (event) =>
+      handleAction(
+        "revealResult",
+        "Result reveal transaction sent",
+        "Failed to reveal result",
+        event
+      ),
+    [handleAction]
+  );
+  const handlePayWinners = useCallback(
+    (event) =>
+      handleAction(
+        "payWinners",
+        "Pay winners transaction sent",
+        "Failed to pay winners",
+        event
+      ),
+    [handleAction]
+  );
 
   const handleBetAmountChange = useCallback((event) => {
     setBetAmount(event.target.value);
@@ -364,7 +436,11 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
     const hours = Math.floor((countdownTime % (3600 * 24)) / 3600);
     const minutes = Math.floor((countdownTime % 3600) / 60);
     const seconds = countdownTime % 60;
-    return `${days.toString().padStart(2, '0')}d ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    return `${days.toString().padStart(2, "0")}d ${hours
+      .toString()
+      .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}`;
   }, [countdownTime]);
 
   const renderImageItems = useCallback(() => {
@@ -390,12 +466,16 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
                 <div></div>
                 <h2 className="af-class-p_body_big">Fruit Edition</h2>
                 <div></div>
-                <div className="af-class-p_body">Drag and drop to rank the images below from best to worst. If your vote matches the average of all votes then you win the pot!</div>
+                <div className="af-class-p_body">
+                  Drag and drop to rank the images below from best to worst. If
+                  your vote matches the average of all votes then you win the
+                  pot!
+                </div>
               </div>
               <div className="af-class-game-stats">
                 <div className="af-class-typehead">
                   <div className="af-class-p_body">Total Pot</div>
-                  <FetchBalance contractAddress={kbcAddress} factor="1"/>
+                  <FetchBalance contractAddress={kbcAddress} factor="1" />
                 </div>
                 <div className="af-class-typehead">
                   <div className="af-class-p_body">Time to reveal</div>
@@ -405,53 +485,83 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
             </div>
             <div className="af-class-bet-input">
               <div className="af-class-form-block w-form">
-                <form id="wf-form-amount" name="wf-form-amount" data-name="amount" method="get" className="af-class-form">
+                <form
+                  id="wf-form-amount"
+                  name="wf-form-amount"
+                  data-name="amount"
+                  method="get"
+                  className="af-class-form"
+                >
                   {!userHasVoted ? (
-                    <div>
+                    <div className="af-class-p_body">
                       <BetInput
                         value={betAmount}
                         onValueChange={handleBetAmountChange}
                         onMaxClick={handleMaxClick}
                       />
-                      <button
-                        type="submit"
-                        data-wait="Please wait..."
-                        className={`af-class-submit-button w-button${isBetLoading ? ' af-class-submit-button--loading' : ''}`}
-                        onClick={handleBet}
-                      >
-                        {!isBetLoading ? (
-                          <span className="af-class-button__text">Cast Vote</span>
-                        ) : (
-                          <span className="af-class-button__placeholder">Cast Vote</span>
-                        )}
-                      </button>
+                      <div className="af-class-button">
+                        <button
+                          type="submit"
+                          data-wait="Please wait..."
+                          className={`af-class-submit-button w-button${
+                            isBetLoading
+                              ? "af-class-submit-button--loading"
+                              : ""
+                          }`}
+                          onClick={handleBet}
+                        >
+                          {!isBetLoading ? (
+                            <span className="af-class-button__text">
+                              Cast Vote
+                            </span>
+                          ) : (
+                            <span className="af-class-button__placeholder">
+                              Cast Vote
+                            </span>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   ) : (
-                    <div className="af-class-entry-received-message">Vote received!</div>
-                      // <button
-                      //   type="button"
-                      //   className={`af-class-submit-button w-button${isLoading ? ' af-class-submit-button--loading' : ''}`}
-                      //   onClick={handleViewOwnVote}
-                      // >
-                      //   {!isLoading ? (
-                      //     <span className="af-class-button__text">View Your Vote</span>
-                      //   ) : (
-                      //     <span className="af-class-button__placeholder">View Your Vote</span>
-                      //   )}
-                      // </button>
+                    <div className="af-class-entry-received-message">
+                      Vote received!
+                    </div>
+                    // <button
+                    //   type="button"
+                    //   className={`af-class-submit-button w-button${isLoading ? ' af-class-submit-button--loading' : ''}`}
+                    //   onClick={handleViewOwnVote}
+                    // >
+                    //   {!isLoading ? (
+                    //     <span className="af-class-button__text">View Your Vote</span>
+                    //   ) : (
+                    //     <span className="af-class-button__placeholder">View Your Vote</span>
+                    //   )}
+                    // </button>
                   )}
                 </form>
               </div>
             </div>
             <div className="w-layout-vflex af-class-flex-block">
-              <div className="af-class-selection-grid">{renderImageItems()}</div>
+              <div className="af-class-selection-grid">
+                {renderImageItems().map((item, index) => (
+                  <div
+                    key={index}
+                    className="af-class-image-item"
+                    // style={{ transition: 'opacity 0.3s' }}
+                    // onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                    // onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </span>
       </span>
     </DndProvider>
   );
-}
+};
 
 export default KeynesianGame;
 

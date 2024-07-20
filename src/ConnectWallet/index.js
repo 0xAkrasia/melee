@@ -1,1 +1,1 @@
-export * from './connectWallet'
+export * from "./ConnectWallet";

@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { BrowserProvider } from 'ethers';
 import { initFhevm } from 'fhevmjs';
-import { LoginButton } from '../connectWallet';
+import { LoginButton } from '../ConnectWallet';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import Footer from './footer';
 import KeynesianGame from '../keynesianBeautyContest/keynesianBeautyContest';
@@ -56,25 +56,25 @@ function ParentComponent() {
     <div className="main-container">
       <div className="navbar header">
         <div className="div">
-          <img alt="Melee Logo" src="images/meleeName.png" style={{ width: '200px', height: 'auto' }} />
-          <div className="div-2">
-            <div className="dropdown">
-              <div className="text-wrapper" style={{ cursor: 'pointer' }}>Games</div>
-              <div className="dropdown-content">
+          <img alt="Melee Logo" src="images/meleeName.png" style={{ width: '200px', height: 'auto',  }} />
+          <div className="div-2" style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="dropdown" >
+              <div className="text-wrapper">Games</div>
+              <div className="dropdown-content" style={{ border: '2px solid orange' }}>
                 <div className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => setSelectedGame('star-fighter')}>Star Fighter</div>
                 <div className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => setSelectedGame('keynesian')}>Keynesian Beauty Contest</div>
                 {/* Add more game options here */}
               </div>
             </div>
-            <div className="text-wrapper" style={{ cursor: 'pointer' }} onClick={() => window.open('https://docs.melee.game', '_blank')}>Docs</div>
+            <div className="text-wrapper" onClick={() => window.open('https://docs.melee.game', '_blank')}>Docs</div>
             {/* <div className="text-wrapper" style={{ cursor: 'pointer' }}>History</div> */}
           </div>
         </div>
         <div className="div-3">
-          <a href="https://x.com/MeleeCrypto" target="_blank" rel="noopener noreferrer">
+          <a href="https://x.com/MeleeCrypto" target="_blank" rel="noopener noreferrer" >
             <img className="img" alt="X log" src="images/xLogoOrange.svg" />
           </a>
-          <a href="https://discord.gg/5jhSRKbVTR" target="_blank" rel="noopener noreferrer">
+          <a href="https://discord.gg/5jhSRKbVTR" target="_blank" rel="noopener noreferrer" >
             <img className="img" alt="Discord logo" src="images/discordLogoOrange.svg" />
           </a>
           <div className="div-wrapper">
@@ -82,6 +82,10 @@ function ParentComponent() {
           </div>
         </div>
       </div>
+
+
+
+
       {/* Render the selected game */}
       <div className="content">
         {selectedGame === 'keynesian' && (
