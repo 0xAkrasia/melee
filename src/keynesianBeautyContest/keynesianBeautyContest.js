@@ -247,9 +247,11 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
         // Refresh the state by calling handleConnectWallet again
         handleConnectWallet(walletProvider, wallets);
       } catch (error) {
-        console.error("Error casting vote:", error);
-        // alert("Failed to cast vote");
-        toast.error("Failed to cast vote");
+        if (error.message.includes("send at least 0.01 ETH to enter")) {
+          toast.error("send at least 0.01 ETH to enter");
+        } else if (error.message.includes("player already voted")) {
+          toast.error("You have already voted");
+        }
       } finally {
         setIsBetLoading(false); // Stop the loading indicator
       }

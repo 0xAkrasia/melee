@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { BrowserProvider } from 'ethers';
 import { initFhevm } from 'fhevmjs';
-import { LoginButton } from '../ConnectWallet';
+import { LoginButton } from '../connectWallet/connectWallet';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import Footer from './footer';
 import KeynesianGame from '../keynesianBeautyContest/keynesianBeautyContest';
