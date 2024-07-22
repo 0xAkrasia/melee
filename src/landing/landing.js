@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { BrowserProvider } from 'ethers';
 import { initFhevm } from 'fhevmjs';
-import { LoginButton } from '../connectWallet/connectWallet';
+import { LoginButton } from '../ConnectWallet/ConnectWallet';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import Footer from './footer';
 import KeynesianGame from '../keynesianBeautyContest/keynesianBeautyContest';
@@ -60,9 +60,9 @@ function ParentComponent() {
           <div className="div-2" style={{ display: 'flex', alignItems: 'center' }}>
             <div className="dropdown" >
               <div className="text-wrapper">Games</div>
-              <div className="dropdown-content" style={{ border: '2px solid orange' }}>
-                <div className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => setSelectedGame('star-fighter')}>Star Fighter</div>
-                <div className="dropdown-item" style={{ cursor: 'pointer' }} onClick={() => setSelectedGame('keynesian')}>Keynesian Beauty Contest</div>
+              <div className="dropdown-content" >
+                <div className="dropdown-item"  onClick={() => setSelectedGame('star-fighter')}>Star Fighter</div>
+                <div className="dropdown-item"  onClick={() => setSelectedGame('keynesian')}>Keynesian Beauty Contest</div>
                 {/* Add more game options here */}
               </div>
             </div>

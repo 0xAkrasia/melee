@@ -25,7 +25,7 @@ export const LoginButton = ({ authenticated }) => {
     } else {
         return (
             <button 
-                className="connect-wallet-button connect-wallet-text"
+                className="connect-wallet-button connect-wallet-text "
                 onClick={login}
             >
                 Connect Wallet
@@ -33,3 +33,6 @@ export const LoginButton = ({ authenticated }) => {
         );
     }
 };
+
+
+// text-shadow: 0 0 12px #ff8700;

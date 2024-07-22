@@ -12,6 +12,8 @@ import contractAddresses from "../contracts/contractAddresses.json";
 import "../css/KeynesianGame.css";
 import { postCiphertext } from "../ciphertextBriding/ciphertextToCCIP";
 import toast from "react-hot-toast";
+import ClipLoader from "react-spinners/ClipLoader";
+import Loader from "../components/loader";
 
 initFhevm();
 
@@ -505,11 +507,14 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
                         <button
                           type="submit"
                           data-wait="Please wait..."
-                          className={`af-class-submit-button w-button${
-                            isBetLoading
-                              ? "af-class-submit-button--loading"
-                              : ""
-                          }`}
+                          className={`af-class-submit-button w-button`}
+                          // className={`af-class-submit-button w-button${
+                          //   isBetLoading
+                          //     ? "af-class-submit-button--loading"
+                          //     : ""
+                          // }`}
+                          //
+
                           onClick={handleBet}
                         >
                           {!isBetLoading ? (
@@ -517,9 +522,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
                               Cast Vote
                             </span>
                           ) : (
-                            <span className="af-class-button__placeholder">
-                              Cast Vote
-                            </span>
+                            <Loader />
                           )}
                         </button>
                       </div>
