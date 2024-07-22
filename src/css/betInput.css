@@ -19,6 +19,7 @@
 .bet-input-icon {
   font-size: 1.2em;
   margin-right: 10px;
+  text-shadow: 0 0 15px #ff8700;
 }
 
 .bet-input {
@@ -27,6 +28,7 @@
   border: none;
   font-size: 1em;
   color: #ff9900;
+  text-shadow: 0 0 15px #ff8700;
 }
 
 .bet-input:focus {
@@ -36,6 +38,7 @@
 .bet-input-max {
   display: flex;
   align-items: center;
+  
 }
 
 .max-button {
@@ -44,6 +47,8 @@
   color: #ff9900;
   cursor: pointer;
   margin-left: 5px;
+  font-size: 1.2em;
+  text-shadow: 0 0 15px #ff8700;
 }
 
 .max-button:hover {
