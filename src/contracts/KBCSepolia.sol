@@ -156,7 +156,7 @@ contract KBCSepolia {
         }
     }
 
-    function fallback() public onlyOwner gameEnded {
+    function failSafe() public onlyOwner gameEnded {
         // fallback function to claim the remaining balance after the game is over and claim window is closed
         // this ensures funds can be returned to users in the event of bridge or other issues
         require(block.timestamp >= endTime + 48 hours, "Fallback is not allowed yet");

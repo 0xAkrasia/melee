@@ -7,7 +7,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import contractAbi from "../contracts/KBCSepoliaABI.json";
 import { FetchBalance, fetchBalance } from "./fetchBalance";
 import BetInput from "./betInput";
-import { parseEther } from "ethers";
+import { parseEther, formatEther } from "ethers";
 import contractAddresses from "../contracts/contractAddresses.json";
 import "../css/KeynesianGame.css";
 import { postCiphertext } from "../ciphertextBriding/ciphertextToCCIP";
@@ -17,7 +17,6 @@ import Loader from "../components/loader";
 initFhevm();
 
 const kbcAddress = contractAddresses[0].KBCSepolia;
-const TARGETDATE = new Date("2024-07-20T00:00:00Z"); // Replace with your target date-time
 const IMAGE_NAMES = [
   "apple",
   "banana",
@@ -71,34 +70,53 @@ const ImageItem = ({ id, index, imagePath, moveImage }) => {
 // background-color: rgba(25, 13, 0, 0.5);
 const KeynesianGame = ({ walletProvider, wallets }) => {
   const [selectedImages, setSelectedImages] = useState(IMAGE_NAMES);
-  const [countdownTime, setCountdownTime] = useState(
-    Math.floor((TARGETDATE - new Date()) / 1000)
-  ); // Calculate initial countdown time
+  const [countdownTime, setCountdownTime] = useState(0);
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [userHasVoted, setUserHasVoted] = useState(false);
   const [isBetLoading, setIsBetLoading] = useState(false); // State for loading effect during vote cast
   const [isLoading, setIsLoading] = useState(false); // State for loading effect during view own vote
   const [instance, setInstance] = useState(null); // Global state for instance
-  const [betAmount, setBetAmount] = useState("0.01"); // Set default value to 0.01
+  const [betAmount, setBetAmount] = useState("1.00"); // Set default value to 0.01
   const intervalRef = useRef(null); // Reference to store the interval ID
+  const [endTime, setEndTime] = useState(null);
+
+  const fetchEndTime = useCallback(async () => {
+    try {
+      const signer = await walletProvider.getSigner();
+      const contract = new Contract(kbcAddress, contractAbi, signer);
+      const endTimeFromContract = await contract.endTime();
+      const endTimeMs = Number(endTimeFromContract) * 1000; // Convert to milliseconds
+      setEndTime(endTimeMs);
+    } catch (error) {
+      console.error("Error fetching endTime:", error);
+    }
+  }, [walletProvider]);
 
   useEffect(() => {
-    console.log("Wallet provider:", walletProvider); // Debug statement
-    console.log("Wallets:", wallets); // Debug statement
+    fetchEndTime();
+  }, [fetchEndTime]);
 
-    intervalRef.current = setInterval(() => {
-      setCountdownTime((prevCount) => {
-        if (prevCount <= 0) {
+  useEffect(() => {
+    if (endTime) {
+      const updateCountdown = () => {
+        const now = Date.now();
+        const timeLeft = Math.max(0, endTime - now);
+        setCountdownTime(Math.floor(timeLeft / 1000));
+        
+        if (timeLeft <= 0) {
           clearInterval(intervalRef.current);
-          return 0;
         }
-        return prevCount - 1;
-      });
-    }, 1000);
+      };
 
-    // Cleanup function to clear the interval
-    return () => clearInterval(intervalRef.current);
-  }, []);
+      // Update immediately and then set interval
+      updateCountdown();
+      intervalRef.current = setInterval(updateCountdown, 1000);
+
+      return () => {
+        clearInterval(intervalRef.current);
+      };
+    }
+  }, [endTime]);
 
   const moveImage = (fromIndex, toIndex) => {
     const updatedImages = [...selectedImages];
@@ -150,7 +168,9 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   const checkVotingStatus = useCallback(async (signer) => {
     const contract = new Contract(kbcAddress, contractAbi, signer);
     const userAddress = await signer.getAddress();
-    const hasVoted = await contract.hasVotedBase(userAddress);
+    const betValueBigNumber = await contract.betValue(userAddress);
+    const betValueEther = parseFloat(formatEther(betValueBigNumber));
+    const hasVoted = betValueEther >= 0.01;
     console.log("User has voted:", hasVoted);
     return hasVoted;
   }, []);
@@ -164,10 +184,8 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
           setUserHasVoted(false);
           return;
         }
-        console.log("Connecting wallet...");
         const signer = await walletProvider.getSigner();
         if (signer) {
-          console.log("checkVotingStatus");
           const userHasVoted = await checkVotingStatus(signer);
           setIsWalletConnected(true);
           console.log("wallet connected", isWalletConnected);
@@ -198,25 +216,6 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
     setInstance(newInstance);
     return newInstance;
   }, [instance]);
-
-  // const createFHEInstance = useCallback(async (web3Provider) => {
-  //   if (instance) {
-  //     return instance;
-  //   }
-
-  //   const network = await web3Provider.getNetwork();
-  //   const chainId = +network.chainId.toString();
-  //   const ret = await web3Provider.call({
-  //     to: FHELibAddress,
-  //     data: "0xd9d47bb001",
-  //   });
-  //   const decoded = AbiCoder.defaultAbiCoder().decode(["bytes"], ret);
-  //   const publicKey = decoded[0];
-  //   const newInstance = await createInstance({ chainId, publicKey });
-  //   console.log("FHE instance created", newInstance);
-  //   setInstance(newInstance);
-  //   return newInstance;
-  // }, [instance]);
 
   const handleBet = useCallback(
     async (event) => {
@@ -435,16 +434,19 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   }, [walletProvider, wallets]);
 
   const renderCountdown = useCallback(() => {
-    const days = Math.floor(countdownTime / (3600 * 24));
-    const hours = Math.floor((countdownTime % (3600 * 24)) / 3600);
+    if (!endTime) {
+      console.log("endTime not set, returning 'Loading...'");
+      return "Loading...";
+    }
+
+    const hours = Math.floor(countdownTime / 3600);
     const minutes = Math.floor((countdownTime % 3600) / 60);
     const seconds = countdownTime % 60;
-    return `${days.toString().padStart(2, "0")}d ${hours
+    const countdownString = `${hours.toString().padStart(2, "0")}h ${minutes
       .toString()
-      .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
-      .toString()
-      .padStart(2, "0")}`;
-  }, [countdownTime]);
+      .padStart(2, "0")}m ${seconds.toString().padStart(2, "0")}s`;
+    return countdownString;
+  }, [countdownTime, endTime]);
 
   const renderImageItems = useCallback(() => {
     return selectedImages.map((id, index) => (
