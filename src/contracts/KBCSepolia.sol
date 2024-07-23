@@ -7,14 +7,16 @@ import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 
 contract KBCSepolia {
     // GAME VARS
-    mapping(address => bool) public hasVotedBase;
     bool public gameOver;
-    uint32 public winningScore;
-    address[] public winners;
+    uint32 public highScore;
+    mapping(address => uint32) public scores;
     mapping(address => bool) public winChecked;
+    mapping(address => bool) public hasClaimed;
     mapping(address => uint256) public betValue;
     uint256 public winnersBets;
+    uint256 public winnersPrize;
     address public owner;
+    uint256 public endTime;
 
     // BRIDGE VARS
     IInterchainSecurityModule public interchainSecurityModule;
@@ -31,8 +33,9 @@ contract KBCSepolia {
         ISM = 0xcE87DC19a0497120c8db474FCE082b02239A6Da3;
         interchainSecurityModule = IInterchainSecurityModule(ISM);
         owner = msg.sender;
+        endTime = block.timestamp + 48 hours;
         gameOver = false;
-        winningScore = 0;
+        highScore = 0;
         winnersBets = 0;
     }
 
@@ -69,13 +72,20 @@ contract KBCSepolia {
         //set up to receive donations to the pot
     }
 
+    function _addressToBytes32(address _addr) internal pure returns (bytes32) {
+        return bytes32(uint256(uint160(_addr)));
+    }
+
     function castVote(bytes calldata vote) external payable gameLive returns (bytes32) {
         // Send player vote as ciphertext to KBCInco
         // verify valid entry
-        require(!hasVotedBase[msg.sender], "player already voted");
-        require(msg.value >= 0.01 ether, "send at least 0.01 ETH to enter");
-        betValue[msg.sender] = msg.value;
-        hasVotedBase[msg.sender] = true;
+        betValue[msg.sender] = betValue[msg.sender] + msg.value;
+        require(betValue[msg.sender] >= 0.01 ether, "send at least 0.01 ETH to enter");
+
+        //check if game is over
+        if (block.timestamp >= endTime) {
+            gameOver = true;
+        }
 
         //send vote with player address to KBCInco
         bytes32 _hash = keccak256(vote);
@@ -93,11 +103,9 @@ contract KBCSepolia {
         return _hash;
     }
 
-    function _addressToBytes32(address _addr) internal pure returns (bytes32) {
-        return bytes32(uint256(uint160(_addr)));
-    }
-
-    function endGame() public onlyOwner gameLive {
+    function endGame() public gameLive {
+        // fallback if player submission does not end game
+        require(block.timestamp >= endTime, "Cannot end the game before endTime");
         gameOver = true;
     }
 
@@ -105,31 +113,53 @@ contract KBCSepolia {
         // handle bridged winning players and scores from KBCInco contract
         (address player, uint32 score) = abi.decode(_message, (address, uint32));
 
-        require(hasVotedBase[player], "player didn't vote");
+        require(betValue[player] >= 0.01 ether, "player didn't vote");
         require(winChecked[player] == false, "win has already been checked");
         winChecked[player] = true;
 
         // check if a player has the winning score, if so add player address to the 'winners' array
-        if (score > winningScore) {
-            delete winners;
-            winningScore = score;
-            winners.push(player);
+        if (score > highScore) {
+            highScore = score;
+            scores[player] = score;
             winnersBets = betValue[player];
-        } else if (score == winningScore) {
-            winners.push(player);
+        } else if (score == highScore) {
+            scores[player] = score;
             winnersBets += betValue[player];
         }
     }
 
-    function payWinners() public onlyOwner gameEnded {
-        // transfer payment to winner and pay Melee 3% house rake
-        require(winners.length > 0, "No winners to pay");
-        payable(owner).transfer((address(this).balance * 3) / 100);
+    function calculateWinnings() public gameEnded {
+        require(highScore > 0, "No winners determined yet");
+        
+        uint256 totalPrize = address(this).balance;
+        uint256 houseFee = (totalPrize * 4) / 100;
+        winnersPrize = totalPrize - houseFee;
 
-        uint256 prize = address(this).balance;
-        for (uint256 i = 0; i < winners.length; i++) {
-            uint256 winAmount = (prize * betValue[winners[i]]) / winnersBets;
-            payable(winners[i]).transfer(winAmount);
+        payable(owner).transfer(houseFee);
+    }
+    
+    function claimWinnings(address[] memory winners) public gameEnded {
+        require(block.timestamp >= endTime + 24 hours, "Winnings are not pushable yet");
+        require(highScore > 0, "No winners determined yet");
+        require(winnersPrize > 0, "Winnings have not been calculated");
+
+        for (uint i = 0; i < winners.length; i++) {
+            address winner = winners[i];
+            require(scores[winner] == highScore, "Address is not a winner");
+            require(!hasClaimed[winner], "Winner has already claimed");
+
+            uint256 winAmount = (winnersPrize * betValue[winner]) / winnersBets;
+            require(winAmount > 0, "No winnings to push for this winner");
+
+            hasClaimed[winner] = true;
+            payable(winner).transfer(winAmount);
         }
+    }
+
+    function fallback() public onlyOwner gameEnded {
+        // fallback function to claim the remaining balance after the game is over and claim window is closed
+        // this ensures funds can be returned to users in the event of bridge or other issues
+        require(block.timestamp >= endTime + 48 hours, "Fallback is not allowed yet");
+        payable(owner).transfer(address(this).balance);
     }
 }

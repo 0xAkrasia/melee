@@ -12,12 +12,10 @@ import contractAddresses from "../contracts/contractAddresses.json";
 import "../css/KeynesianGame.css";
 import { postCiphertext } from "../ciphertextBriding/ciphertextToCCIP";
 import toast from "react-hot-toast";
-import ClipLoader from "react-spinners/ClipLoader";
 import Loader from "../components/loader";
 
 initFhevm();
 
-const FHELibAddress = contractAddresses[0].FHELibAddress;
 const kbcAddress = contractAddresses[0].KBCSepolia;
 const TARGETDATE = new Date("2024-07-20T00:00:00Z"); // Replace with your target date-time
 const IMAGE_NAMES = [
@@ -234,9 +232,8 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
 
         const voteUint8 = convertToUint32(orderedImages);
         const encryptedVote = instance.encrypt32(voteUint8);
-        console.log("Encrypted vote:", encryptedVote);
-        // const hash = await postCiphertext(encryptedVote);
-        // console.log('Hash:', hash);
+        const hash = await postCiphertext(encryptedVote);
+        console.log('Hash:', hash);
 
         const tx = await contract.castVote(encryptedVote, {
           value: parseEther(betAmount),
@@ -253,6 +250,8 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
           toast.error("send at least 0.01 ETH to enter");
         } else if (error.message.includes("player already voted")) {
           toast.error("You have already voted");
+        } else if (error.message.includes("insufficient funds for gas * price + value")) {
+          toast.error("insufficient funds");
         }
       } finally {
         setIsBetLoading(false); // Stop the loading indicator

@@ -17,7 +17,6 @@ contract KBCInco is EIP712WithModifier {
 
     // GAME VARS
     address public owner;
-    mapping(address => bool) public hasVotedInco;
     mapping(address => euint32) private encryptedVotes;
     mapping(address => uint32) public decryptedVotes;
     bool public gameOver;
@@ -27,15 +26,17 @@ contract KBCInco is EIP712WithModifier {
     uint32[8] public finalScores;
     mapping(uint32 => uint32) public winningMap;
     uint32 public winningScore;
+    uint256 public endTime;
 
     event handled(bytes32 hash);
 
-    constructor() EIP712WithModifier("Authorization token", "1") {
+    constructor(uint256 _endTime) EIP712WithModifier("Authorization token", "1") {
         // contract is EIP712 to allow reencrypts
 
         // GAME VARS
         owner = msg.sender;
         gameOver = false;
+        endTime = _endTime;
         winningScore = 0; // set to zero to initiate winning score search algo
         nCandidates = 8;
         targetTotal = (nCandidates * (nCandidates - 1)) / 2; // target sum of total entry points (8+7+6...)
@@ -88,8 +89,6 @@ contract KBCInco is EIP712WithModifier {
         (bytes32 committedHash, address sepSender) = abi.decode(message, (bytes32, address));
 
         // add player votes to candidate totals to update scores
-        require(!hasVotedInco[sepSender], "player already voted");
-        hasVotedInco[sepSender] = true;
         euint32 encryptedVote = TFHE.asEuint32(cipherVote);
 
         euint32 runningTotal = TFHE.asEuint32(0);
@@ -101,10 +100,15 @@ contract KBCInco is EIP712WithModifier {
 
         TFHE.optReq(TFHE.eq(runningTotal, targetTotal));
         encryptedVotes[sepSender] = encryptedVote;
+
+        if (block.timestamp >= endTime) {
+            gameOver = true;
+        }
     }
 
-    function revealResult() public onlyOwner gameLive {
+    function revealResult() public gameLive {
         // end the game and reveal results
+        require(block.timestamp >= endTime, "The game has not ended");
         gameOver = true;
 
         for (uint32 i = 0; i < nCandidates; i++) {
@@ -112,7 +116,7 @@ contract KBCInco is EIP712WithModifier {
         }
     }
 
-    function revealWinningMapping() public onlyOwner gameEnded {
+    function revealWinningMapping() public gameEnded {
         // call after revealResult (separated to split gas fees)
         // sort in ascending order and make mapping to account for ties
         uint32[8] memory winningOrder = _bubbleSortWithIndices(finalScores);
@@ -161,7 +165,6 @@ contract KBCInco is EIP712WithModifier {
 
     function winCheck(address player) public gameEnded {
         // check if a player has the highest score
-        require(hasVotedInco[player], "player didn't vote");
         require(decryptedVotes[player] != 0, "decrypt vote first");
 
         uint32 playerVote = decryptedVotes[player];

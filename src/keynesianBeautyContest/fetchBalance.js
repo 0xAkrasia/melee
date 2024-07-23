@@ -15,7 +15,7 @@ export const FetchBalance = ({ contractAddress, factor }) => {
                 setBalance(totalPot);
             } catch (error) {
                 console.error('Error fetching balance:', error);
-                setBalance('Error fetching balance');
+                setBalance('Error');
             }
         };
 
