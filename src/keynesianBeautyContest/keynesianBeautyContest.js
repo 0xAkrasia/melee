@@ -76,7 +76,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   const [isBetLoading, setIsBetLoading] = useState(false); // State for loading effect during vote cast
   const [isLoading, setIsLoading] = useState(false); // State for loading effect during view own vote
   const [instance, setInstance] = useState(null); // Global state for instance
-  const [betAmount, setBetAmount] = useState("1.00"); // Set default value to 0.01
+  const [betAmount, setBetAmount] = useState("0.1"); // Set default value to 0.1
   const intervalRef = useRef(null); // Reference to store the interval ID
   const [endTime, setEndTime] = useState(null);
 
