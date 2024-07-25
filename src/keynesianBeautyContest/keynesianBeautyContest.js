@@ -1,7 +1,7 @@
 /* eslint-disable */
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { initFhevm, createInstance } from "fhevmjs";
-import { BrowserProvider, Contract, AbiCoder } from "ethers";
+import { BrowserProvider, Contract, JsonRpcProvider } from "ethers";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import contractAbi from "../contracts/KBCSepoliaABI.json";
@@ -82,15 +82,15 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
 
   const fetchEndTime = useCallback(async () => {
     try {
-      const signer = await walletProvider.getSigner();
-      const contract = new Contract(kbcAddress, contractAbi, signer);
+      const provider = new JsonRpcProvider('https://1rpc.io/sepolia');
+      const contract = new Contract(kbcAddress, contractAbi, provider);
       const endTimeFromContract = await contract.endTime();
       const endTimeMs = Number(endTimeFromContract) * 1000; // Convert to milliseconds
       setEndTime(endTimeMs);
     } catch (error) {
       console.error("Error fetching endTime:", error);
     }
-  }, [walletProvider]);
+  }, []);
 
   useEffect(() => {
     fetchEndTime();
@@ -549,17 +549,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
             </div>
             <div className="w-layout-vflex af-class-flex-block">
               <div className="af-class-selection-grid">
-                {renderImageItems().map((item, index) => (
-                  <div
-                    key={index}
-                    className="af-class-image-item"
-                    // style={{ transition: 'opacity 0.3s' }}
-                    // onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                    // onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                  >
-                    {item}
-                  </div>
-                ))}
+                {renderImageItems()}
               </div>
             </div>
           </div>
