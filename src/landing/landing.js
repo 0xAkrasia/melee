@@ -66,7 +66,7 @@ function ParentComponent() {
                 {/* Add more game options here */}
               </div>
             </div>
-            <div className="text-wrapper" onClick={() => window.open('https://docs.melee.game', '_blank')}>Docs</div>
+            <div className="text-wrapper" onClick={() => window.open('https://melee.gitbook.io/melee/', '_blank')}>Docs</div>
             {/* <div className="text-wrapper" style={{ cursor: 'pointer' }}>History</div> */}
           </div>
         </div>

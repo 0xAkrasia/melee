@@ -182,17 +182,28 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
           console.error("Wallet provider not found");
           setIsWalletConnected(false);
           setUserHasVoted(false);
+          toast.error("Wallet provider not found. Please ensure MetaMask is installed and connected.");
           return;
         }
+
+        // Check if the provider has a getSigner method
+        if (typeof walletProvider.getSigner !== 'function') {
+          console.error("Invalid wallet provider: getSigner method not found");
+          setIsWalletConnected(false);
+          setUserHasVoted(false);
+          toast.error("Invalid wallet provider. Please reconnect your wallet.");
+          return;
+        }
+
         const signer = await walletProvider.getSigner();
         if (signer) {
           const userHasVoted = await checkVotingStatus(signer);
           setIsWalletConnected(true);
-          console.log("wallet connected", isWalletConnected);
+          console.log("wallet connected", true);
           setUserHasVoted(userHasVoted);
         } else {
           setIsWalletConnected(false);
-          console.log("wallet connected", isWalletConnected);
+          console.log("wallet connected", false);
           setUserHasVoted(false);
         }
       } catch (error) {
