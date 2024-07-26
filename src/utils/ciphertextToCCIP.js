@@ -5,7 +5,7 @@ const uint8ArrayToHex = (uint8Array) => {
       .map(byte => byte.toString(16).padStart(2, '0'))
       .join('');
   };
-  
+
 // Function to send POST request with ciphertext
 export const postCiphertext = async (ciphertext) => {
     try {

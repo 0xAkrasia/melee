@@ -30,13 +30,13 @@ contract KBCInco is EIP712WithModifier {
 
     event handled(bytes32 hash);
 
-    constructor(uint256 _endTime) EIP712WithModifier("Authorization token", "1") {
+    constructor() EIP712WithModifier("Authorization token", "1") {
         // contract is EIP712 to allow reencrypts
 
         // GAME VARS
         owner = msg.sender;
         gameOver = false;
-        endTime = _endTime;
+        endTime = block.timestamp + 48 hours;
         winningScore = 0; // set to zero to initiate winning score search algo
         nCandidates = 8;
         targetTotal = (nCandidates * (nCandidates - 1)) / 2; // target sum of total entry points (8+7+6...)
