@@ -13,20 +13,13 @@ import "../css/KeynesianGame.css";
 import { postCiphertext } from "../ciphertextBriding/ciphertextToCCIP";
 import toast from "react-hot-toast";
 import Loader from "../components/loader";
+import imageCategories from "../contracts/imageCategories.json";
 
 initFhevm();
 
+const imageCategory = "Memecoin"
 const kbcAddress = contractAddresses[0].KBCSepolia;
-const IMAGE_NAMES = [
-  "apple",
-  "banana",
-  "blueberry",
-  "cherry",
-  "mango",
-  "strawberry",
-  "orange",
-  "watermelon",
-];
+const imageNames = imageCategories[0][imageCategory];
 
 const ImageItem = ({ id, index, imagePath, moveImage }) => {
   const ref = React.useRef(null);
@@ -61,15 +54,19 @@ const ImageItem = ({ id, index, imagePath, moveImage }) => {
         ref={ref} // Apply drag and drop to img element
         src={imagePath}
         loading="lazy"
-        alt=""
+        alt={`Image ${id}`}
         className="af-class-img"
+        onError={(e) => {
+          console.error("Image failed to load:", imagePath);
+          e.target.style.display = 'none';
+        }}
       />
     </div>
   );
 };
 // background-color: rgba(25, 13, 0, 0.5);
 const KeynesianGame = ({ walletProvider, wallets }) => {
-  const [selectedImages, setSelectedImages] = useState(IMAGE_NAMES);
+  const [selectedImages, setSelectedImages] = useState(imageNames || []);
   const [countdownTime, setCountdownTime] = useState(0);
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [userHasVoted, setUserHasVoted] = useState(false);
@@ -127,7 +124,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
 
   const convertToUint32 = useCallback((selectedImageIdsArray) => {
     let result = 0;
-    const imageIds = IMAGE_NAMES;
+    const imageIds = imageNames;
 
     selectedImageIdsArray.forEach((id, index) => {
       // Find the index of the current image id
@@ -147,7 +144,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   }, []);
 
   const uint8ToSelectedImageIds = (voteUint8) => {
-    const imageIds = IMAGE_NAMES;
+    const imageIds = imageNames;
     const selectedImageIdsArray = [];
 
     const voteUint8Num = Number(voteUint8);
@@ -182,7 +179,6 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
           console.error("Wallet provider not found");
           setIsWalletConnected(false);
           setUserHasVoted(false);
-          toast.error("Wallet provider not found. Please ensure MetaMask is installed and connected.");
           return;
         }
 
@@ -460,16 +456,20 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   }, [countdownTime, endTime]);
 
   const renderImageItems = useCallback(() => {
-    return selectedImages.map((id, index) => (
+    return (selectedImages || []).map((id, index) => (
       <ImageItem
         key={id}
         id={id}
         index={index}
-        imagePath={`images/fruit/${id}.png`}
+        imagePath={`images/${imageCategory}/${id}.png`}
         moveImage={moveImage}
       />
     ));
-  }, [selectedImages, moveImage]);
+  }, [selectedImages, moveImage, imageCategory]);
+
+  useEffect(() => {
+    setSelectedImages(imageNames || []);
+  }, [imageCategory]);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -480,7 +480,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
               <div className="af-class-game-title">
                 <div className="af-class-h1">Keynesian Beauty Contest</div>
                 <div></div>
-                <h2 className="af-class-p_body_big">Fruit Edition</h2>
+                <h2 className="af-class-p_body_big">{imageCategory} Edition</h2>
                 <div></div>
                 <div className="af-class-p_body">
                   Drag and drop to rank the images below from best to worst. If

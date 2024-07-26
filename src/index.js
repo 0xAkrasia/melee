@@ -77,15 +77,17 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <PrivyProvider
     appId={"clsay39yw04tv13s57t7fig9f"}
     config={{
-      loginMethods: ["email", "google", "discord", "wallet"],
+      loginMethods: ["email", "twitter", "discord", "wallet"],
       defaultChain: sepolia,
       supportedChains: [inco, baseMainnet, sepolia],
       appearance: {
         theme: "dark",
         accentColor: "#3673f5",
-        logo: "https://raw.githubusercontent.com/0xAkrasia/Melee/main/public/images/meleeIcon.png",
-        showWalletLoginFirst: false,
-        walletList: ["coinbase_wallet", "wallet_connect", "metamask"],
+        // landingHeader: 'Your custom header text',
+        // loginMessage: 'Your custom header #2 text',
+        logo: "https://raw.githubusercontent.com/0xAkrasia/melee/f446a3440cea66046e1314462de21a15657d335a/public/images/meleeIcon.svg?token=A3STTHTSSDVZWHDMZZ5JDH3GUKFZM",
+        showWalletLoginFirst: true,
+        walletList: ["metamask", "coinbase_wallet", "detected_wallets"],
       },
     }}
   >
