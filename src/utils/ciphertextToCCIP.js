@@ -10,7 +10,7 @@ const uint8ArrayToHex = (uint8Array) => {
 export const postCiphertext = async (ciphertext) => {
     try {
         const hexCiphertext = '0x' + uint8ArrayToHex(ciphertext);
-        const response = await axios.post('/api/token', {
+        const response = await axios.post('https://hyperlane-ccip.vercel.app/token', {
             ciphertext: hexCiphertext
         });
         return response.data;
@@ -23,7 +23,7 @@ export const postCiphertext = async (ciphertext) => {
 // Function to send GET request with hash
 export const getCiphertextByHash = async (hash) => {
     try {
-        const response = await axios.get('/api/token', {
+        const response = await axios.get('https://hyperlane-ccip.vercel.app/token', {
             params: {
                 hash: hash
             }

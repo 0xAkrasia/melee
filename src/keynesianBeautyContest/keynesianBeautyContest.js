@@ -10,7 +10,7 @@ import BetInput from "./betInput";
 import { parseEther, formatEther } from "ethers";
 import contractAddresses from "../contracts/contractAddresses.json";
 import "../css/KeynesianGame.css";
-import { postCiphertext } from "../ciphertextBriding/ciphertextToCCIP";
+import { postCiphertext } from "../utils/ciphertextToCCIP";
 import toast from "react-hot-toast";
 import Loader from "../components/loader";
 import imageCategories from "../contracts/imageCategories.json";
