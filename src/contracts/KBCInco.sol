@@ -3,7 +3,6 @@ pragma solidity ^0.8.19;
 
 import { IMailbox } from "@hyperlane-xyz/core/contracts/interfaces/IMailbox.sol";
 import { IInterchainSecurityModule } from "@hyperlane-xyz/core/contracts/interfaces/IInterchainSecurityModule.sol";
-import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import "fhevm/lib/TFHE.sol";
 import "fhevm/abstracts/EIP712WithModifier.sol";
 
@@ -24,6 +23,7 @@ contract KBCInco is EIP712WithModifier {
     uint32 public nCandidates;
     uint32 public targetTotal;
     uint32[8] public finalScores;
+    mapping(address => uint32) public playerScores;
     mapping(uint32 => uint32) public winningMap;
     uint32 public winningScore;
     uint256 public endTime;
@@ -164,7 +164,6 @@ contract KBCInco is EIP712WithModifier {
     }
 
     function winCheck(address player) public gameEnded {
-        // check if a player has the highest score
         require(decryptedVotes[player] != 0, "decrypt vote first");
 
         uint32 playerVote = decryptedVotes[player];
@@ -186,16 +185,17 @@ contract KBCInco is EIP712WithModifier {
         }
 
         require(validEntry, "invalid player entry");
+        playerScores[player] = score;
 
         // If a player has the winning score then bridge info
         if (score >= winningScore) {
             winningScore = score;
-            IMailbox(mailbox).dispatch(
-                DomainID,
-                bytes32(uint256(uint160(recipient))),
-                abi.encode(player, winningScore)
-            );
+            IMailbox(mailbox).dispatch(DomainID, _addressToBytes32(recipient), abi.encode(uint8(1), abi.encode(player, winningScore)));
         }
+    }
+
+    function _addressToBytes32(address _addr) internal pure returns (bytes32) {
+        return bytes32(uint256(uint160(_addr)));
     }
 
     function viewOwnVote(

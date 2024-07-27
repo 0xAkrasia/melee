@@ -227,17 +227,27 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   const handleBet = useCallback(
     async (event) => {
       event.preventDefault();
-      setIsBetLoading(true); // Start the loading indicator
+      setIsBetLoading(true);
       try {
         const instance = await createFHEInstance();
         const signer = await walletProvider.getSigner();
         const contract = new Contract(kbcAddress, contractAbi, signer);
 
-        // Ensure to reorder images to specific order if needed
+        // Get the current order of images
         const orderedImages = selectedImages.slice();
 
-        const voteUint8 = convertToUint32(orderedImages);
-        const encryptedVote = instance.encrypt32(voteUint8);
+        // Convert image order to indices
+        const imageIndices = orderedImages.map(id => imageNames.indexOf(id));
+
+        // Encode the vote as a base 8 number
+        let voteUint32 = 0;
+        for (let i = 0; i < imageIndices.length; i++) {
+          voteUint32 += i * Math.pow(8, imageIndices[i]);
+        }
+
+        const encryptedVote = instance.encrypt32(voteUint32);
+        console.log("Encrypted vote:", encryptedVote);
+
         const hash = await postCiphertext(encryptedVote);
         console.log('Hash:', hash);
 
@@ -246,12 +256,10 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
         });
         await tx.wait();
 
-        // Set selected images as required post-casting
-        setSelectedImages(orderedImages); // You can reset or keep as handled earlier
-
         // Refresh the state by calling handleConnectWallet again
         handleConnectWallet(walletProvider, wallets);
       } catch (error) {
+        console.error("Error in handleBet:", error);
         if (error.message.includes("send at least 0.01 ETH to enter")) {
           toast.error("send at least 0.01 ETH to enter");
         } else if (error.message.includes("player already voted")) {
@@ -260,13 +268,13 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
           toast.error("insufficient funds");
         }
       } finally {
-        setIsBetLoading(false); // Stop the loading indicator
+        setIsBetLoading(false);
       }
     },
     [
       betAmount,
       selectedImages,
-      convertToUint32,
+      imageNames,
       createFHEInstance,
       walletProvider,
       handleConnectWallet,
@@ -520,13 +528,6 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
                           type="submit"
                           data-wait="Please wait..."
                           className={`af-class-submit-button w-button`}
-                          // className={`af-class-submit-button w-button${
-                          //   isBetLoading
-                          //     ? "af-class-submit-button--loading"
-                          //     : ""
-                          // }`}
-                          //
-
                           onClick={handleBet}
                         >
                           {!isBetLoading ? (
@@ -543,17 +544,6 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
                     <div className="af-class-entry-received-message">
                       Vote received!
                     </div>
-                    // <button
-                    //   type="button"
-                    //   className={`af-class-submit-button w-button${isLoading ? ' af-class-submit-button--loading' : ''}`}
-                    //   onClick={handleViewOwnVote}
-                    // >
-                    //   {!isLoading ? (
-                    //     <span className="af-class-button__text">View Your Vote</span>
-                    //   ) : (
-                    //     <span className="af-class-button__placeholder">View Your Vote</span>
-                    //   )}
-                    // </button>
                   )}
                 </form>
               </div>

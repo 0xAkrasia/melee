@@ -3,7 +3,6 @@ pragma solidity ^0.8.19;
 
 import { IMailbox } from "@hyperlane-xyz/core/contracts/interfaces/IMailbox.sol";
 import { IInterchainSecurityModule } from "@hyperlane-xyz/core/contracts/interfaces/IInterchainSecurityModule.sol";
-import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 
 contract KBCSepolia {
     // GAME VARS
@@ -109,9 +108,10 @@ contract KBCSepolia {
         gameOver = true;
     }
 
-    function handle(uint32 _origin, bytes32 _sender, bytes memory _message) external payable gameEnded onlyMailbox {
+    function handle(uint32 _origin, bytes32 _sender, bytes calldata _message) external gameEnded onlyMailbox {
         // handle bridged winning players and scores from KBCInco contract
-        (address player, uint32 score) = abi.decode(_message, (address, uint32));
+        (uint8 handler, bytes memory playerInfo) = abi.decode(_message, (uint8, bytes));
+        (address player, uint32 score) = abi.decode(playerInfo, (address, uint32));
 
         require(betValue[player] >= 0.01 ether, "player didn't vote");
         require(winChecked[player] == false, "win has already been checked");
@@ -137,7 +137,7 @@ contract KBCSepolia {
 
         payable(owner).transfer(houseFee);
     }
-    
+
     function claimWinnings(address[] memory winners) public gameEnded {
         require(block.timestamp >= endTime + 24 hours, "Winnings are not pushable yet");
         require(highScore > 0, "No winners determined yet");

@@ -174,7 +174,7 @@
 		],
 		"name": "handle",
 		"outputs": [],
-		"stateMutability": "payable",
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
