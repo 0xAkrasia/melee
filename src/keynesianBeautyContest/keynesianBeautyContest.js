@@ -5,7 +5,7 @@ import { BrowserProvider, Contract, JsonRpcProvider } from "ethers";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import contractAbi from "../contracts/KBCSepoliaABI.json";
-import { FetchBalance, fetchBalance } from "./fetchBalance";
+import { FetchBalance } from "./fetchBalance";
 import BetInput from "./betInput";
 import { parseEther, formatEther } from "ethers";
 import contractAddresses from "../contracts/contractAddresses.json";
@@ -499,7 +499,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
               <div className="af-class-game-stats">
                 <div className="af-class-typehead">
                   <div className="af-class-p_body">Total Pot</div>
-                  <FetchBalance contractAddress={kbcAddress} factor="1" />
+                  <FetchBalance contractAddress={kbcAddress} factor={1} refreshInterval={5000} />
                 </div>
                 <div className="af-class-typehead">
                   <div className="af-class-p_body">Time to reveal</div>

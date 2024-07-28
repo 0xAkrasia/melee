@@ -260,6 +260,19 @@
 	},
 	{
 		"inputs": [],
+		"name": "highScore",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "interchainSecurityModule",
 		"outputs": [
 			{
@@ -457,19 +470,6 @@
 			}
 		],
 		"name": "winningMap",
-		"outputs": [
-			{
-				"internalType": "uint32",
-				"name": "",
-				"type": "uint32"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "winningScore",
 		"outputs": [
 			{
 				"internalType": "uint32",

@@ -25,7 +25,7 @@ contract KBCInco is EIP712WithModifier {
     uint32[8] public finalScores;
     mapping(address => uint32) public playerScores;
     mapping(uint32 => uint32) public winningMap;
-    uint32 public winningScore;
+    uint32 public highScore;
     uint256 public endTime;
 
     event handled(bytes32 hash);
@@ -36,8 +36,8 @@ contract KBCInco is EIP712WithModifier {
         // GAME VARS
         owner = msg.sender;
         gameOver = false;
-        endTime = block.timestamp + 48 hours;
-        winningScore = 0; // set to zero to initiate winning score search algo
+        endTime = block.timestamp + 12 minutes;
+        highScore = 0; // set to zero to initiate winning score search algo
         nCandidates = 8;
         targetTotal = (nCandidates * (nCandidates - 1)) / 2; // target sum of total entry points (8+7+6...)
 
@@ -100,10 +100,6 @@ contract KBCInco is EIP712WithModifier {
 
         TFHE.optReq(TFHE.eq(runningTotal, targetTotal));
         encryptedVotes[sepSender] = encryptedVote;
-
-        if (block.timestamp >= endTime) {
-            gameOver = true;
-        }
     }
 
     function revealResult() public gameLive {
@@ -188,9 +184,9 @@ contract KBCInco is EIP712WithModifier {
         playerScores[player] = score;
 
         // If a player has the winning score then bridge info
-        if (score >= winningScore) {
-            winningScore = score;
-            IMailbox(mailbox).dispatch(DomainID, _addressToBytes32(recipient), abi.encode(uint8(1), abi.encode(player, winningScore)));
+        if (score >= highScore) {
+            highScore = score;
+            IMailbox(mailbox).dispatch(DomainID, _addressToBytes32(recipient), abi.encode(uint8(1), abi.encode(player, highScore)));
         }
     }
 
