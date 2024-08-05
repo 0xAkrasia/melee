@@ -35,8 +35,11 @@ export const getCiphertextByHash = async (hash) => {
 };
 
 // Example usage
-// const main = async () => {
-//     //call API and commit hash to contract
-//     const hash = await postCiphertext('CIPHERTEXT_HERE');
-//     console.log('Hash:', hash);
-// };
+const main = async () => {
+    //call API and commit hash to contract
+    // const hash = await postCiphertext('CIPHERTEXT_HERE');
+    const ciphertext = await getCiphertextByHash('0x6dadd2d37f8b983def131b83612eb865a7fb131c0f604e29e5364c706d4c62ca');
+    console.log('Ciphertext:', ciphertext);
+};
+
+main();

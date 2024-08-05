@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { formatEther, JsonRpcProvider } from 'ethers';
 import '../css/fetchBalance.css';
 
-const provider = new JsonRpcProvider('https://1rpc.io/sepolia');
+const provider = new JsonRpcProvider('https://1rpc.io/base');
 
 export const FetchBalance = ({ contractAddress, factor, refreshInterval = 5000 }) => {
     const [balance, setBalance] = useState('');

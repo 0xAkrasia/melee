@@ -12,7 +12,7 @@ contract KBCInco is EIP712WithModifier {
     address public mailbox;
     address public ISM;
     address public recipient;
-    uint32 public DomainID = 11155111;
+    uint32 public DomainID = 8453;
 
     // GAME VARS
     address public owner;
@@ -36,14 +36,14 @@ contract KBCInco is EIP712WithModifier {
         // GAME VARS
         owner = msg.sender;
         gameOver = false;
-        endTime = block.timestamp + 12 minutes;
+        endTime = block.timestamp + 20 minutes;
         highScore = 0; // set to zero to initiate winning score search algo
         nCandidates = 8;
         targetTotal = (nCandidates * (nCandidates - 1)) / 2; // target sum of total entry points (8+7+6...)
 
         // BRIDGE VARS
-        mailbox = 0x51510C9df44256FE61f391286F81E52A708919db;
-        ISM = 0xcAe8bD09aE9Ac21da7d1e189b5F7376aeCc82497;
+        mailbox = 0xA2Be69D0f75d2465f1d81cDf1bd7d52b131eD363;
+        ISM = 0x8549dFC06042ed1302A53f7e85687b74d58bE865;
         interchainSecurityModule = IInterchainSecurityModule(ISM);
     }
 
@@ -69,12 +69,12 @@ contract KBCInco is EIP712WithModifier {
     }
 
     modifier onlyISM() {
-        require(msg.sender == ISM, "Only mailbox can call this function");
+        require(msg.sender == ISM, "Only ISM can call this function");
         _;
     }
 
     function setRecipient(address _recipient) public onlyOwner {
-        recipient = _recipient; //contract address on Sepolia
+        recipient = _recipient; //contract address on Base
     }
 
     //no-op function but called by mailbox pos verification so keep
@@ -86,7 +86,7 @@ contract KBCInco is EIP712WithModifier {
     function handleWithCiphertext(uint32 _origin, bytes32 _sender, bytes memory _message) external onlyISM {
         // receive data
         (bytes memory message, bytes memory cipherVote) = abi.decode(_message, (bytes, bytes));
-        (bytes32 committedHash, address sepSender) = abi.decode(message, (bytes32, address));
+        (bytes32 committedHash, address baseSender) = abi.decode(message, (bytes32, address));
 
         // add player votes to candidate totals to update scores
         euint32 encryptedVote = TFHE.asEuint32(cipherVote);
@@ -99,7 +99,7 @@ contract KBCInco is EIP712WithModifier {
         }
 
         TFHE.optReq(TFHE.eq(runningTotal, targetTotal));
-        encryptedVotes[sepSender] = encryptedVote;
+        encryptedVotes[baseSender] = encryptedVote;
     }
 
     function revealResult() public gameLive {

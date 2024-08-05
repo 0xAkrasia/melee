@@ -6,6 +6,7 @@ import { LoginButton } from '../utils/ConnectWallet';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import Footer from './footer';
 import KeynesianGame from '../keynesianBeautyContest/keynesianBeautyContest';
+import GameHistory from '../gameHistory/gameHistory';
 import '../css/normalize.css';
 import '../css/webflow.css';
 import '../css/starFighter.css';
@@ -54,6 +55,16 @@ function ParentComponent() {
 
   return (
     <div className="main-container">
+      <div className="newsreel-banner">
+        <div class="scroll">
+        <div>
+          NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </div>
+        <div>
+          NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NEW GAME EVERY 24HRS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </div>
+        </div>
+      </div>
       <div className="navbar header">
         <div className="div">
           <img alt="Melee Logo" src="images/meleeName.png" style={{ width: '200px', height: 'auto',  }} />
@@ -61,13 +72,12 @@ function ParentComponent() {
             <div className="dropdown" >
               <div className="text-wrapper">Games</div>
               <div className="dropdown-content" >
-                <div className="dropdown-item"  onClick={() => setSelectedGame('star-fighter')}>Star Fighter</div>
                 <div className="dropdown-item"  onClick={() => setSelectedGame('keynesian')}>Keynesian Beauty Contest</div>
-                {/* Add more game options here */}
+                <div className="dropdown-item"  onClick={() => setSelectedGame('star-fighter')}>Star Fighter</div>
               </div>
             </div>
+            <div className="text-wrapper" onClick={() => setSelectedGame('history')}>History</div>
             <div className="text-wrapper" onClick={() => window.open('https://melee.gitbook.io/melee/', '_blank')}>Docs</div>
-            {/* <div className="text-wrapper" style={{ cursor: 'pointer' }}>History</div> */}
           </div>
         </div>
         <div className="div-3">
@@ -84,9 +94,7 @@ function ParentComponent() {
       </div>
 
 
-
-
-      {/* Render the selected game */}
+      {/* Render the selected game or history */}
       <div className="content">
         {selectedGame === 'keynesian' && (
           <KeynesianGame walletProvider={walletProvider} wallets={wallets} />
@@ -95,6 +103,9 @@ function ParentComponent() {
           <div className="coming-soon-message">
             Coming Soon ...
           </div>
+        )}
+        {selectedGame === 'history' && (
+          <GameHistory />
         )}
       </div>
       <Footer className="footer" /> {/* Add Footer here */}

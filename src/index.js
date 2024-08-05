@@ -29,7 +29,7 @@ export const inco = defineChain({
   },
 });
 
-export const baseMainnet = defineChain({
+export const base = defineChain({
   id: 8453,
   name: "Base Mainnet",
   network: "Base Mainnet",
@@ -78,14 +78,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     appId={"clsay39yw04tv13s57t7fig9f"}
     config={{
       loginMethods: ["email", "twitter", "discord", "wallet"],
-      defaultChain: sepolia,
-      supportedChains: [inco, baseMainnet, sepolia],
+      defaultChain: base,
+      supportedChains: [inco, base, sepolia],
       appearance: {
         theme: "dark",
-        accentColor: "#3673f5",
+        accentColor: "#FF8700",
         // landingHeader: 'Your custom header text',
         // loginMessage: 'Your custom header #2 text',
-        logo: "https://raw.githubusercontent.com/0xAkrasia/melee/f446a3440cea66046e1314462de21a15657d335a/public/images/meleeIcon.svg?token=A3STTHTSSDVZWHDMZZ5JDH3GUKFZM",
+        logo: "https://raw.githubusercontent.com/0xAkrasia/melee/f446a3440cea66046e1314462de21a15657d335a/public/images/meleeIcon.svg",
         showWalletLoginFirst: true,
         walletList: ["metamask", "coinbase_wallet", "detected_wallets"],
       },

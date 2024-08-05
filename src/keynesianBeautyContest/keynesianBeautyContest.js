@@ -4,12 +4,12 @@ import { initFhevm, createInstance } from "fhevmjs";
 import { BrowserProvider, Contract, JsonRpcProvider } from "ethers";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import contractAbi from "../contracts/KBCSepoliaABI.json";
+import contractAbi from "../contracts/KBCBaseABI.json";
 import { FetchBalance } from "./fetchBalance";
 import BetInput from "./betInput";
 import { parseEther, formatEther } from "ethers";
 import contractAddresses from "../contracts/contractAddresses.json";
-import "../css/KeynesianGame.css";
+import "../css/keynesianBeautyContest.css";
 import { postCiphertext } from "../utils/ciphertextToCCIP";
 import toast from "react-hot-toast";
 import Loader from "../components/loader";
@@ -18,7 +18,7 @@ import imageCategories from "../contracts/imageCategories.json";
 initFhevm();
 
 const imageCategory = "Memecoin"
-const kbcAddress = contractAddresses[0].KBCSepolia;
+const kbcAddress = contractAddresses[0].KBCBase;
 const imageNames = imageCategories[0][imageCategory];
 
 const ImageItem = ({ id, index, imagePath, moveImage }) => {
@@ -64,7 +64,7 @@ const ImageItem = ({ id, index, imagePath, moveImage }) => {
     </div>
   );
 };
-// background-color: rgba(25, 13, 0, 0.5);
+
 const KeynesianGame = ({ walletProvider, wallets }) => {
   const [selectedImages, setSelectedImages] = useState(imageNames || []);
   const [countdownTime, setCountdownTime] = useState(0);
@@ -73,13 +73,13 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   const [isBetLoading, setIsBetLoading] = useState(false); // State for loading effect during vote cast
   const [isLoading, setIsLoading] = useState(false); // State for loading effect during view own vote
   const [instance, setInstance] = useState(null); // Global state for instance
-  const [betAmount, setBetAmount] = useState("0.1"); // Set default value to 0.1
+  const [betAmount, setBetAmount] = useState("0.001");
   const intervalRef = useRef(null); // Reference to store the interval ID
   const [endTime, setEndTime] = useState(null);
 
   const fetchEndTime = useCallback(async () => {
     try {
-      const provider = new JsonRpcProvider('https://1rpc.io/sepolia');
+      const provider = new JsonRpcProvider('https://1rpc.io/base');
       const contract = new Contract(kbcAddress, contractAbi, provider);
       const endTimeFromContract = await contract.endTime();
       const endTimeMs = Number(endTimeFromContract) * 1000; // Convert to milliseconds
@@ -167,7 +167,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
     const userAddress = await signer.getAddress();
     const betValueBigNumber = await contract.betValue(userAddress);
     const betValueEther = parseFloat(formatEther(betValueBigNumber));
-    const hasVoted = betValueEther >= 0.01;
+    const hasVoted = betValueEther >= 0.001;
     console.log("User has voted:", hasVoted);
     return hasVoted;
   }, []);
@@ -260,8 +260,8 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
         handleConnectWallet(walletProvider, wallets);
       } catch (error) {
         console.error("Error in handleBet:", error);
-        if (error.message.includes("send at least 0.01 ETH to enter")) {
-          toast.error("send at least 0.01 ETH to enter");
+        if (error.message.includes("send at least 0.001 ETH to enter")) {
+          toast.error("send at least 0.001 ETH to enter");
         } else if (error.message.includes("player already voted")) {
           toast.error("You have already voted");
         } else if (error.message.includes("insufficient funds for gas * price + value")) {

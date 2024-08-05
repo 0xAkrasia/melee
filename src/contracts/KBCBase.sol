@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import { IMailbox } from "@hyperlane-xyz/core/contracts/interfaces/IMailbox.sol";
 import { IInterchainSecurityModule } from "@hyperlane-xyz/core/contracts/interfaces/IInterchainSecurityModule.sol";
 
-contract KBCSepolia {
+contract KBCBase {
     // GAME VARS
     bool public gameOver;
     uint32 public highScore;
@@ -28,11 +28,11 @@ contract KBCSepolia {
     event handled(address incoSender);
 
     constructor() {
-        mailbox = 0xfFAEF09B3cd11D9b20d1a19bECca54EEC2884766;
-        ISM = 0xcE87DC19a0497120c8db474FCE082b02239A6Da3;
+        mailbox = 0xeA87ae93Fa0019a82A727bfd3eBd1cFCa8f64f1D;
+        ISM = 0x094714b3453096cD7Dc0746D4Dd7fA70cbFEEd3D;
         interchainSecurityModule = IInterchainSecurityModule(ISM);
         owner = msg.sender;
-        endTime = block.timestamp + 12 minutes;
+        endTime = block.timestamp + 20 minutes;
         gameOver = false;
         highScore = 0;
         winnersBets = 0;
@@ -59,7 +59,7 @@ contract KBCSepolia {
     }
 
     modifier onlyISM() {
-        require(msg.sender == ISM, "Only mailbox can call this function");
+        require(msg.sender == ISM, "Only ISM can call this function");
         _;
     }
 
@@ -79,7 +79,7 @@ contract KBCSepolia {
         // Send player vote as ciphertext to KBCInco
         // verify valid entry
         betValue[msg.sender] += msg.value;
-        require(betValue[msg.sender] >= 0.01 ether, "send at least 0.01 ETH to enter");
+        require(betValue[msg.sender] >= 0.001 ether, "send at least 0.001 ETH to enter");
 
         //check if game is over
         if (block.timestamp >= endTime) {
@@ -137,7 +137,7 @@ contract KBCSepolia {
     }
 
     function claimWinnings(address[] memory winners) public gameEnded {
-        require(block.timestamp >= endTime + 12 minutes, "Winnings are not pushable yet");
+        require(block.timestamp >= endTime + 20 minutes, "Winnings are not pushable yet");
         require(highScore > 0, "No winners determined yet");
         require(winnersPrize > 0, "Winnings have not been calculated");
 
@@ -157,7 +157,7 @@ contract KBCSepolia {
     function failSafe() public onlyOwner gameEnded {
         // fallback function to claim the remaining balance after the game is over and claim window is closed
         // this ensures funds can be returned to users in the event of bridge or other issues
-        require(block.timestamp >= endTime + 12 minutes, "Fallback is not allowed yet");
+        require(block.timestamp >= endTime + 20 minutes, "Fallback is not allowed yet");
         payable(owner).transfer(address(this).balance);
     }
 }
