@@ -28,8 +28,6 @@ contract KBCBase {
     event handled(address incoSender);
 
     constructor() {
-        // mailbox = 0xeA87ae93Fa0019a82A727bfd3eBd1cFCa8f64f1D;
-        // ISM = 0x094714b3453096cD7Dc0746D4Dd7fA70cbFEEd3D;
         mailbox = 0xfFAEF09B3cd11D9b20d1a19bECca54EEC2884766;
         ISM = 0xcE87DC19a0497120c8db474FCE082b02239A6Da3;
         interchainSecurityModule = IInterchainSecurityModule(ISM);
@@ -111,6 +109,9 @@ contract KBCBase {
     }
 
     function handle(uint32 _origin, bytes32 _sender, bytes calldata _message) external onlyMailbox {
+        require(_origin == DomainID, "Invalid origin");
+        require(_sender == _addressToBytes32(recipient), "Invalid sender");
+        
         // handle bridged winning players and scores from KBCInco contract
         (uint8 handler, bytes memory playerInfo) = abi.decode(_message, (uint8, bytes));
         (address player, uint32 score) = abi.decode(playerInfo, (address, uint32));

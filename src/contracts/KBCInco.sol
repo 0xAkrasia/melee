@@ -7,13 +7,6 @@ import "fhevm/lib/TFHE.sol";
 import "fhevm/abstracts/EIP712WithModifier.sol";
 
 contract KBCInco is EIP712WithModifier {
-    // BRIDGE VARS
-    IInterchainSecurityModule public interchainSecurityModule;
-    address public mailbox;
-    address public ISM;
-    address public recipient;
-    uint32 public DomainID = 8453;
-
     // GAME VARS
     address public owner;
     mapping(address => euint32) private encryptedVotes;
@@ -27,6 +20,13 @@ contract KBCInco is EIP712WithModifier {
     mapping(uint32 => uint32) public winningMap;
     uint32 public highScore;
     uint256 public endTime;
+    
+    // BRIDGE VARS
+    IInterchainSecurityModule public interchainSecurityModule;
+    address public mailbox;
+    address public ISM;
+    address public recipient;
+    uint32 public DomainID = 11155111;
 
     event handled(bytes32 hash);
 
@@ -42,10 +42,8 @@ contract KBCInco is EIP712WithModifier {
         targetTotal = (nCandidates * (nCandidates - 1)) / 2; // target sum of total entry points (8+7+6...)
 
         // BRIDGE VARS
-        // mailbox = 0xA2Be69D0f75d2465f1d81cDf1bd7d52b131eD363;
-        // ISM = 0x8549dFC06042ed1302A53f7e85687b74d58bE865;
         mailbox = 0x51510C9df44256FE61f391286F81E52A708919db;
-        ISM = 0x8e5195C7DCAa858fdFb4F12C9B189097BF1953bd;
+        ISM = 0xcAe8bD09aE9Ac21da7d1e189b5F7376aeCc82497;
         interchainSecurityModule = IInterchainSecurityModule(ISM);
     }
 
@@ -81,11 +79,17 @@ contract KBCInco is EIP712WithModifier {
 
     //no-op function but called by mailbox pos verification so keep
     function handle(uint32 _origin, bytes32 _sender, bytes memory _body) external onlyMailbox {
+        require(_origin == DomainID, "Invalid origin");
+        require(_sender == _addressToBytes32(recipient), "Invalid sender");
+
         bytes32 committedHash = abi.decode(_body, (bytes32));
         emit handled(committedHash);
     }
 
     function handleWithCiphertext(uint32 _origin, bytes32 _sender, bytes memory _message) external onlyISM {
+        require(_origin == DomainID, "Invalid origin");
+        require(_sender == _addressToBytes32(recipient), "Invalid sender");
+        
         // receive data
         (bytes memory message, bytes memory cipherVote) = abi.decode(_message, (bytes, bytes));
         (bytes32 committedHash, address baseSender) = abi.decode(message, (bytes32, address));
