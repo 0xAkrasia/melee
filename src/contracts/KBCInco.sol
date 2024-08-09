@@ -80,7 +80,7 @@ contract KBCInco is EIP712WithModifier {
     //no-op function but called by mailbox pos verification so keep
     function handle(uint32 _origin, bytes32 _sender, bytes memory _body) external onlyMailbox {
         require(_origin == DomainID, "Invalid origin");
-        require(_sender == _addressToBytes32(recipient), "Invalid sender");
+        require(_bytes32ToAddress(_sender) == recipient, "Invalid sender");
 
         bytes32 committedHash = abi.decode(_body, (bytes32));
         emit handled(committedHash);
@@ -88,7 +88,7 @@ contract KBCInco is EIP712WithModifier {
 
     function handleWithCiphertext(uint32 _origin, bytes32 _sender, bytes memory _message) external onlyISM {
         require(_origin == DomainID, "Invalid origin");
-        require(_sender == _addressToBytes32(recipient), "Invalid sender");
+        require(_bytes32ToAddress(_sender) == recipient, "Invalid sender");
         
         // receive data
         (bytes memory message, bytes memory cipherVote) = abi.decode(_message, (bytes, bytes));
@@ -198,6 +198,10 @@ contract KBCInco is EIP712WithModifier {
 
     function _addressToBytes32(address _addr) internal pure returns (bytes32) {
         return bytes32(uint256(uint160(_addr)));
+    }
+
+    function _bytes32ToAddress(bytes32 _byteAddr) internal pure returns (address) {
+        return address(uint160(uint256(_byteAddr)));
     }
 
     function viewOwnVote(

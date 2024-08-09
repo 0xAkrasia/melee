@@ -75,6 +75,10 @@ contract KBCBase {
         return bytes32(uint256(uint160(_addr)));
     }
 
+    function _bytes32ToAddress(bytes32 _byteAddr) internal pure returns (address) {
+        return address(uint160(uint256(_byteAddr)));
+    }
+    
     function castVote(bytes calldata vote) external payable gameLive returns (bytes32) {
         // Send player vote as ciphertext to KBCInco
         // verify valid entry
@@ -110,7 +114,7 @@ contract KBCBase {
 
     function handle(uint32 _origin, bytes32 _sender, bytes calldata _message) external onlyMailbox {
         require(_origin == DomainID, "Invalid origin");
-        require(_sender == _addressToBytes32(recipient), "Invalid sender");
+        require(_bytes32ToAddress(_sender) == recipient, "Invalid sender");
         
         // handle bridged winning players and scores from KBCInco contract
         (uint8 handler, bytes memory playerInfo) = abi.decode(_message, (uint8, bytes));
