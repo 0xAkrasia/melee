@@ -1,11 +1,11 @@
 /* eslint-disable */
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { initFhevm, createInstance } from "fhevmjs";
-import { BrowserProvider, Contract, JsonRpcProvider } from "ethers";
+import { BrowserProvider, Contract } from "ethers";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import contractAbi from "../contracts/KBCBaseABI.json";
-import { FetchBalance } from "./fetchBalance";
+import { FetchBalance, fetchBalance } from "./fetchBalance";
 import BetInput from "./betInput";
 import { parseEther, formatEther } from "ethers";
 import contractAddresses from "../contracts/contractAddresses.json";
@@ -14,6 +14,7 @@ import { postCiphertext } from "../utils/ciphertextToCCIP";
 import toast from "react-hot-toast";
 import Loader from "../components/loader";
 import imageCategories from "../contracts/imageCategories.json";
+import { fetchEndTime } from "./fetchEndTime";
 
 initFhevm();
 
@@ -77,21 +78,18 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   const intervalRef = useRef(null); // Reference to store the interval ID
   const [endTime, setEndTime] = useState(null);
 
-  const fetchEndTime = useCallback(async () => {
-    try {
-      const provider = new JsonRpcProvider('https://1rpc.io/base');
-      const contract = new Contract(kbcAddress, contractAbi, provider);
-      const endTimeFromContract = await contract.endTime();
-      const endTimeMs = Number(endTimeFromContract) * 1000; // Convert to milliseconds
-      setEndTime(endTimeMs);
-    } catch (error) {
-      console.error("Error fetching endTime:", error);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchEndTime();
-  }, [fetchEndTime]);
+    const getEndTime = async () => {
+      try {
+        const endTimeMs = await fetchEndTime();
+        setEndTime(endTimeMs);
+      } catch (error) {
+        console.error("Error setting endTime:", error);
+      }
+    };
+
+    getEndTime();
+  }, []);
 
   useEffect(() => {
     if (endTime) {
@@ -244,7 +242,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
         for (let i = 0; i < imageIndices.length; i++) {
           voteUint32 += i * Math.pow(8, imageIndices[i]);
         }
-
+        console.log("Vote uint32:", voteUint32);
         const encryptedVote = instance.encrypt32(voteUint32);
         console.log("Encrypted vote:", encryptedVote);
 
@@ -436,11 +434,11 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   }, []);
 
   const handleMaxClick = useCallback(async (event) => {
-    event.preventDefault(); // Prevent form submission
+    event.preventDefault();
     const signer = await walletProvider.getSigner();
     const userAddress = await signer.getAddress();
     const userBalance = await fetchBalance(userAddress, 1);
-    const maxBetAmount = userBalance; // Replace with actual logic to get the max balance from the user's wallet
+    const maxBetAmount = userBalance;
     setBetAmount(maxBetAmount);
   }, []);
 

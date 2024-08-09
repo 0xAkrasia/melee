@@ -28,8 +28,10 @@ contract KBCBase {
     event handled(address incoSender);
 
     constructor() {
-        mailbox = 0xeA87ae93Fa0019a82A727bfd3eBd1cFCa8f64f1D;
-        ISM = 0x094714b3453096cD7Dc0746D4Dd7fA70cbFEEd3D;
+        // mailbox = 0xeA87ae93Fa0019a82A727bfd3eBd1cFCa8f64f1D;
+        // ISM = 0x094714b3453096cD7Dc0746D4Dd7fA70cbFEEd3D;
+        mailbox = 0xfFAEF09B3cd11D9b20d1a19bECca54EEC2884766;
+        ISM = 0xcE87DC19a0497120c8db474FCE082b02239A6Da3;
         interchainSecurityModule = IInterchainSecurityModule(ISM);
         owner = msg.sender;
         endTime = block.timestamp + 20 minutes;
@@ -155,9 +157,9 @@ contract KBCBase {
     }
 
     function failSafe() public onlyOwner gameEnded {
-        // fallback function to claim the remaining balance after the game is over and claim window is closed
+        // failsafe function to claim the remaining balance after the game is over and claim window is closed
         // this ensures funds can be returned to users in the event of bridge or other issues
-        require(block.timestamp >= endTime + 20 minutes, "Fallback is not allowed yet");
+        require(block.timestamp >= endTime + 20 minutes, "Failsafe is not allowed yet");
         payable(owner).transfer(address(this).balance);
     }
 }

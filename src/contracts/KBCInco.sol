@@ -42,8 +42,10 @@ contract KBCInco is EIP712WithModifier {
         targetTotal = (nCandidates * (nCandidates - 1)) / 2; // target sum of total entry points (8+7+6...)
 
         // BRIDGE VARS
-        mailbox = 0xA2Be69D0f75d2465f1d81cDf1bd7d52b131eD363;
-        ISM = 0x8549dFC06042ed1302A53f7e85687b74d58bE865;
+        // mailbox = 0xA2Be69D0f75d2465f1d81cDf1bd7d52b131eD363;
+        // ISM = 0x8549dFC06042ed1302A53f7e85687b74d58bE865;
+        mailbox = 0x51510C9df44256FE61f391286F81E52A708919db;
+        ISM = 0x8e5195C7DCAa858fdFb4F12C9B189097BF1953bd;
         interchainSecurityModule = IInterchainSecurityModule(ISM);
     }
 
