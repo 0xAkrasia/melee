@@ -32,7 +32,7 @@ contract KBCBase {
         ISM = 0xcE87DC19a0497120c8db474FCE082b02239A6Da3;
         interchainSecurityModule = IInterchainSecurityModule(ISM);
         owner = msg.sender;
-        endTime = block.timestamp + 20 minutes;
+        endTime = block.timestamp + 24 hours;
         gameOver = false;
         highScore = 0;
         winnersBets = 0;
@@ -78,7 +78,7 @@ contract KBCBase {
     function _bytes32ToAddress(bytes32 _byteAddr) internal pure returns (address) {
         return address(uint160(uint256(_byteAddr)));
     }
-    
+
     function castVote(bytes calldata vote) external payable gameLive returns (bytes32) {
         // Send player vote as ciphertext to KBCInco
         // verify valid entry
@@ -144,7 +144,7 @@ contract KBCBase {
     }
 
     function claimWinnings(address[] memory winners) public gameEnded {
-        require(block.timestamp >= endTime + 20 minutes, "Winnings are not pushable yet");
+        require(block.timestamp >= endTime + 24 hours, "Winnings are not pushable yet");
         require(highScore > 0, "No winners determined yet");
         require(winnersPrize > 0, "Winnings have not been calculated");
 
@@ -164,7 +164,7 @@ contract KBCBase {
     function failSafe() public onlyOwner gameEnded {
         // failsafe function to claim the remaining balance after the game is over and claim window is closed
         // this ensures funds can be returned to users in the event of bridge or other issues
-        require(block.timestamp >= endTime + 20 minutes, "Failsafe is not allowed yet");
+        require(block.timestamp >= endTime + 24 hours, "Failsafe is not allowed yet");
         payable(owner).transfer(address(this).balance);
     }
 }

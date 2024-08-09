@@ -76,11 +76,11 @@
         text-transform: uppercase;
         white-space: nowrap;
         color: #ff8700; /* Bright orange color */
-        animation: animate 50s -50s linear infinite;
+        animation: animate 100s -100s linear infinite;
         will-change: transform;
         
         &:nth-child(2) {
-            animation: animate2 50s -25s linear infinite;
+            animation: animate2 100s -50s linear infinite;
         }
     }
 }

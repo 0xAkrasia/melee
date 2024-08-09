@@ -36,7 +36,7 @@ contract KBCInco is EIP712WithModifier {
         // GAME VARS
         owner = msg.sender;
         gameOver = false;
-        endTime = block.timestamp + 20 minutes;
+        endTime = block.timestamp + 24 hours;
         highScore = 0; // set to zero to initiate winning score search algo
         nCandidates = 8;
         targetTotal = (nCandidates * (nCandidates - 1)) / 2; // target sum of total entry points (8+7+6...)
