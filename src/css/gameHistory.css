@@ -1,3 +1,9 @@
+:root {
+  --edition-width: 80px;
+  --pot-width: 60px;
+  --winners-width: 50px;
+}
+
 .game-history {
     width: 100%;
     max-width: 1038px;
@@ -29,26 +35,15 @@
     border-collapse: collapse;
   }
 
-  .history-header {
+  .history-header,
+  .history-item {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr repeat(8, 90px);
-    gap: 10px;
+    grid-template-columns: var(--edition-width) var(--pot-width) var(--winners-width) repeat(8, minmax(70px, 1fr)) 50px;
+    gap: 5px;
     padding: 10px 0;
     border-bottom: 2px solid #4c2800;
     font-weight: bold;
-  }
-
-  .history-item {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr repeat(8, 90px);
-    gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid #4c2800;
-    align-items: center;
-  }
-
-  .history-item.last-item {
-    border-bottom: none;
+    align-items: center; /* This will vertically align all items */
   }
 
   .history-header span,
@@ -56,26 +51,45 @@
     text-align: center;
     text-shadow: 0 0 12px #ff8700;
     font-family: Chakra Petch, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 2px;
   }
 
   .image-score-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    height: 100%; /* Ensure full height */
   }
 
   .history-item img {
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
     object-fit: cover;
     border-radius: 8px;
     text-shadow: 0 0 12px #ff8700;
   }
 
   .score {
-    margin-top: 5px;
-    font-size: 12px;
+    margin-top: 2px;
+    font-size: 10px;
     color: #ff8700;
     text-shadow: 0 0 12px #ff8700;
     font-family: Chakra Petch, sans-serif;
+  }
+
+  .result-column {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    height: 100%; /* Ensure full height */
+  }
+
+  .history-item.last-item {
+    border-bottom: none;
   }

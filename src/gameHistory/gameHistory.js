@@ -1,26 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Contract } from 'ethers';
 import '../css/gameHistory.css';
 import "../css/keynesianBeautyContest.css";
+import contractAbi from "../contracts/KBCBaseABI.json";
+import contractAddresses from "../contracts/contractAddresses.json";
 
-const GameHistory = () => {
-  // Updated gameHistory without date
-  const gameHistory = [
-    // {
-    //   name: "Fruit",
-    //   totalBet: "Ξ 10.50",
-    //   winners: 3,
-    //   images: ["apple", "banana", "cherry", "mango", "orange", "strawberry", "watermelon", "blueberry"],
-    //   scores: [85, 72, 68, 54, 47, 39, 25, 10]
-    // },
-    // {
-    //   name: "Memecoin",
-    //   totalBet: "Ξ 20.75",
-    //   winners: 5,
-    //   images: ["doge", "pepe", "shiba", "bonk", "wif", "mog", "popcat", "retardio"],
-    //   scores: [92, 88, 76, 65, 59, 43, 31, 18]
-    // },
+const GameHistory = ({ walletProvider }) => {
+  const [gameHistory, setGameHistory] = useState([
+    {
+      name: "Memecoin",
+      totalBet: "Ξ 0.012",
+      winners: 1,
+      images: ["wif", "popcat", "doge", "pepe", "retardio", "shiba", "bonk", "mog"],
+      scores: [1,4,5,6,6,9,11,14],
+      address: "0xb839192F40b8dD9da2c2C0856a9D660b623B8FAd"
+    },
     // Add more entries as needed
-  ];
+  ]);
+  const [userScores, setUserScores] = useState({});
+  const [highScore, setHighScore] = useState(0);
+
+  useEffect(() => {
+    const fetchGameData = async () => {
+      if (!walletProvider) return;
+
+      try {
+        const signer = await walletProvider.getSigner();
+        const userAddress = await signer.getAddress();
+        const kbcAddress = contractAddresses[0].KBCBase;
+        const contract = new Contract(kbcAddress, contractAbi, signer);
+
+        // Fetch high score
+        const fetchedHighScore = await contract.highScore();
+        setHighScore(fetchedHighScore);
+
+        // Fetch user scores for each game
+        const updatedGameHistory = await Promise.all(gameHistory.map(async (game) => {
+          const score = await contract.scores(userAddress);
+          return { ...game, userScore: score };
+        }));
+
+        setGameHistory(updatedGameHistory);
+      } catch (error) {
+        console.error("Error fetching game data:", error);
+      }
+    };
+
+    fetchGameData();
+  }, [walletProvider]);
 
   return (
     <div className="game-history af-class-game-container">
@@ -37,6 +64,7 @@ const GameHistory = () => {
           {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
             <span key={num}>{num}</span>
           ))}
+          <span>Player Win</span>
         </div>
         {gameHistory.map((game, index) => (
           <div key={index} className={`history-item ${index === gameHistory.length - 1 ? 'last-item' : ''}`}>
@@ -52,6 +80,9 @@ const GameHistory = () => {
                 <div className="score">{game.scores[imgIndex]}</div>
               </span>
             ))}
+            <span className="result-column">
+              {game.userScore === highScore ? '✅' : '❌'}
+            </span>
           </div>
         ))}
       </div>

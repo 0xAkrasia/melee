@@ -18,7 +18,7 @@ import { fetchEndTime } from "./fetchEndTime";
 
 initFhevm();
 
-const imageCategory = "Memecoin"
+const imageCategory = "Fruit"
 const kbcAddress = contractAddresses[0].KBCBase;
 const imageNames = imageCategories[0][imageCategory];
 
