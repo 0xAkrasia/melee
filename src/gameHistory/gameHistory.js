@@ -74,7 +74,7 @@ const GameHistory = ({ walletProvider }) => {
             {game.images.map((image, imgIndex) => (
               <span key={imgIndex} className="image-score-container">
                 <img
-                  src={`images/${game.name.split(' ')[0].toLowerCase()}/${image}.png`}
+                  src={`https://raw.githubusercontent.com/0xAkrasia/melee/main/public/images/${game.name.split(' ')[0]}/${image}.png`}
                   alt={`Rank ${imgIndex + 1}`}
                 />
                 <div className="score">{game.scores[imgIndex]}</div>

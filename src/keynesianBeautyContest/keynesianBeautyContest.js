@@ -18,7 +18,7 @@ import { fetchEndTime } from "./fetchEndTime";
 
 initFhevm();
 
-const imageCategory = "Fruit"
+const imageCategory = "Fruits"
 const kbcAddress = contractAddresses[0].KBCBase;
 const imageNames = imageCategories[0][imageCategory];
 
@@ -467,7 +467,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
         key={id}
         id={id}
         index={index}
-        imagePath={`images/${imageCategory}/${id}.png`}
+        imagePath={`https://raw.githubusercontent.com/0xAkrasia/melee/main/public/images/${imageCategory}/${id}.png`}
         moveImage={moveImage}
       />
     ));
