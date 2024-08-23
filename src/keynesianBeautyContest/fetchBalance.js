@@ -3,7 +3,7 @@ import { formatEther, JsonRpcProvider } from 'ethers';
 import '../css/fetchBalance.css';
 
 const rpcUrls = [
-    'https://1rpc.io/sepolia',
+    'https://ethereum-sepolia.rpc.subquery.network/public',
 ];
 
 let currentRpcIndex = 0;

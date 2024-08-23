@@ -6,7 +6,7 @@ const kbcAddress = contractAddresses[0].KBCBase;
 
 export const fetchEndTime = async () => {
   try {
-    const provider = new JsonRpcProvider('https://1rpc.io/sepolia');
+    const provider = new JsonRpcProvider('https://ethereum-sepolia.rpc.subquery.network/public');
     const contract = new Contract(kbcAddress, contractAbi, provider);
     const endTimeFromContract = await contract.endTime();
     return Number(endTimeFromContract) * 1000; // Convert to milliseconds
