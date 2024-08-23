@@ -18,7 +18,7 @@ import { fetchEndTime } from "./fetchEndTime";
 
 initFhevm();
 
-const imageCategory = "Fruits"
+const imageCategory = "Memecoin"
 const kbcAddress = contractAddresses[0].KBCBase;
 const imageNames = imageCategories[0][imageCategory];
 
@@ -66,7 +66,7 @@ const ImageItem = ({ id, index, imagePath, moveImage }) => {
   );
 };
 
-const KeynesianGame = ({ walletProvider, wallets }) => {
+const KeynesianBeautyContest = ({ walletProvider, wallets }) => {
   const [selectedImages, setSelectedImages] = useState(imageNames || []);
   const [countdownTime, setCountdownTime] = useState(0);
   const [isWalletConnected, setIsWalletConnected] = useState(false);
@@ -484,7 +484,7 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
           <div className="af-class-game-container">
             <div className="af-class-game-header">
               <div className="af-class-game-title">
-                <div className="af-class-h1">Keynesian Beauty Contest</div>
+                <div className="af-class-h1">Beauty Contest Game</div>
                 <div></div>
                 <h2 className="af-class-p_body_big">{imageCategory} Edition</h2>
                 <div></div>
@@ -558,6 +558,6 @@ const KeynesianGame = ({ walletProvider, wallets }) => {
   );
 };
 
-export default KeynesianGame;
+export default KeynesianBeautyContest;
 
 /* eslint-enable */

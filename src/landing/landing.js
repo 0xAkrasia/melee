@@ -5,7 +5,7 @@ import { initFhevm } from 'fhevmjs';
 import { LoginButton } from '../utils/ConnectWallet';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import Footer from './footer';
-import KeynesianGame from '../keynesianBeautyContest/keynesianBeautyContest';
+import KeynesianBeautyContest from '../keynesianBeautyContest/keynesianBeautyContest';
 import GameHistory from '../gameHistory/gameHistory';
 import '../css/normalize.css';
 import '../css/webflow.css';
@@ -19,7 +19,7 @@ function ParentComponent() {
   const { wallets } = useWallets();
 
   const [walletProvider, setWalletProvider] = useState(null);
-  const [selectedGame, setSelectedGame] = useState('keynesian');
+  const [selection, setSelection] = useState('keynesian-beauty-contest');
   const landingRef = useRef();
 
   useEffect(() => {
@@ -72,11 +72,11 @@ function ParentComponent() {
             <div className="dropdown" >
               <div className="text-wrapper">Games</div>
               <div className="dropdown-content" >
-                <div className="dropdown-item"  onClick={() => setSelectedGame('keynesian')}>Keynesian Beauty Contest</div>
-                <div className="dropdown-item"  onClick={() => setSelectedGame('star-fighter')}>Star Fighter</div>
+                <div className="dropdown-item"  onClick={() => setSelection('keynesian-beauty-contest')}>Keynesian Beauty Contest</div>
+                <div className="dropdown-item"  onClick={() => setSelection('star-fighter')}>Star Fighter</div>
               </div>
             </div>
-            <div className="text-wrapper" onClick={() => setSelectedGame('history')}>History</div>
+            <div className="text-wrapper" onClick={() => setSelection('history')}>History</div>
             <div className="text-wrapper" onClick={() => window.open('https://melee.gitbook.io/melee/', '_blank')}>Docs</div>
           </div>
         </div>
@@ -96,16 +96,16 @@ function ParentComponent() {
 
       {/* Render the selected game or history */}
       <div className="content">
-        {selectedGame === 'keynesian' && (
-          <KeynesianGame walletProvider={walletProvider} wallets={wallets} />
+        {selection === 'keynesian-beauty-contest' && (
+          <KeynesianBeautyContest walletProvider={walletProvider} wallets={wallets} />
         )}
-        {selectedGame === 'star-fighter' && (
+        {selection === 'star-fighter' && (
           <div className="coming-soon-message">
             Coming Soon ...
           </div>
         )}
-        {selectedGame === 'history' && (
-          <GameHistory />
+        {selection === 'history' && (
+          <GameHistory walletProvider={walletProvider} wallets={wallets} />
         )}
       </div>
       <Footer className="footer" /> {/* Add Footer here */}

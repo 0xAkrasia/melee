@@ -3,51 +3,52 @@ import { Contract } from 'ethers';
 import '../css/gameHistory.css';
 import "../css/keynesianBeautyContest.css";
 import contractAbi from "../contracts/KBCBaseABI.json";
-import contractAddresses from "../contracts/contractAddresses.json";
 
-const GameHistory = ({ walletProvider }) => {
+const GameHistory = ({walletProvider, wallets}) => {
   const [gameHistory, setGameHistory] = useState([
     {
-      name: "Memecoin",
+      name: "Fruit",
       totalBet: "Ξ 0.012",
       winners: 1,
-      images: ["wif", "popcat", "doge", "pepe", "retardio", "shiba", "bonk", "mog"],
+      images: ["strawberry", "watermelon", "cherry", "mango", "blueberry", "orange", "apple", "banana"],
       scores: [1,4,5,6,6,9,11,14],
       address: "0xb839192F40b8dD9da2c2C0856a9D660b623B8FAd"
     },
     // Add more entries as needed
   ]);
-  const [userScores, setUserScores] = useState({});
   const [highScore, setHighScore] = useState(0);
 
   useEffect(() => {
-    const fetchGameData = async () => {
-      if (!walletProvider) return;
+    const fetchGameData = async (game) => {
+      if (!walletProvider) return game;
 
       try {
         const signer = await walletProvider.getSigner();
-        const userAddress = await signer.getAddress();
-        const kbcAddress = contractAddresses[0].KBCBase;
-        const contract = new Contract(kbcAddress, contractAbi, signer);
+        const userAddress = await wallets[0].address;
+        const contract = new Contract(game.address, contractAbi, signer);
 
         // Fetch high score
         const fetchedHighScore = await contract.highScore();
-        setHighScore(fetchedHighScore);
+        setHighScore(Number(fetchedHighScore));
 
-        // Fetch user scores for each game
-        const updatedGameHistory = await Promise.all(gameHistory.map(async (game) => {
-          const score = await contract.scores(userAddress);
-          return { ...game, userScore: score };
-        }));
-
-        setGameHistory(updatedGameHistory);
+        // Fetch user score for this game
+        const score = await contract.scores(userAddress);
+        return { ...game, userScore: Number(score) };
       } catch (error) {
         console.error("Error fetching game data:", error);
+        return game;
       }
     };
 
-    fetchGameData();
-  }, [walletProvider]);
+    const updateGameHistory = async () => {
+      const updatedGameHistory = await Promise.all(gameHistory.map(fetchGameData));
+      setGameHistory(updatedGameHistory);
+    };
+
+    if (walletProvider && wallets.length > 0) {
+      updateGameHistory();
+    }
+  }, [walletProvider, wallets, gameHistory]);
 
   return (
     <div className="game-history af-class-game-container">
@@ -81,7 +82,7 @@ const GameHistory = ({ walletProvider }) => {
               </span>
             ))}
             <span className="result-column">
-              {game.userScore === highScore ? '✅' : '❌'}
+              {highScore !== 0 && game.userScore === highScore ? '✅' : '❌'}
             </span>
           </div>
         ))}
